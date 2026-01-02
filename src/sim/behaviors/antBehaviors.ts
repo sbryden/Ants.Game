@@ -221,15 +221,14 @@ export function avoidObstacle(
   // This steers the ant around the obstacle rather than directly away
   const perpX = -dy;
   const perpY = dx;
-  const perpLength = Math.sqrt(perpX * perpX + perpY * perpY);
 
   // Choose direction (left or right) that better matches current heading
-  const currentDot = (ant.vx * perpX + ant.vy * perpY) / perpLength;
+  const currentDot = (ant.vx * perpX + ant.vy * perpY) / distance;
   const sign = currentDot >= 0 ? 1 : -1;
 
   // Set target velocity to steer around obstacle
-  ant.targetVx = sign * (perpX / perpLength) * config.speed;
-  ant.targetVy = sign * (perpY / perpLength) * config.speed;
+  ant.targetVx = sign * (perpX / distance) * config.speed;
+  ant.targetVy = sign * (perpY / distance) * config.speed;
 }
 
 /**
