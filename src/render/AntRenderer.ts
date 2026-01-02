@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { Ant } from '../sim/Ant';
 import { AntState } from '../sim/AntState';
-import { ANT_RENDER_CONFIG } from '../config';
+import { ANT_RENDER_CONFIG, ANT_CARRY_CONFIG } from '../config';
 
 /**
  * AntRenderer handles procedural rendering of ants using Phaser.Graphics
@@ -58,6 +58,15 @@ export class AntRenderer {
       ant.y + headOffsetY,
       ANT_RENDER_CONFIG.HEAD_RADIUS
     );
+
+    // Draw carrying indicator if ant has food
+    if (ant.carriedFood > 0) {
+      const carryScale = ant.carriedFood / ANT_CARRY_CONFIG.MAX_CAPACITY;
+      const indicatorRadius = ANT_CARRY_CONFIG.CARRYING_INDICATOR_RADIUS * carryScale;
+      
+      this.graphics.fillStyle(ANT_CARRY_CONFIG.CARRYING_INDICATOR_COLOR, 0.8);
+      this.graphics.fillCircle(ant.x, ant.y, indicatorRadius);
+    }
 
     // TODO: Add legs, antennae for more realistic appearance
     // TODO: Add pheromone trail visualization
