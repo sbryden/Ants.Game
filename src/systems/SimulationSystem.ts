@@ -34,6 +34,7 @@ export class SimulationSystem {
   private world: World;
   private movementConfig: MovementConfig;
   private transitionConfig: StateTransitionConfig;
+  private frameCounter: number = 0;
 
   constructor(world: World) {
     this.world = world;
@@ -69,7 +70,15 @@ export class SimulationSystem {
     this.world.pheromoneGrid.decay(deltaTime, PHEROMONE_CONFIG.NEST_DECAY_RATE, PheromoneType.NEST);
     this.world.pheromoneGrid.decay(deltaTime, PHEROMONE_CONFIG.DANGER_DECAY_RATE, PheromoneType.DANGER);
 
-    // Extension point: Pheromone diffusion (Segment 3)
+    // Pheromone diffusion (runs every N frames for performance)
+    this.frameCounter++;
+    if (this.frameCounter >= PHEROMONE_CONFIG.DIFFUSION_UPDATE_INTERVAL) {
+      this.world.pheromoneGrid.diffuse(PheromoneType.FOOD, PHEROMONE_CONFIG.DIFFUSION_RATE);
+      this.world.pheromoneGrid.diffuse(PheromoneType.NEST, PHEROMONE_CONFIG.DIFFUSION_RATE);
+      this.world.pheromoneGrid.diffuse(PheromoneType.DANGER, PHEROMONE_CONFIG.DIFFUSION_RATE);
+      this.frameCounter = 0;
+    }
+
     // Extension point: Colony resource updates
     // Extension point: Task assignment system
   }

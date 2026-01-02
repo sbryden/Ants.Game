@@ -15,6 +15,9 @@ export class PheromoneGrid {
   
   // Separate grid for each pheromone type
   private grids: Map<PheromoneType, Float32Array>;
+  
+  // Buffer for diffusion calculations (double-buffering)
+  private diffusionBuffer: Float32Array;
 
   /**
    * Create a new pheromone grid
@@ -36,6 +39,9 @@ export class PheromoneGrid {
     for (const type of Object.values(PheromoneType)) {
       this.grids.set(type, new Float32Array(this.gridWidth * this.gridHeight));
     }
+    
+    // Initialize diffusion buffer (shared across all types)
+    this.diffusionBuffer = new Float32Array(this.gridWidth * this.gridHeight);
   }
 
   /**
@@ -135,6 +141,76 @@ export class PheromoneGrid {
 
   public getCellSize(): number {
     return this.cellSize;
+  }
+
+  /**
+   * Diffuse pheromones across the grid using 4-neighbor averaging
+   * Uses double-buffering to avoid read-write conflicts
+   * 
+   * Algorithm: Each cell's new value is the weighted average of itself
+   * and its 4 neighbors (north, south, east, west).
+   * Edge cells only average with available neighbors.
+   * 
+   * @param type Pheromone type to diffuse
+   * @param diffusionRate Rate of diffusion (0-1). 0 = no diffusion, 1 = full averaging
+   */
+  public diffuse(type: PheromoneType, diffusionRate: number): void {
+    const grid = this.grids.get(type);
+    if (!grid) return;
+
+    // Clear the buffer
+    this.diffusionBuffer.fill(0);
+
+    // Apply diffusion: for each cell, average with neighbors
+    for (let y = 0; y < this.gridHeight; y++) {
+      for (let x = 0; x < this.gridWidth; x++) {
+        const index = y * this.gridWidth + x;
+        const currentValue = grid[index];
+
+        // Accumulate values from this cell and neighbors
+        let sum = currentValue;
+        let count = 1;
+
+        // North neighbor
+        if (y > 0) {
+          sum += grid[(y - 1) * this.gridWidth + x];
+          count++;
+        }
+
+        // South neighbor
+        if (y < this.gridHeight - 1) {
+          sum += grid[(y + 1) * this.gridWidth + x];
+          count++;
+        }
+
+        // West neighbor
+        if (x > 0) {
+          sum += grid[y * this.gridWidth + (x - 1)];
+          count++;
+        }
+
+        // East neighbor
+        if (x < this.gridWidth - 1) {
+          sum += grid[y * this.gridWidth + (x + 1)];
+          count++;
+        }
+
+        // Calculate average
+        const average = sum / count;
+
+        // Blend between current value and average based on diffusion rate
+        // diffusionRate = 0 means no change, diffusionRate = 1 means full averaging
+        this.diffusionBuffer[index] = currentValue * (1 - diffusionRate) + average * diffusionRate;
+
+        // Clamp small values to zero
+        if (this.diffusionBuffer[index] < PHEROMONE_CONFIG.MIN_STRENGTH) {
+          this.diffusionBuffer[index] = 0;
+        }
+      }
+    }
+
+    // Copy diffusion results back to main grid
+    grid.set(this.diffusionBuffer);
   }
 
   /**
