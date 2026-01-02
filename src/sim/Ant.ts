@@ -25,7 +25,8 @@ export class Ant {
 
   /**
    * Update ant position based on velocity
-   * Simple integration for MVP - no collision detection yet
+   * Simple integration for MVP - no ant-to-ant collision detection here;
+   * boundary (wall) collisions are handled by the simulation system.
    */
   public updatePosition(deltaTime: number): void {
     this.x += this.vx * deltaTime;
