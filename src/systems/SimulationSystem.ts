@@ -61,6 +61,7 @@ export class SimulationSystem {
   /**
    * Bounce ant off world boundaries
    * Simple collision response - reverses velocity component when hitting a wall
+   * Boundaries are exclusive (0 and width/height are valid positions)
    */
   private bounceOffWalls(ant: Ant): void {
     if (ant.x < 0 || ant.x > this.world.width) {

@@ -35,6 +35,7 @@ export class World {
 
   /**
    * Spawn an ant in a specific colony
+   * Invalidates ant cache since the collection has changed
    */
   public spawnAnt(colony: Colony): Ant {
     const ant = colony.spawnAnt(this.nextAntId++);
@@ -46,6 +47,7 @@ export class World {
    * Get all ants across all colonies
    * Useful for global operations like rendering or collision detection
    * Returns cached array to avoid per-frame allocations
+   * Note: Cache is invalidated only on ant spawn (MVP does not support removal)
    */
   public getAllAnts(): Ant[] {
     if (this.antsCacheDirty) {
