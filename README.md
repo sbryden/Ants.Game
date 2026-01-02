@@ -239,7 +239,51 @@ Exit criteria:
 * ⏳ Trails strengthen and decay naturally
 * ⏳ Emergent path optimization occurs without hardcoding
 
-### Phase 3 — Emergent Worker Specialization
+### Phase 3 — Colony & Resources
+
+**Goal:** The colony becomes a persistent system.
+
+* Nest location
+* Food sources placed in the world
+* Food pickup and delivery
+* Shared colony food store
+* Simple success / failure conditions (e.g. starvation)
+
+Exit criteria:
+
+* Ants successfully gather and return food
+* Colony state meaningfully changes over time
+* Player can visually understand resource flow
+
+### Phase 4 — Menu / Title Screen
+
+**Goal:** Create a calm, minimal entry point that reflects the game's observational nature.
+
+The menu system acts as both the **first screen** players see and a **lightweight configuration step** before entering the simulation.
+
+#### Design Principles
+
+* **Minimal and observational** — Text and UI elements are kept simple
+* **Living background** — Ants are visible and moving behind the menu overlay
+* **Defaults-first** — Players can start immediately without changing any settings
+
+#### Initial Configuration Options
+
+* **Starting ant amount** — Select how many ants the simulation begins with
+* **Theme selection** — Visual-only themes affecting colors and contrast
+  * Default (current look and feel)
+  * High Contrast (improved readability and accessibility)
+  * Black & White (minimal / experimental)
+  * Future themes (intentionally extensible)
+
+Exit criteria:
+
+* Menu serves as an inviting, calm entry point
+* Players can configure basic simulation parameters
+* Sensible defaults allow immediate play
+* Theme system is extensible for future options
+
+### Phase 5 — Emergent Worker Specialization
 
 **Goal:** Ants develop distinct behavioral patterns through experience.
 
@@ -314,50 +358,6 @@ Exit criteria:
 
 * The system should allow ants to shift their effective specialization over time if colony needs change (e.g., temporary role drift or deliberate retraining). This is a "future feature" to keep Phase 3 focused and lightweight.
 * Deeper caste mechanics, lifecycle rules (e.g., queens/princesses spawning new castes), and caste-specific behaviors will be introduced in later phases when the simulation and pheromone systems are stable.
-
-### Phase 4 — Colony & Resources
-
-**Goal:** The colony becomes a persistent system.
-
-* Nest location
-* Food sources placed in the world
-* Food pickup and delivery
-* Shared colony food store
-* Simple success / failure conditions (e.g. starvation)
-
-Exit criteria:
-
-* Ants successfully gather and return food
-* Colony state meaningfully changes over time
-* Player can visually understand resource flow
-
-### Phase 5 — Menu / Title Screen
-
-**Goal:** Create a calm, minimal entry point that reflects the game's observational nature.
-
-The menu system acts as both the **first screen** players see and a **lightweight configuration step** before entering the simulation.
-
-#### Design Principles
-
-* **Minimal and observational** — Text and UI elements are kept simple
-* **Living background** — Ants are visible and moving behind the menu overlay
-* **Defaults-first** — Players can start immediately without changing any settings
-
-#### Initial Configuration Options
-
-* **Starting ant amount** — Select how many ants the simulation begins with
-* **Theme selection** — Visual-only themes affecting colors and contrast
-  * Default (current look and feel)
-  * High Contrast (improved readability and accessibility)
-  * Black & White (minimal / experimental)
-  * Future themes (intentionally extensible)
-
-Exit criteria:
-
-* Menu serves as an inviting, calm entry point
-* Players can configure basic simulation parameters
-* Sensible defaults allow immediate play
-* Theme system is extensible for future options
 
 ### Phase 6 — Player Interaction (Indirect Control)
 
