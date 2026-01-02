@@ -400,3 +400,41 @@ export const PHEROMONE_CONFIG = {
     DANGER: 0xffff00,  // Yellow
   },
 } as const;
+
+/**
+ * Pheromone following behavior configuration
+ * Controls how foraging ants sense and follow pheromone trails
+ */
+export const PHEROMONE_BEHAVIOR_CONFIG = {
+  /**
+   * Distance in pixels to sample pheromones in each of 8 directions
+   * Larger = ants sense further but less precisely (requires more computation)
+   * Smaller = ants only sense nearby pheromones (more localized)
+   */
+  SAMPLE_DISTANCE: 60,
+
+  /**
+   * Strength of pheromone influence on foraging ant movement (0-1)
+   * 0 = ignore pheromones, move randomly
+   * 1 = follow pheromone gradient perfectly (greedy)
+   * 0.6 = moderately follow trails while maintaining exploration
+   */
+  FOLLOW_STRENGTH: 0.6,
+
+  /**
+   * Randomness factor for pheromone following (0-1)
+   * 0 = purely greedy (always choose best direction)
+   * 1 = random (never follow pheromones)
+   * 0.15 = 15% chance to explore randomly despite pheromone signal
+   * 
+   * This adds natural variation: ants sometimes ignore trails to explore new areas
+   */
+  EXPLORATION_RANDOMNESS: 0.15,
+
+  /**
+   * Minimum pheromone concentration threshold for gradient detection (0-1)
+   * Signal below this is considered noise and ignored
+   * Prevents ants from getting stuck on stale/weak pheromones
+   */
+  GRADIENT_THRESHOLD: 0.01,
+} as const;

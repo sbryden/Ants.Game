@@ -12,6 +12,7 @@ import {
   detectObstacles,
   avoidObstacle,
   resolveObstacleCollisions,
+  perceiveEnvironment,
   MovementConfig,
 } from '../sim/behaviors/antBehaviors';
 import {
@@ -20,7 +21,12 @@ import {
   StateTransitionConfig,
   DEFAULT_TRANSITION_CONFIG,
 } from '../sim/behaviors/BehaviorStateMachine';
-import { WORLD_CONFIG, MOVEMENT_CONFIG, COLONY_CONFIG, PERCEPTION_CONFIG, PHEROMONE_CONFIG } from '../config';
+import {
+  calculateGradientDirection,
+  followPheromone,
+  PheromoneBehaviorConfig,
+} from '../sim/behaviors/pheromoneBehaviors';
+import { WORLD_CONFIG, MOVEMENT_CONFIG, COLONY_CONFIG, PERCEPTION_CONFIG, PHEROMONE_CONFIG, PHEROMONE_BEHAVIOR_CONFIG } from '../config';
 
 /**
  * SimulationSystem orchestrates the deterministic simulation update loop
@@ -35,6 +41,7 @@ export class SimulationSystem {
   private world: World;
   private movementConfig: MovementConfig;
   private transitionConfig: StateTransitionConfig;
+  private pheromoneBehaviorConfig: PheromoneBehaviorConfig;
   private frameCounter: number = 0;
 
   constructor(world: World) {
@@ -45,6 +52,11 @@ export class SimulationSystem {
       turnSpeed: MOVEMENT_CONFIG.TURN_SPEED,
     };
     this.transitionConfig = DEFAULT_TRANSITION_CONFIG;
+    this.pheromoneBehaviorConfig = {
+      sampleDistance: PHEROMONE_BEHAVIOR_CONFIG.SAMPLE_DISTANCE,
+      followStrength: PHEROMONE_BEHAVIOR_CONFIG.FOLLOW_STRENGTH,
+      explorationRandomness: PHEROMONE_BEHAVIOR_CONFIG.EXPLORATION_RANDOMNESS,
+    };
   }
 
   /**
@@ -121,10 +133,37 @@ export class SimulationSystem {
         break;
 
       case AntState.FORAGING:
-        // Similar to wandering but could have different behavior in future
-        // (e.g., more directed search patterns)
+        // Forage with pheromone gradient following
         if (ant.timeSinceDirectionChange >= this.movementConfig.changeDirectionInterval) {
-          applyRandomWander(ant, this.movementConfig);
+          // Sample pheromones to guide foraging
+          const perception = perceiveEnvironment(
+            ant,
+            this.world,
+            this.pheromoneBehaviorConfig.sampleDistance
+          );
+          
+          // Get Food pheromone gradient (what foraging ants follow)
+          const foodGradient = perception.pheromoneGradients.get(PheromoneType.FOOD);
+          
+          if (foodGradient) {
+            // Calculate direction to strongest food pheromone
+            const gradientDirection = calculateGradientDirection(
+              foodGradient,
+              PHEROMONE_BEHAVIOR_CONFIG.GRADIENT_THRESHOLD
+            );
+            
+            // Apply pheromone influence with exploration randomness
+            followPheromone(
+              ant,
+              gradientDirection,
+              this.movementConfig.speed,
+              this.pheromoneBehaviorConfig
+            );
+          } else {
+            // Fallback to random wandering if no pheromone data
+            applyRandomWander(ant, this.movementConfig);
+          }
+          
           ant.timeSinceDirectionChange = 0;
         }
         break;

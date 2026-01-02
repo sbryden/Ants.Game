@@ -3,6 +3,8 @@ import { AntState } from '../AntState';
 import { World } from '../World';
 import { Obstacle } from '../Obstacle';
 import { PerceptionData } from './PerceptionData';
+import { PheromoneType } from '../PheromoneType';
+import { samplePheromoneGradient } from './pheromoneBehaviors';
 
 /**
  * Pure behavior functions for ants
@@ -279,12 +281,20 @@ export function resolveObstacleCollisions(ant: Ant, world: World): void {
  * Gather all sensory information available to an ant from its environment.
  * This creates a PerceptionData snapshot that can be used by decision-making systems.
  * 
- * Extension point: Future perception will include pheromones, food, other ants, etc.
+ * Phase 1: Obstacles and spatial awareness (home direction/distance)
+ * Phase 2: Pheromone gradient sensing (8-directional sampling)
+ * 
+ * Extension point: Future perception will include food, other ants, threats, etc.
  * 
  * @param ant - The ant perceiving the environment
  * @param world - The world being perceived
+ * @param pheromoneSampleDistance - Distance to sample pheromones (pixels)
  */
-export function perceiveEnvironment(ant: Ant, world: World): PerceptionData {
+export function perceiveEnvironment(
+  ant: Ant,
+  world: World,
+  pheromoneSampleDistance: number
+): PerceptionData {
   // Get obstacles within perception range
   const nearbyObstacles = world.getObstaclesNear(ant.x, ant.y, ant.perceptionRange);
 
@@ -309,10 +319,26 @@ export function perceiveEnvironment(ant: Ant, world: World): PerceptionData {
     directionToHome = Math.atan2(dy, dx);
   }
 
+  // Sample pheromone gradients in all 8 directions
+  const pheromoneGradients = new Map<PheromoneType, any>();
+  pheromoneGradients.set(
+    PheromoneType.FOOD,
+    samplePheromoneGradient(ant, world.pheromoneGrid, PheromoneType.FOOD, pheromoneSampleDistance)
+  );
+  pheromoneGradients.set(
+    PheromoneType.NEST,
+    samplePheromoneGradient(ant, world.pheromoneGrid, PheromoneType.NEST, pheromoneSampleDistance)
+  );
+  pheromoneGradients.set(
+    PheromoneType.DANGER,
+    samplePheromoneGradient(ant, world.pheromoneGrid, PheromoneType.DANGER, pheromoneSampleDistance)
+  );
+
   return {
     nearbyObstacles,
     nearestObstacleDistance,
     distanceToHome,
     directionToHome,
+    pheromoneGradients,
   };
 }
