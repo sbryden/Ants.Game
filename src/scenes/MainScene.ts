@@ -9,7 +9,7 @@ import { AntState } from '../sim/AntState';
 import { Ant } from '../sim/Ant';
 import { Obstacle } from '../sim/Obstacle';
 import { PheromoneType } from '../sim/PheromoneType';
-import { SCENE_CONFIG, PHASER_CONFIG, PHEROMONE_CONFIG } from '../config';
+import { SCENE_CONFIG, PHASER_CONFIG } from '../config';
 
 /**
  * Main game scene for Ants!
@@ -108,13 +108,8 @@ export class MainScene extends Phaser.Scene {
     // Convert delta from milliseconds to seconds
     const deltaTime = delta / 1000;
 
-    // Update simulation
+    // Update simulation (includes pheromone decay)
     this.simulationSystem.update(deltaTime);
-
-    // Decay pheromones
-    this.world.pheromoneGrid.decay(deltaTime, PHEROMONE_CONFIG.FOOD_DECAY_RATE, PheromoneType.FOOD);
-    this.world.pheromoneGrid.decay(deltaTime, PHEROMONE_CONFIG.NEST_DECAY_RATE, PheromoneType.NEST);
-    this.world.pheromoneGrid.decay(deltaTime, PHEROMONE_CONFIG.DANGER_DECAY_RATE, PheromoneType.DANGER);
 
     // Render pheromone overlay first (if enabled)
     this.pheromoneRenderer.render(this.world.pheromoneGrid);

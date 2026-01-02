@@ -1,4 +1,5 @@
 import { PheromoneType } from './PheromoneType';
+import { PHEROMONE_CONFIG } from '../config';
 
 /**
  * PheromoneGrid manages pheromone storage and operations
@@ -59,8 +60,8 @@ export class PheromoneGrid {
 
     const index = gridY * this.gridWidth + gridX;
     
-    // Add strength to existing value (accumulate)
-    grid[index] = Math.min(grid[index] + strength, 10.0); // Cap at 10.0 to prevent overflow
+    // Add strength to existing value (accumulate), capped at max strength
+    grid[index] = Math.min(grid[index] + strength, PHEROMONE_CONFIG.MAX_STRENGTH);
   }
 
   /**

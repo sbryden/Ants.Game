@@ -1,6 +1,7 @@
 import { World } from '../sim/World';
 import { Ant } from '../sim/Ant';
 import { AntState } from '../sim/AntState';
+import { PheromoneType } from '../sim/PheromoneType';
 import {
   applyRandomWander,
   updatePosition,
@@ -18,7 +19,7 @@ import {
   StateTransitionConfig,
   DEFAULT_TRANSITION_CONFIG,
 } from '../sim/behaviors/BehaviorStateMachine';
-import { WORLD_CONFIG, MOVEMENT_CONFIG, COLONY_CONFIG, PERCEPTION_CONFIG } from '../config';
+import { WORLD_CONFIG, MOVEMENT_CONFIG, COLONY_CONFIG, PERCEPTION_CONFIG, PHEROMONE_CONFIG } from '../config';
 
 /**
  * SimulationSystem orchestrates the deterministic simulation update loop
@@ -63,7 +64,12 @@ export class SimulationSystem {
       this.updateAntBehavior(ant, deltaTime);
     }
 
-    // Extension point: Pheromone system update
+    // Pheromone system update: Decay all pheromone types
+    this.world.pheromoneGrid.decay(deltaTime, PHEROMONE_CONFIG.FOOD_DECAY_RATE, PheromoneType.FOOD);
+    this.world.pheromoneGrid.decay(deltaTime, PHEROMONE_CONFIG.NEST_DECAY_RATE, PheromoneType.NEST);
+    this.world.pheromoneGrid.decay(deltaTime, PHEROMONE_CONFIG.DANGER_DECAY_RATE, PheromoneType.DANGER);
+
+    // Extension point: Pheromone diffusion (Segment 3)
     // Extension point: Colony resource updates
     // Extension point: Task assignment system
   }

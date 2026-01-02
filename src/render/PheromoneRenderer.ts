@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { PheromoneGrid } from '../sim/PheromoneGrid';
 import { PheromoneType } from '../sim/PheromoneType';
+import { PHEROMONE_CONFIG } from '../config';
 
 /**
  * PheromoneRenderer visualizes pheromone grids as heatmap overlays
@@ -35,10 +36,10 @@ export class PheromoneRenderer {
     const gridHeight = grid.getGridHeight();
     const cellSize = grid.getCellSize();
 
-    // Render each pheromone type with different colors
-    this.renderPheromoneType(grid, PheromoneType.NEST, gridWidth, gridHeight, cellSize, 0x0000ff); // Blue
-    this.renderPheromoneType(grid, PheromoneType.FOOD, gridWidth, gridHeight, cellSize, 0xff0000); // Red
-    this.renderPheromoneType(grid, PheromoneType.DANGER, gridWidth, gridHeight, cellSize, 0xffff00); // Yellow
+    // Render each pheromone type with configured colors
+    this.renderPheromoneType(grid, PheromoneType.NEST, gridWidth, gridHeight, cellSize, PHEROMONE_CONFIG.COLORS.NEST);
+    this.renderPheromoneType(grid, PheromoneType.FOOD, gridWidth, gridHeight, cellSize, PHEROMONE_CONFIG.COLORS.FOOD);
+    this.renderPheromoneType(grid, PheromoneType.DANGER, gridWidth, gridHeight, cellSize, PHEROMONE_CONFIG.COLORS.DANGER);
   }
 
   /**
@@ -67,8 +68,8 @@ export class PheromoneRenderer {
         const strength = data[index];
 
         if (strength > 0.01) {
-          // Normalize strength to 0-1 range (assuming max strength is 10)
-          const normalizedStrength = Math.min(strength / 10.0, 1.0);
+          // Normalize strength to 0-1 range using configured max strength
+          const normalizedStrength = Math.min(strength / PHEROMONE_CONFIG.MAX_STRENGTH, 1.0);
           
           // Use quadratic curve for better visual perception
           const opacity = Math.pow(normalizedStrength, 0.5) * 0.6; // Max opacity 0.6

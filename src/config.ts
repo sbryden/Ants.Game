@@ -341,4 +341,19 @@ export const PHEROMONE_CONFIG = {
    * Lower = more localized trails, higher = broader spread
    */
   DIFFUSION_RATE: 0.1,
+
+  /**
+   * Maximum pheromone strength cap
+   * Prevents overflow from repeated depositions
+   */
+  MAX_STRENGTH: 10.0,
+
+  /**
+   * Visualization colors for pheromone types (hex)
+   */
+  COLORS: {
+    FOOD: 0xff0000,    // Red
+    NEST: 0x0000ff,    // Blue
+    DANGER: 0xffff00,  // Yellow
+  },
 } as const;
