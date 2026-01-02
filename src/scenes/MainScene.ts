@@ -5,6 +5,7 @@ import { AntRenderer } from '../render/AntRenderer';
 import { ColonyRenderer } from '../render/ColonyRenderer';
 import { ObstacleRenderer } from '../render/ObstacleRenderer';
 import { PheromoneRenderer } from '../render/PheromoneRenderer';
+import { FoodSourceRenderer } from '../render/FoodSourceRenderer';
 import { AntState } from '../sim/AntState';
 import { Ant } from '../sim/Ant';
 import { Obstacle } from '../sim/Obstacle';
@@ -22,6 +23,7 @@ export class MainScene extends Phaser.Scene {
   private colonyRenderer!: ColonyRenderer;
   private obstacleRenderer!: ObstacleRenderer;
   private pheromoneRenderer!: PheromoneRenderer;
+  private foodSourceRenderer!: FoodSourceRenderer;
   private debugText!: Phaser.GameObjects.Text;
   private pheromoneOverlayText!: Phaser.GameObjects.Text;
 
@@ -48,6 +50,7 @@ export class MainScene extends Phaser.Scene {
     this.colonyRenderer = new ColonyRenderer(this);
     this.obstacleRenderer = new ObstacleRenderer(this);
     this.pheromoneRenderer = new PheromoneRenderer(this);
+    this.foodSourceRenderer = new FoodSourceRenderer(this);
 
     // Display title
     this.add
@@ -124,6 +127,9 @@ export class MainScene extends Phaser.Scene {
 
     // Render colonies (nests)
     this.colonyRenderer.render(this.world.getColonies());
+
+    // Render food sources
+    this.foodSourceRenderer.render(this.world.foodSource);
 
     // Render ants on top
     const ants = this.world.getAllAnts();

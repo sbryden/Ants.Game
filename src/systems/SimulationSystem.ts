@@ -98,6 +98,11 @@ export class SimulationSystem {
       this.frameCounter = 0;
     }
 
+    // Food respawn: If no food source or current one is depleted, spawn a new one
+    if (!this.world.foodSource || this.world.foodSource.isDepleted()) {
+      this.world.spawnFoodSource();
+    }
+
     // Extension point: Colony resource updates
     // Extension point: Task assignment system
   }
