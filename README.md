@@ -26,8 +26,10 @@ Currently implementing the foundational simulation architecture and basic ant be
 - ✅ Basic worker ant entities with simple movement
 - ✅ Deterministic update loop
 - ✅ Procedural ant rendering (simple shapes)
-- 🚧 Colony structure
-- 🚧 Basic ant behaviors (wandering, returning to colony)
+- ✅ Colony structure with nest visualization
+- ✅ Basic ant behaviors (wandering, foraging, returning to colony)
+- ✅ Finite state machine with smooth transitions
+- ✅ Obstacle avoidance and perception system
 
 ### Future
 - Pheromone system (grid-based diffusion and decay)
@@ -154,47 +156,54 @@ This roadmap outlines the evolution of Ants.Game from its current foundation int
 
 The roadmap is organized by **phases**, not strict timelines. Each phase should result in a playable, observable simulation with clear new behaviors.
 
-### Phase 0 — Foundation (Current)
+### Phase 0 — Foundation
 
 **Goal:** A stable simulation loop with visible agents.
 
-Status: ✅ *In progress / mostly complete*
+Status: ✅ **Complete**
 
-* Phaser + TypeScript scaffold
-* Deterministic update loop
-* Basic world bounds
-* Ant data model
-* Simple ant movement / wandering
-* Procedural rendering (no assets)
-* Project structure aligned with simulation-first architecture
+* ✅ Phaser + TypeScript scaffold
+* ✅ Deterministic update loop
+* ✅ Basic world bounds
+* ✅ Ant data model
+* ✅ Simple ant movement / wandering
+* ✅ Procedural rendering (no assets)
+* ✅ Project structure aligned with simulation-first architecture
+* ✅ Colony nest visualization
+* ✅ Returning to colony behavior
+* ✅ Centralized configuration system (config.ts)
 
 Exit criteria:
 
-* Ants move consistently and deterministically
-* Simulation logic is decoupled from rendering
-* Codebase feels easy to reason about
+* ✅ Ants move consistently and deterministically
+* ✅ Simulation logic is decoupled from rendering
+* ✅ Codebase feels easy to reason about
 
 ### Phase 1 — Core Ant Behavior
 
 **Goal:** Ants exhibit purposeful individual behavior.
 
-* Ant finite state machine (FSM)
+Status: ✅ **Complete**
+
+* ✅ Ant finite state machine (FSM)
   * Idle
   * Wandering
   * Foraging
   * Returning
-* Directional movement with inertia
-* Simple obstacle avoidance
-* Randomized but bounded decision-making
-* Debug visualization of ant state (color / indicator)
+* ✅ Directional movement with inertia (smooth turning)
+* ✅ Obstacle avoidance using tangent-based steering
+* ✅ Perception system foundation (PerceptionData interface)
+* ✅ Randomized probabilistic decision-making
+* ✅ Debug visualization of ant state (color-coded by state)
+* ✅ Live debug UI showing state distribution
 
 Exit criteria:
 
-* Individual ants feel "alive"
-* States are easy to inspect and reason about
-* No pheromones yet — behavior is still local
+* ✅ Individual ants feel "alive"
+* ✅ States are easy to inspect and reason about
+* ✅ No pheromones yet — behavior is still local
 
-### Phase 2 — Emergent Worker Specialization
+### Phase 2 — Emergent Worker Specialization (Current)
 
 **Goal:** Ants develop distinct behavioral patterns through experience.
 

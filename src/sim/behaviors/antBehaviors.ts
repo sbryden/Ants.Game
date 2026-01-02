@@ -1,6 +1,8 @@
 import { Ant } from '../Ant';
 import { AntState } from '../AntState';
 import { World } from '../World';
+import { Obstacle } from '../Obstacle';
+import { PerceptionData } from './PerceptionData';
 
 /**
  * Pure behavior functions for ants
@@ -143,4 +145,130 @@ export function initializeMovementIfIdle(ant: Ant, config: MovementConfig): void
   if (ant.state === AntState.IDLE) {
     applyRandomWander(ant, config);
   }
+}
+
+/**
+ * Detect nearby obstacles within perception range
+ * Returns the closest obstacle that the ant is heading towards, or null if none found
+ * 
+ * @param ant - Ant to check for obstacles
+ * @param world - World containing obstacles
+ * @param perceptionRange - How far the ant can "see" obstacles
+ */
+export function detectObstacles(
+  ant: Ant,
+  world: World,
+  perceptionRange: number
+): Obstacle | null {
+  const nearbyObstacles = world.getObstaclesNear(ant.x, ant.y, perceptionRange);
+
+  if (nearbyObstacles.length === 0) {
+    return null;
+  }
+
+  // Find the closest obstacle the ant is heading towards
+  let closestObstacle: Obstacle | null = null;
+  let closestDistance = Infinity;
+
+  // Current velocity direction (normalized)
+  const speed = Math.sqrt(ant.vx * ant.vx + ant.vy * ant.vy);
+  if (speed === 0) {
+    return null; // Ant not moving, no collision imminent
+  }
+  const dirX = ant.vx / speed;
+  const dirY = ant.vy / speed;
+
+  for (const obstacle of nearbyObstacles) {
+    const dx = obstacle.x - ant.x;
+    const dy = obstacle.y - ant.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Check if ant is heading towards this obstacle (dot product > 0)
+    const dotProduct = (dx * dirX + dy * dirY) / distance;
+    if (dotProduct > 0.5) {
+      // Heading toward obstacle
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestObstacle = obstacle;
+      }
+    }
+  }
+
+  return closestObstacle;
+}
+
+/**
+ * Apply steering force to avoid an obstacle
+ * Modifies target velocity to steer away from the obstacle
+ * Uses a simple tangent-based avoidance strategy
+ * 
+ * @param ant - Ant that needs to avoid obstacle
+ * @param obstacle - Obstacle to avoid
+ * @param config - Movement configuration for speed
+ */
+export function avoidObstacle(
+  ant: Ant,
+  obstacle: Obstacle,
+  config: MovementConfig
+): void {
+  const dx = obstacle.x - ant.x;
+  const dy = obstacle.y - ant.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance === 0) return; // Ant exactly on obstacle center (shouldn't happen)
+
+  // Calculate perpendicular direction (tangent to obstacle)
+  // This steers the ant around the obstacle rather than directly away
+  const perpX = -dy;
+  const perpY = dx;
+
+  // Choose direction (left or right) that better matches current heading
+  const currentDot = (ant.vx * perpX + ant.vy * perpY) / distance;
+  const sign = currentDot >= 0 ? 1 : -1;
+
+  // Set target velocity to steer around obstacle
+  ant.targetVx = sign * (perpX / distance) * config.speed;
+  ant.targetVy = sign * (perpY / distance) * config.speed;
+}
+
+/**
+ * Gather all sensory information available to an ant from its environment.
+ * This creates a PerceptionData snapshot that can be used by decision-making systems.
+ * 
+ * Extension point: Future perception will include pheromones, food, other ants, etc.
+ * 
+ * @param ant - The ant perceiving the environment
+ * @param world - The world being perceived
+ */
+export function perceiveEnvironment(ant: Ant, world: World): PerceptionData {
+  // Get obstacles within perception range
+  const nearbyObstacles = world.getObstaclesNear(ant.x, ant.y, ant.perceptionRange);
+
+  // Find nearest obstacle
+  let nearestObstacleDistance = Infinity;
+  for (const obstacle of nearbyObstacles) {
+    const distance = obstacle.distanceToEdge(ant.x, ant.y);
+    if (distance < nearestObstacleDistance) {
+      nearestObstacleDistance = distance;
+    }
+  }
+
+  // Get colony for home awareness
+  const colony = world.getColony(ant.colonyId);
+  let distanceToHome = 0;
+  let directionToHome = 0;
+  
+  if (colony) {
+    const dx = colony.x - ant.x;
+    const dy = colony.y - ant.y;
+    distanceToHome = Math.sqrt(dx * dx + dy * dy);
+    directionToHome = Math.atan2(dy, dx);
+  }
+
+  return {
+    nearbyObstacles,
+    nearestObstacleDistance,
+    distanceToHome,
+    directionToHome,
+  };
 }

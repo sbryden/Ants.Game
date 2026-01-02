@@ -1,5 +1,6 @@
 import { Colony } from './Colony';
 import { Ant } from './Ant';
+import { Obstacle } from './Obstacle';
 
 /**
  * World represents the entire simulation space
@@ -10,6 +11,7 @@ export class World {
   public width: number;
   public height: number;
   public colonies: Colony[];
+  public obstacles: Obstacle[];
   private nextAntId: number;
   private cachedAnts: Ant[];
   private antsCacheDirty: boolean;
@@ -18,6 +20,7 @@ export class World {
     this.width = width;
     this.height = height;
     this.colonies = [];
+    this.obstacles = [];
     this.nextAntId = 0;
     this.cachedAnts = [];
     this.antsCacheDirty = true;
@@ -74,5 +77,37 @@ export class World {
    */
   public getColony(colonyId: number): Colony | undefined {
     return this.colonies[colonyId];
+  }
+
+  /**
+   * Add an obstacle to the world
+   */
+  public addObstacle(obstacle: Obstacle): void {
+    this.obstacles.push(obstacle);
+  }
+
+  /**
+   * Get all obstacles in the world
+   */
+  public getObstacles(): Obstacle[] {
+    return this.obstacles;
+  }
+
+  /**
+   * Get obstacles within a certain range of a point
+   * Useful for perception and avoidance behaviors
+   */
+  public getObstaclesNear(x: number, y: number, range: number): Obstacle[] {
+    const nearby: Obstacle[] = [];
+    for (const obstacle of this.obstacles) {
+      const dx = obstacle.x - x;
+      const dy = obstacle.y - y;
+      const distanceToCenter = Math.sqrt(dx * dx + dy * dy);
+      // Consider obstacle "near" if any part of it is within range
+      if (distanceToCenter - obstacle.radius <= range) {
+        nearby.push(obstacle);
+      }
+    }
+    return nearby;
   }
 }

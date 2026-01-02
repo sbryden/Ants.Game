@@ -8,6 +8,8 @@ import {
   moveTowardsPoint,
   isNearPoint,
   applyInertia,
+  detectObstacles,
+  avoidObstacle,
   MovementConfig,
 } from '../sim/behaviors/antBehaviors';
 import {
@@ -16,7 +18,7 @@ import {
   StateTransitionConfig,
   DEFAULT_TRANSITION_CONFIG,
 } from '../sim/behaviors/BehaviorStateMachine';
-import { WORLD_CONFIG, MOVEMENT_CONFIG, COLONY_CONFIG } from '../config';
+import { WORLD_CONFIG, MOVEMENT_CONFIG, COLONY_CONFIG, PERCEPTION_CONFIG } from '../config';
 
 /**
  * SimulationSystem orchestrates the deterministic simulation update loop
@@ -124,6 +126,12 @@ export class SimulationSystem {
 
     // Apply inertia (smooth turning toward target velocity)
     applyInertia(ant, this.movementConfig, deltaTime);
+
+    // Check for obstacles and avoid if necessary (after state behaviors but before movement)
+    const nearestObstacle = detectObstacles(ant, this.world, PERCEPTION_CONFIG.OBSTACLE_DETECTION_RANGE);
+    if (nearestObstacle) {
+      avoidObstacle(ant, nearestObstacle, this.movementConfig);
+    }
 
     // Apply movement based on current velocity
     updatePosition(ant, deltaTime);

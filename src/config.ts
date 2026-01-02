@@ -118,6 +118,24 @@ export const COLONY_CONFIG = {
 } as const;
 
 /**
+ * Perception and sensing configuration
+ * How ants perceive their environment
+ */
+export const PERCEPTION_CONFIG = {
+  /**
+   * Range (in pixels) at which ants can detect obstacles
+   * Used for collision avoidance behavior
+   */
+  OBSTACLE_DETECTION_RANGE: 80,
+
+  /**
+   * General perception range for future features
+   * Useful for pheromone detection, ant-to-ant awareness, etc.
+   */
+  PERCEPTION_RANGE: 100,
+} as const;
+
+/**
  * Ant rendering configuration
  * Visual properties for ant appearance
  */
