@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { Ant } from '../sim/Ant';
+import { AntState } from '../sim/AntState';
 
 /**
  * AntRenderer handles procedural rendering of ants using Phaser.Graphics
@@ -11,9 +12,16 @@ export class AntRenderer {
 
   // Ant visual properties
   private readonly antBodyRadius = 3;
-  private readonly antBodyColor = 0x8b4513; // Brown
   private readonly antHeadRadius = 2;
   private readonly antHeadColor = 0x654321; // Darker brown
+
+  // State-based body colors for debug visualization
+  private readonly stateColors = {
+    [AntState.IDLE]: 0x808080,      // Gray - idle/resting
+    [AntState.WANDERING]: 0x8b4513, // Brown - normal wandering
+    [AntState.FORAGING]: 0x4a7c4e,  // Green - searching for food
+    [AntState.RETURNING]: 0x4169a1, // Blue - returning home
+  };
 
   constructor(scene: Phaser.Scene) {
     this.graphics = scene.add.graphics();
@@ -34,6 +42,7 @@ export class AntRenderer {
 
   /**
    * Draw a single ant as simple circles
+   * Body color indicates current state (debug visualization)
    * Body + head for MVP, expandable for future detail (legs, mandibles, etc.)
    */
   private drawAnt(ant: Ant): void {
@@ -49,8 +58,9 @@ export class AntRenderer {
       headOffsetY = normalizedVy * (this.antBodyRadius + this.antHeadRadius);
     }
 
-    // Draw body
-    this.graphics.fillStyle(this.antBodyColor, 1);
+    // Draw body with state-based color
+    const bodyColor = this.stateColors[ant.state] || 0x8b4513; // Default to brown
+    this.graphics.fillStyle(bodyColor, 1);
     this.graphics.fillCircle(ant.x, ant.y, this.antBodyRadius);
 
     // Draw head

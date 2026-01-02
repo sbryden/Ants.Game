@@ -5,10 +5,18 @@ import {
   applyRandomWander,
   updatePosition,
   constrainToWorld,
-  shouldChangeDirection,
-  initializeMovementIfIdle,
+  moveTowardsPoint,
+  isNearPoint,
+  applyInertia,
   MovementConfig,
 } from '../sim/behaviors/antBehaviors';
+import {
+  evaluateStateTransition,
+  changeState,
+  StateTransitionConfig,
+  DEFAULT_TRANSITION_CONFIG,
+} from '../sim/behaviors/BehaviorStateMachine';
+import { WORLD_CONFIG } from '../config';
 
 /**
  * SimulationSystem orchestrates the deterministic simulation update loop
@@ -22,13 +30,16 @@ import {
 export class SimulationSystem {
   private world: World;
   private movementConfig: MovementConfig;
+  private transitionConfig: StateTransitionConfig;
 
   constructor(world: World) {
     this.world = world;
     this.movementConfig = {
       speed: 50, // pixels per second
-      changeDirectionInterval: 2, // seconds
+      changeDirectionInterval: 2, // seconds (now mostly unused, kept for compatibility)
+      turnSpeed: 0.3, // How quickly ants can turn (0-1, lower = more realistic)
     };
+    this.transitionConfig = DEFAULT_TRANSITION_CONFIG;
   }
 
   /**
@@ -58,24 +69,63 @@ export class SimulationSystem {
   /**
    * Update a single ant's behavior and state
    * Uses pure functions from behaviors/ to maintain separation of concerns
-   * 
-   * Future: This could be generalized to support different behavior sets
-   * based on ant role, traits, or tasks
+   * Now includes FSM-based state transitions and inertia-based movement
    */
   private updateAntBehavior(ant: Ant, deltaTime: number): void {
-    // Update behavior timing
+    // Update timing
     ant.timeSinceDirectionChange += deltaTime;
+    ant.timeInCurrentState += deltaTime;
 
-    // Decide if we should change direction (wandering behavior)
-    if (shouldChangeDirection(ant.timeSinceDirectionChange, this.movementConfig)) {
-      applyRandomWander(ant, this.movementConfig);
-      ant.timeSinceDirectionChange = 0;
-    } else {
-      // If idle and not changing direction, start moving
-      initializeMovementIfIdle(ant, this.movementConfig);
+    // Get ant's colony for home position
+    const colony = this.world.getColony(ant.colonyId);
+    if (!colony) return; // Safety check
+
+    // Evaluate state transitions (FSM)
+    const newState = evaluateStateTransition(ant, deltaTime, this.transitionConfig);
+    if (newState !== ant.state) {
+      changeState(ant, newState);
     }
 
-    // Apply movement
+    // State-specific movement behaviors
+    switch (ant.state) {
+      case AntState.IDLE:
+        // Stop moving when idle
+        ant.targetVx = 0;
+        ant.targetVy = 0;
+        break;
+
+      case AntState.WANDERING:
+        // Change direction periodically while wandering
+        if (ant.timeSinceDirectionChange >= this.movementConfig.changeDirectionInterval) {
+          applyRandomWander(ant, this.movementConfig);
+          ant.timeSinceDirectionChange = 0;
+        }
+        break;
+
+      case AntState.FORAGING:
+        // Similar to wandering but could have different behavior in future
+        // (e.g., more directed search patterns)
+        if (ant.timeSinceDirectionChange >= this.movementConfig.changeDirectionInterval) {
+          applyRandomWander(ant, this.movementConfig);
+          ant.timeSinceDirectionChange = 0;
+        }
+        break;
+
+      case AntState.RETURNING:
+        // Move towards home
+        moveTowardsPoint(ant, colony.x, colony.y, this.movementConfig);
+
+        // Check if reached home (deterministic transition)
+        if (isNearPoint(ant, colony.x, colony.y, 15)) {
+          changeState(ant, AntState.IDLE);
+        }
+        break;
+    }
+
+    // Apply inertia (smooth turning toward target velocity)
+    applyInertia(ant, this.movementConfig, deltaTime);
+
+    // Apply movement based on current velocity
     updatePosition(ant, deltaTime);
 
     // Constrain to world bounds
@@ -105,8 +155,7 @@ export class SimulationSystem {
     );
 
     // Spawn initial ants for MVP
-    const initialAntCount = 20;
-    for (let i = 0; i < initialAntCount; i++) {
+    for (let i = 0; i < WORLD_CONFIG.INITIAL_ANT_COUNT; i++) {
       const ant = this.world.spawnAnt(colony);
       // Start with random velocity
       applyRandomWander(ant, this.movementConfig);

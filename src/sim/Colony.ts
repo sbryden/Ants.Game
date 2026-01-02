@@ -9,12 +9,14 @@ export class Colony {
   public x: number; // Colony center position
   public y: number;
   public ants: Ant[];
+  public resourceCount: number; // Food/resources stored (Phase 4 feature, structure ready)
 
   constructor(id: number, x: number, y: number) {
     this.id = id;
     this.x = x;
     this.y = y;
     this.ants = [];
+    this.resourceCount = 0;
   }
 
   /**
@@ -32,5 +34,12 @@ export class Colony {
    */
   public getAnts(): Ant[] {
     return [...this.ants];
+  }
+
+  /**
+   * Get the count of ants in this colony
+   */
+  public getAntCount(): number {
+    return this.ants.length;
   }
 }
