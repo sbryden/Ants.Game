@@ -1,5 +1,4 @@
 import { Obstacle } from '../Obstacle';
-import { Ant } from '../Ant';
 
 /**
  * PerceptionData encapsulates what an ant can perceive from its environment.
