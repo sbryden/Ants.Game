@@ -111,6 +111,12 @@ Follow this naming scheme consistently:
 - ✅ "Grid-based pheromone system with decay"
 - ❌ "Pheromone grid uses flat Float32Array with bilinear interpolation"
 
+**Handle completed features appropriately**:
+- When a feature is completed, incorporate its mechanics into the relevant documentation sections
+- Remove completed items from roadmaps — keep roadmaps future-looking only
+- Don't mark roadmap items as "done" or "completed"; simply remove them and update to show future state
+- If work is purely technical (refactoring, infrastructure), update roadmap without adding documentation
+
 ### Code Documentation
 
 **Prefer self-documenting code**:
