@@ -242,7 +242,7 @@ Exit criteria:
 * Food sources placed in the world
 * Food pickup and delivery
 * Shared colony food store
-* Simple success / failure conditions (e.g. starvation)
+* Resource accumulation
 
 Exit criteria:
 
@@ -250,7 +250,24 @@ Exit criteria:
 * Colony state meaningfully changes over time
 * Player can visually understand resource flow
 
-### Phase 4 — Menu / Title Screen
+### Phase 4 — Health & Eating
+
+**Goal:** Colonies survive by maintaining positive food flow.
+
+* Ant consumption rates (ants eat stored food to survive)
+* Colony health tracking (colony survives if food ≥ consumption)
+* Starvation mechanics (ants slow down / inactive when hungry)
+* Starvation as failure condition (colony dies if food depleted)
+* Metrics display (food stored, consumption rate, surplus/deficit)
+
+Exit criteria:
+
+* Ants require food to stay active
+* Colony must maintain positive food production (foraging > consumption)
+* Player observes resource flow dynamically
+* Survival mechanics add strategic depth
+
+### Phase 5 — Menu / Title Screen
 
 **Goal:** Create a calm, minimal entry point that reflects the game's observational nature.
 
@@ -278,7 +295,7 @@ Exit criteria:
 * Sensible defaults allow immediate play
 * Theme system is extensible for future options
 
-### Phase 5 — Emergent Worker Specialization
+### Phase 6 — Emergent Worker Specialization
 
 **Goal:** Ants develop distinct behavioral patterns through experience.
 
@@ -354,7 +371,25 @@ Exit criteria:
 * The system should allow ants to shift their effective specialization over time if colony needs change (e.g., temporary role drift or deliberate retraining). This is a "future feature" to keep Phase 3 focused and lightweight.
 * Deeper caste mechanics, lifecycle rules (e.g., queens/princesses spawning new castes), and caste-specific behaviors will be introduced in later phases when the simulation and pheromone systems are stable.
 
-### Phase 6 — Player Interaction (Indirect Control)
+### Phase 7 — Nursery / Reproduction
+
+**Goal:** Colonies grow by breeding new ants.
+
+* Egg/larva/pupa lifecycle stages
+* Queen ant produces eggs
+* Worker ants feed larvae (brood care behavior)
+* Pupae mature into adult ants (workers, soldiers, etc.)
+* Population growth dynamics
+* Energy cost of reproduction (colony needs surplus food)
+
+Exit criteria:
+
+* Ants are born and age through stages
+* Brood care creates specialized behavior (some ants prioritize nursery)
+* Colony population grows if food surplus sufficient
+* Population stabilizes or declines if food deficit
+
+### Phase 8 — Player Interaction (Indirect Control)
 
 **Goal:** Player influences the system without direct unit control.
 
@@ -369,7 +404,7 @@ Exit criteria:
 * Player feels like an observer / influencer, not a micromanager
 * Interactions reinforce simulation learning
 
-### Phase 7 — World Depth
+### Phase 9 — World Depth
 
 **Goal:** Add environmental complexity.
 
@@ -383,7 +418,7 @@ Exit criteria:
 * Exploration becomes meaningful
 * The map feels like a system, not a backdrop
 
-### Phase 8 — Other Colonies & Threats
+### Phase 10 — Other Colonies & Threats
 
 **Goal:** Introduce conflict and competition.
 
@@ -397,7 +432,7 @@ Exit criteria:
 * Emergent conflict arises naturally
 * No hard-scripted battles
 
-### Phase 9 — Systems & Scale
+### Phase 11 — Systems & Scale
 
 **Goal:** Stress-test the simulation.
 
@@ -411,7 +446,7 @@ Exit criteria:
 * Simulation remains stable under load
 * Performance issues are understood and controlled
 
-### Phase 10 — Persistence & Replayability
+### Phase 12 — Persistence & Replayability
 
 **Goal:** Make simulations meaningful over time.
 
@@ -425,7 +460,7 @@ Exit criteria:
 * Simulations can be revisited and compared
 * Player can experiment intentionally
 
-### Phase 11 — Polish (Only If It Serves Clarity)
+### Phase 13 — Polish (Only If It Serves Clarity)
 
 **Goal:** Improve readability, not flash.
 
