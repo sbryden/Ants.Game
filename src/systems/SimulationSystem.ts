@@ -145,9 +145,74 @@ export class SimulationSystem {
     // Constrain to world bounds
     constrainToWorld(ant, this.world);
 
+    // Pheromone deposition based on ant state
+    this.depositPheromones(ant);
+
     // Extension point: Pheromone detection and response
     // Extension point: Food/threat detection
     // Extension point: Ant-to-ant interactions (communication, combat)
+  }
+
+  /**
+   * Deposit pheromones based on ant's current state
+   * Different states deposit different types and strengths of pheromones
+   * 
+   * Deposition rules:
+   * - IDLE: No deposition (ant is at nest)
+   * - WANDERING: Nest pheromone (leaving breadcrumbs)
+   * - FORAGING: Weak Food pheromone (searching) + Nest pheromone
+   * - RETURNING: Strong Food pheromone (found something!) + Nest pheromone
+   */
+  private depositPheromones(ant: Ant): void {
+    switch (ant.state) {
+      case AntState.IDLE:
+        // Idle ants don't deposit pheromones
+        break;
+
+      case AntState.WANDERING:
+        // Leave nest breadcrumb trail
+        this.world.pheromoneGrid.deposit(
+          ant.x,
+          ant.y,
+          PheromoneType.NEST,
+          PHEROMONE_CONFIG.DEPOSITION_WANDERING
+        );
+        break;
+
+      case AntState.FORAGING:
+        // Leave weak food trail (searching, not returning)
+        this.world.pheromoneGrid.deposit(
+          ant.x,
+          ant.y,
+          PheromoneType.FOOD,
+          PHEROMONE_CONFIG.DEPOSITION_FORAGING
+        );
+        // Also leave nest breadcrumbs
+        this.world.pheromoneGrid.deposit(
+          ant.x,
+          ant.y,
+          PheromoneType.NEST,
+          PHEROMONE_CONFIG.DEPOSITION_WANDERING
+        );
+        break;
+
+      case AntState.RETURNING:
+        // Leave strong food trail (found something!)
+        this.world.pheromoneGrid.deposit(
+          ant.x,
+          ant.y,
+          PheromoneType.FOOD,
+          PHEROMONE_CONFIG.DEPOSITION_RETURNING
+        );
+        // Also leave nest breadcrumbs
+        this.world.pheromoneGrid.deposit(
+          ant.x,
+          ant.y,
+          PheromoneType.NEST,
+          PHEROMONE_CONFIG.DEPOSITION_WANDERING
+        );
+        break;
+    }
   }
 
   /**

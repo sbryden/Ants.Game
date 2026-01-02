@@ -36,7 +36,7 @@ Currently implementing the foundational simulation architecture and basic ant be
 ### In Development
 - 🚧 Pheromone-based ant communication (Phase 2)
   - ✅ Core grid system with decay
-  - 🚧 Ant deposition by state
+  - ✅ Ant deposition by state
   - 🚧 Grid diffusion
   - 🚧 Gradient following behavior
 
@@ -215,7 +215,7 @@ Exit criteria:
 
 **Goal:** Emergent colony behavior via indirect communication.
 
-**Status:** Segment 1 of 5 complete
+**Status:** Segment 2 of 5 complete
 
 **Completed:**
 - ✅ Pheromone grid data structure (Float32Array-based)
@@ -223,14 +223,13 @@ Exit criteria:
 - ✅ Core operations: deposit, sample, decay
 - ✅ Toggleable pheromone heatmap overlay (press 'P' key)
 - ✅ Configuration-driven parameters (PHEROMONE_CONFIG)
+- ✅ State-based ant deposition (idle/wandering/foraging/returning)
 
 **In Progress:**
-- 🚧 Deposit rules tied to ant state
 - 🚧 Diffusion over time
 - 🚧 Pheromone-following behavior
 
 **Remaining Work:**
-- Ant-based automatic deposition (Segment 2)
 - Grid diffusion system (Segment 3)
 - Gradient following behavior (Segment 4)
 - Polish and tuning (Segment 5)
