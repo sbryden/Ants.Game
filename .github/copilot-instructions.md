@@ -41,11 +41,22 @@ Ants.Game is a SimAnt-inspired ant colony simulation focused on emergent behavio
 - **Intent-heavy comments** — Explain "why" before implementation details
 - **Avoid premature abstraction** — Start simple, refactor when patterns emerge
 
-### File Naming
+### Naming Conventions
 
-- Use PascalCase for classes and types: `Ant.ts`, `Colony.ts`
-- Use camelCase for utility modules: `pheromoneHelpers.ts`
-- Use kebab-case for config files: `vite.config.ts`
+Follow this naming scheme consistently:
+
+**Files and Folders:**
+- **Folders**: kebab-case (e.g., `ant-colony/`, `pheromone-system/`)
+- **Class files**: PascalCase.ts (e.g., `Ant.ts`, `Colony.ts`, `PheromoneGrid.ts`)
+- **Utility files**: camelCase.ts (e.g., `pheromoneHelpers.ts`, `mathUtils.ts`)
+- **Config files**: kebab-case (e.g., `vite.config.ts`, `tsconfig.json`)
+
+**Code Elements:**
+- **Classes**: PascalCase (e.g., `class Ant`, `class ColonyManager`)
+- **Interfaces/Types**: PascalCase (e.g., `interface AntState`, `type Position`)
+- **Enums**: PascalCase (e.g., `enum AntRole`, `enum PheromoneType`)
+- **Functions/Variables**: camelCase (e.g., `updateAnt()`, `antPosition`)
+- **Constants**: SCREAMING_SNAKE_CASE (e.g., `MAX_ANTS`, `DEFAULT_SPEED`)
 
 ### TypeScript Patterns
 
