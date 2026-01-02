@@ -106,7 +106,7 @@ export class PheromoneGrid {
       grid[i] *= decayMultiplier;
       
       // Clamp very small values to zero to avoid floating point issues
-      if (grid[i] < 0.001) {
+      if (grid[i] < PHEROMONE_CONFIG.MIN_STRENGTH) {
         grid[i] = 0;
       }
     }

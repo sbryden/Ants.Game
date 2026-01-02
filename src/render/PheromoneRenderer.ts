@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { PheromoneGrid } from '../sim/PheromoneGrid';
 import { PheromoneType } from '../sim/PheromoneType';
-import { PHEROMONE_CONFIG } from '../config';
+import { PHEROMONE_CONFIG, RENDER_CONFIG } from '../config';
 
 /**
  * PheromoneRenderer visualizes pheromone grids as heatmap overlays
@@ -16,7 +16,7 @@ export class PheromoneRenderer {
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this.graphics = scene.add.graphics();
-    this.graphics.setDepth(5); // Render above obstacles but below ants
+    this.graphics.setDepth(RENDER_CONFIG.PHEROMONE_DEPTH);
     this.visible = false;
     this.graphics.setVisible(false);
   }
@@ -67,12 +67,12 @@ export class PheromoneRenderer {
         const index = y * gridWidth + x;
         const strength = data[index];
 
-        if (strength > 0.01) {
+        if (strength > PHEROMONE_CONFIG.RENDER_THRESHOLD) {
           // Normalize strength to 0-1 range using configured max strength
           const normalizedStrength = Math.min(strength / PHEROMONE_CONFIG.MAX_STRENGTH, 1.0);
           
-          // Use quadratic curve for better visual perception
-          const opacity = Math.pow(normalizedStrength, 0.5) * 0.6; // Max opacity 0.6
+          // Use configured power curve for better visual perception
+          const opacity = Math.pow(normalizedStrength, PHEROMONE_CONFIG.VISUALIZATION_POWER) * PHEROMONE_CONFIG.MAX_OPACITY;
 
           // Calculate pixel position
           const pixelX = x * cellSize;

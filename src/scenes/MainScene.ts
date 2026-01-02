@@ -102,6 +102,9 @@ export class MainScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-T', () => {
       this.depositTestPheromones();
     });
+
+    // Prevent default context menu for right-click test functionality
+    this.input.mouse?.disableContextMenu();
   }
 
   update(_time: number, delta: number): void {
@@ -111,8 +114,10 @@ export class MainScene extends Phaser.Scene {
     // Update simulation (includes pheromone decay)
     this.simulationSystem.update(deltaTime);
 
-    // Render pheromone overlay first (if enabled)
-    this.pheromoneRenderer.render(this.world.pheromoneGrid);
+    // Render pheromone overlay if visible (performance optimization)
+    if (this.pheromoneRenderer.isVisible()) {
+      this.pheromoneRenderer.render(this.world.pheromoneGrid);
+    }
 
     // Render obstacles (background layer)
     this.obstacleRenderer.render(this.world.getObstacles());

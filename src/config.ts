@@ -173,6 +173,24 @@ export const ANT_RENDER_CONFIG = {
 } as const;
 
 /**
+ * Rendering layer depth configuration
+ * Controls z-index ordering of visual elements
+ */
+export const RENDER_CONFIG = {
+  /**
+   * Depth for pheromone overlay
+   * Rendered above obstacles but below ants
+   */
+  PHEROMONE_DEPTH: 5,
+
+  /**
+   * Depth for UI elements
+   * Rendered on top of all game elements
+   */
+  UI_DEPTH: 100,
+} as const;
+
+/**
  * Colony nest rendering configuration
  * Visual properties for colony nest appearance
  */
@@ -347,6 +365,31 @@ export const PHEROMONE_CONFIG = {
    * Prevents overflow from repeated depositions
    */
   MAX_STRENGTH: 10.0,
+
+  /**
+   * Minimum pheromone strength threshold for decay clamping
+   * Values below this are set to zero to avoid floating point precision issues
+   */
+  MIN_STRENGTH: 0.001,
+
+  /**
+   * Minimum visible strength threshold for rendering
+   * Cells below this strength are not rendered (performance optimization)
+   */
+  RENDER_THRESHOLD: 0.01,
+
+  /**
+   * Visualization power curve exponent
+   * Controls how pheromone strength maps to visual opacity
+   * 0.5 = square root (emphasizes weaker pheromones for better visibility)
+   */
+  VISUALIZATION_POWER: 0.5,
+
+  /**
+   * Maximum opacity for pheromone visualization (0-1)
+   * Prevents pheromones from completely obscuring the game view
+   */
+  MAX_OPACITY: 0.6,
 
   /**
    * Visualization colors for pheromone types (hex)
