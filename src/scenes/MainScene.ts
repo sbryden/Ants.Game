@@ -4,6 +4,7 @@ import { SimulationSystem } from '../systems/SimulationSystem';
 import { AntRenderer } from '../render/AntRenderer';
 import { ColonyRenderer } from '../render/ColonyRenderer';
 import { AntState } from '../sim/AntState';
+import { Ant } from '../sim/Ant';
 
 /**
  * Main game scene for Ants!
@@ -92,7 +93,7 @@ export class MainScene extends Phaser.Scene {
   /**
    * Update debug UI showing state distribution
    */
-  private updateDebugUI(ants: any[]): void {
+  private updateDebugUI(ants: Ant[]): void {
     // Count ants in each state
     const stateCounts = {
       [AntState.IDLE]: 0,
@@ -102,7 +103,7 @@ export class MainScene extends Phaser.Scene {
     };
 
     for (const ant of ants) {
-      stateCounts[ant.state]++;
+      stateCounts[ant.state as keyof typeof stateCounts]++;
     }
 
     // Format debug text

@@ -59,4 +59,20 @@ export class World {
     }
     return this.cachedAnts;
   }
+
+  /**
+   * Get all colonies in the world
+   * Returns shallow copy to prevent external modification
+   */
+  public getColonies(): Colony[] {
+    return [...this.colonies];
+  }
+
+  /**
+   * Get a specific colony by ID
+   * Returns undefined if colony doesn't exist
+   */
+  public getColony(colonyId: number): Colony | undefined {
+    return this.colonies[colonyId];
+  }
 }
