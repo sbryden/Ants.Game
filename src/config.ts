@@ -117,6 +117,12 @@ export const COLONY_CONFIG = {
    * Used to trigger state transitions when returning to nest
    */
   HOME_ARRIVAL_DISTANCE: 15,
+
+  /**
+   * Approximate entrance radius for colony validation (pixels)
+   * Used for spawning validation to keep food sources away from colony entrances
+   */
+  ENTRANCE_RADIUS: 30,
 } as const;
 
 /**
@@ -485,6 +491,12 @@ export const FOOD_CONFIG = {
    * Maximum attempts to find valid spawn location before fallback
    */
   SPAWN_ATTEMPTS: 10,
+
+  /**
+   * Buffer distance around food sources for spawn validation (pixels)
+   * Used to ensure food sources don't spawn too close to obstacles or colonies
+   */
+  SPAWN_BUFFER_DISTANCE: 15,
 } as const;
 
 /**

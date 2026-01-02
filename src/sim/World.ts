@@ -3,7 +3,7 @@ import { Ant } from './Ant';
 import { Obstacle } from './Obstacle';
 import { FoodSource } from './FoodSource';
 import { PheromoneGrid } from './PheromoneGrid';
-import { PHEROMONE_CONFIG, FOOD_CONFIG } from '../config';
+import { PHEROMONE_CONFIG, FOOD_CONFIG, COLONY_CONFIG } from '../config';
 
 /**
  * World represents the entire simulation space
@@ -166,7 +166,7 @@ export class World {
    * Valid = not in obstacle, not in colony entrance
    */
   private isValidFoodSourceLocation(x: number, y: number, radius: number): boolean {
-    const minDistance = radius + 15; // Buffer around food source
+    const minDistance = radius + FOOD_CONFIG.SPAWN_BUFFER_DISTANCE;
 
     // Check against obstacles
     for (const obstacle of this.obstacles) {
@@ -183,8 +183,7 @@ export class World {
       const dx = colony.x - x;
       const dy = colony.y - y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      const colonyEntranceRadius = 30; // Approximate entrance size
-      if (distance < minDistance + colonyEntranceRadius) {
+      if (distance < minDistance + COLONY_CONFIG.ENTRANCE_RADIUS) {
         return false;
       }
     }
