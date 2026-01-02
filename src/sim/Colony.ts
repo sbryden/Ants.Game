@@ -28,7 +28,7 @@ export class Colony {
 
   /**
    * Get all ants belonging to this colony
-   * Returns a shallow copy to prevent external modification
+   * Returns a shallow copy of the array to prevent external modification of the colony's ant list
    */
   public getAnts(): Ant[] {
     return [...this.ants];
