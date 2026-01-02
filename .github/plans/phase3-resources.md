@@ -1,5 +1,7 @@
 # Plan: Phase 3 — Colony & Resources
 
+**STATUS**: ✅ ALL SEGMENTS COMPLETE
+
 ## Overview
 
 Implement food sources and resource gathering mechanics. Ants will forage for food, carry it back to the colony, and accumulate resources. This establishes the economic foundation for ant survival (full health/starvation mechanics come in Phase 4).
@@ -154,6 +156,8 @@ Implement food sources and resource gathering mechanics. Ants will forage for fo
 - ✅ Spawn locations avoid obstacles and colony
 - ✅ No TypeScript errors, builds successfully
 
+**Status**: ✅ COMPLETE (Commit: 47ab1bc)
+
 ---
 
 ### Segment 2: Ant Carrying Capacity & Inventory Display
@@ -207,6 +211,8 @@ Implement food sources and resource gathering mechanics. Ants will forage for fo
 - ✅ AntRenderer shows visual indicator when carrying
 - ✅ Carrying state is observable in debug view
 - ✅ No visual clutter at 60 FPS
+
+**Status**: ✅ COMPLETE (Commit: 61dfd47)
 
 ---
 
@@ -339,6 +345,8 @@ Implement food sources and resource gathering mechanics. Ants will forage for fo
 - ✅ Pheromone deposition varies by carrying state
 - ✅ 60 FPS maintained during foraging
 
+**Status**: ✅ COMPLETE (Commit: d6fa2af)
+
 ---
 
 ### Segment 4: Food Depositing & Colony Storage
@@ -393,6 +401,8 @@ Implement food sources and resource gathering mechanics. Ants will forage for fo
 - ✅ Colony.resourceCount increases correctly
 - ✅ Ant.carriedFood zeroed after deposit
 - ✅ Ant transitions to IDLE after deposit
+
+**Status**: ✅ COMPLETE (Commit: 578dc2d)
 
 ---
 
@@ -480,6 +490,8 @@ Implement food sources and resource gathering mechanics. Ants will forage for fo
 - ✅ Ant carrying indicator visible and proportional to load
 - ✅ No visual clutter or performance issues
 - ✅ 60 FPS maintained throughout gameplay
+
+**Status**: ✅ COMPLETE (Commit: 7c1ed79)
 
 ---
 

@@ -26,6 +26,9 @@ export class Ant {
   // Perception properties
   public perceptionRange: number; // How far ant can "see" environment
 
+  // Resource carrying state
+  public carriedFood: number = 0; // Food units currently being carried
+
   // Extension points for future systems (not yet implemented)
   // These will remain unused until Phase 2+
   // TODO: Add pheromone detection data structure

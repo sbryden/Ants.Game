@@ -26,7 +26,13 @@ import {
   followPheromone,
   PheromoneBehaviorConfig,
 } from '../sim/behaviors/pheromoneBehaviors';
-import { WORLD_CONFIG, MOVEMENT_CONFIG, COLONY_CONFIG, PERCEPTION_CONFIG, PHEROMONE_CONFIG, PHEROMONE_BEHAVIOR_CONFIG } from '../config';
+import {
+  detectFoodSources,
+  isAtFoodSource,
+  harvestFood,
+  isCarryingFull,
+} from '../sim/behaviors/foodBehaviors';
+import { WORLD_CONFIG, MOVEMENT_CONFIG, COLONY_CONFIG, PERCEPTION_CONFIG, PHEROMONE_CONFIG, PHEROMONE_BEHAVIOR_CONFIG, FOOD_CONFIG } from '../config';
 
 /**
  * SimulationSystem orchestrates the deterministic simulation update loop
@@ -92,6 +98,11 @@ export class SimulationSystem {
       this.frameCounter = 0;
     }
 
+    // Food respawn: If no food source or current one is depleted, spawn a new one
+    if (!this.world.foodSource || this.world.foodSource.isDepleted()) {
+      this.world.spawnFoodSource();
+    }
+
     // Extension point: Colony resource updates
     // Extension point: Task assignment system
   }
@@ -125,34 +136,27 @@ export class SimulationSystem {
         break;
 
       case AntState.WANDERING:
-        // Change direction periodically while wandering
-        if (ant.timeSinceDirectionChange >= this.movementConfig.changeDirectionInterval) {
-          applyRandomWander(ant, this.movementConfig);
-          ant.timeSinceDirectionChange = 0;
-        }
-        break;
+        // Sample pheromones to guide wandering
+        const perception = perceiveEnvironment(
+          ant,
+          this.world,
+          this.pheromoneBehaviorConfig.sampleDistance
+        );
 
-      case AntState.FORAGING:
-        // Forage with pheromone gradient following
-        if (ant.timeSinceDirectionChange >= this.movementConfig.changeDirectionInterval) {
-          // Sample pheromones to guide foraging
-          const perception = perceiveEnvironment(
-            ant,
-            this.world,
-            this.pheromoneBehaviorConfig.sampleDistance
+        // Check for food pheromone gradient only (ignore nest pheromones)
+        // Wanderers explore for food, nest pheromones would just pull them back home
+        const foodGradient = perception.pheromoneGradients.get(PheromoneType.FOOD);
+        
+        if (foodGradient) {
+          // Calculate direction to strongest food pheromone
+          const gradientDirection = calculateGradientDirection(
+            foodGradient,
+            PHEROMONE_BEHAVIOR_CONFIG.GRADIENT_THRESHOLD
           );
-          
-          // Get Food pheromone gradient (what foraging ants follow)
-          const foodGradient = perception.pheromoneGradients.get(PheromoneType.FOOD);
-          
-          if (foodGradient) {
-            // Calculate direction to strongest food pheromone
-            const gradientDirection = calculateGradientDirection(
-              foodGradient,
-              PHEROMONE_BEHAVIOR_CONFIG.GRADIENT_THRESHOLD
-            );
-            
-            // Apply pheromone influence with exploration randomness
+
+          if (gradientDirection !== null) {
+            // Follow food pheromone with exploration randomness
+            // This naturally transitions to foraging when food is found
             followPheromone(
               ant,
               gradientDirection,
@@ -160,21 +164,62 @@ export class SimulationSystem {
               this.pheromoneBehaviorConfig
             );
           } else {
-            // Fallback to random wandering if no pheromone data
-            applyRandomWander(ant, this.movementConfig);
+            // No clear gradient direction, continue random wandering
+            if (ant.timeSinceDirectionChange >= this.movementConfig.changeDirectionInterval) {
+              applyRandomWander(ant, this.movementConfig);
+              ant.timeSinceDirectionChange = 0;
+            }
           }
+        } else {
+          // No food pheromone detected, random wander and explore
+          if (ant.timeSinceDirectionChange >= this.movementConfig.changeDirectionInterval) {
+            applyRandomWander(ant, this.movementConfig);
+            ant.timeSinceDirectionChange = 0;
+          }
+        }
+        break;
+
+      case AntState.FORAGING:
+        // Detect nearby food sources
+        const foodSources = detectFoodSources(ant, this.world, PERCEPTION_CONFIG.PERCEPTION_RANGE);
+        
+        if (foodSources.length > 0) {
+          const food = foodSources[0];
           
-          ant.timeSinceDirectionChange = 0;
+          if (isAtFoodSource(ant, food)) {
+            // Harvest food from source (automatic while nearby)
+            harvestFood(ant, food, FOOD_CONFIG.HARVEST_RATE * deltaTime);
+            
+            // Transition to returning if full or source depleted
+            if (isCarryingFull(ant) || food.isDepleted()) {
+              changeState(ant, AntState.RETURNING);
+            }
+          } else {
+            // Move towards food source
+            moveTowardsPoint(ant, food.x, food.y, this.movementConfig);
+          }
+        } else {
+          // No nearby food, random wander
+          if (ant.timeSinceDirectionChange >= this.movementConfig.changeDirectionInterval) {
+            applyRandomWander(ant, this.movementConfig);
+            ant.timeSinceDirectionChange = 0;
+          }
         }
         break;
 
       case AntState.RETURNING:
-        // Move towards home
-        moveTowardsPoint(ant, colony.x, colony.y, this.movementConfig);
-
-        // Check if reached home (deterministic transition)
+        // Check if ant has reached home
         if (isNearPoint(ant, colony.x, colony.y, COLONY_CONFIG.HOME_ARRIVAL_DISTANCE)) {
+          // Deposit food to colony if carrying any
+          if (ant.carriedFood > 0) {
+            colony.resourceCount += ant.carriedFood;
+            ant.carriedFood = 0;
+          }
+          // Transition to idle
           changeState(ant, AntState.IDLE);
+        } else {
+          // Move towards home
+          moveTowardsPoint(ant, colony.x, colony.y, this.movementConfig);
         }
         break;
     }
@@ -232,12 +277,16 @@ export class SimulationSystem {
         break;
 
       case AntState.FORAGING:
-        // Leave weak food trail (searching, not returning)
+        // Deposition strength varies by whether ant is carrying food
+        const foragingFoodStrength = ant.carriedFood > 0
+          ? PHEROMONE_CONFIG.DEPOSITION_RETURNING // Strong trail if carrying
+          : PHEROMONE_CONFIG.DEPOSITION_FORAGING;    // Weak trail if searching
+        
         this.world.pheromoneGrid.deposit(
           ant.x,
           ant.y,
           PheromoneType.FOOD,
-          PHEROMONE_CONFIG.DEPOSITION_FORAGING
+          foragingFoodStrength
         );
         // Also leave nest breadcrumbs
         this.world.pheromoneGrid.deposit(
@@ -249,14 +298,17 @@ export class SimulationSystem {
         break;
 
       case AntState.RETURNING:
-        // Leave strong food trail (found something!)
-        this.world.pheromoneGrid.deposit(
-          ant.x,
-          ant.y,
-          PheromoneType.FOOD,
-          PHEROMONE_CONFIG.DEPOSITION_RETURNING
-        );
-        // Also leave nest breadcrumbs
+        // If carrying food, leave strong trail marking successful route
+        if (ant.carriedFood > 0) {
+          this.world.pheromoneGrid.deposit(
+            ant.x,
+            ant.y,
+            PheromoneType.FOOD,
+            PHEROMONE_CONFIG.DEPOSITION_RETURNING
+          );
+        }
+        
+        // Always leave nest breadcrumbs on return
         this.world.pheromoneGrid.deposit(
           ant.x,
           ant.y,

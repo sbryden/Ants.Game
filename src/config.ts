@@ -77,8 +77,9 @@ export const BEHAVIOR_CONFIG = {
   /**
    * Minimum time (seconds) ant must wander before considering other states
    * Prevents rapid state flickering
+   * Increased to 5 (from 3) to allow longer exploration periods
    */
-  WANDERING_MIN_DURATION: 3,
+  WANDERING_MIN_DURATION: 5,
 
   /**
    * Chance per second for wandering ant to transition to foraging
@@ -89,8 +90,9 @@ export const BEHAVIOR_CONFIG = {
   /**
    * Chance per second for wandering ant to return home
    * Evaluated after minimum wandering duration
+   * Lowered to 0.02 (from 0.05) to encourage more exploration
    */
-  WANDERING_TO_RETURNING_CHANCE: 0.05,
+  WANDERING_TO_RETURNING_CHANCE: 0.02,
 
   /**
    * Minimum time (seconds) ant must forage before considering return
@@ -115,6 +117,12 @@ export const COLONY_CONFIG = {
    * Used to trigger state transitions when returning to nest
    */
   HOME_ARRIVAL_DISTANCE: 15,
+
+  /**
+   * Approximate entrance radius for colony validation (pixels)
+   * Used for spawning validation to keep food sources away from colony entrances
+   */
+  ENTRANCE_RADIUS: 30,
 } as const;
 
 /**
@@ -415,8 +423,9 @@ export const PHEROMONE_BEHAVIOR_CONFIG = {
    * Distance in pixels to sample pheromones in each of 8 directions
    * Larger = ants sense further but less precisely (requires more computation)
    * Smaller = ants only sense nearby pheromones (more localized)
+   * Increased to 80 to help wandering ants detect trails from further away
    */
-  SAMPLE_DISTANCE: 60,
+  SAMPLE_DISTANCE: 80,
 
   /**
    * Strength of pheromone influence on foraging ant movement (0-1)
@@ -430,16 +439,102 @@ export const PHEROMONE_BEHAVIOR_CONFIG = {
    * Randomness factor for pheromone following (0-1)
    * 0 = purely greedy (always choose best direction)
    * 1 = random (never follow pheromones)
-   * 0.15 = 15% chance to explore randomly despite pheromone signal
+   * 0.08 = 8% chance to explore randomly despite pheromone signal
    * 
    * This adds natural variation: ants sometimes ignore trails to explore new areas
+   * Reduced from 0.15 to make ants more responsive to trails
    */
-  EXPLORATION_RANDOMNESS: 0.15,
+  EXPLORATION_RANDOMNESS: 0.08,
 
   /**
    * Minimum pheromone concentration threshold for gradient detection (0-1)
    * Signal below this is considered noise and ignored
    * Prevents ants from getting stuck on stale/weak pheromones
+   * Lowered to 0.005 to make wandering ants more responsive to trails
    */
-  GRADIENT_THRESHOLD: 0.01,
+  GRADIENT_THRESHOLD: 0.005,
+} as const;
+
+/**
+ * Food source configuration
+ * Controls food spawning, harvesting, and carrying mechanics
+ */
+export const FOOD_CONFIG = {
+  /**
+   * Initial food amount spawned in each source (units)
+   */
+  INITIAL_FOOD_AMOUNT: 100,
+
+  /**
+   * Radius of food source circle in pixels
+   */
+  SOURCE_RADIUS: 15,
+
+  /**
+   * Harvest rate in food units per second
+   * When ant is at food source
+   */
+  HARVEST_RATE: 1.0,
+
+  /**
+   * Distance threshold for ant to be "at" food source (pixels)
+   * Ant position distance + ant radius must be <= source radius + this threshold
+   */
+  HARVEST_DISTANCE: 20,
+
+  /**
+   * Minimum distance from world edges for food source spawn (pixels)
+   */
+  SPAWN_EDGE_PADDING: 30,
+
+  /**
+   * Maximum attempts to find valid spawn location before fallback
+   */
+  SPAWN_ATTEMPTS: 10,
+
+  /**
+   * Buffer distance around food sources for spawn validation (pixels)
+   * Used to ensure food sources don't spawn too close to obstacles or colonies
+   */
+  SPAWN_BUFFER_DISTANCE: 15,
+} as const;
+
+/**
+ * Ant carrying and inventory configuration
+ */
+export const ANT_CARRY_CONFIG = {
+  /**
+   * Maximum food units an ant can carry
+   */
+  MAX_CAPACITY: 5,
+
+  /**
+   * Radius of carrying indicator dot (pixels)
+   */
+  CARRYING_INDICATOR_RADIUS: 1.5,
+
+  /**
+   * Color of carrying indicator (red tint for food)
+   */
+  CARRYING_INDICATOR_COLOR: 0xff4444,
+} as const;
+
+/**
+ * Food source rendering configuration
+ */
+export const FOOD_RENDER_CONFIG = {
+  /**
+   * Color of food source (tan/brown)
+   */
+  FOOD_COLOR: 0xd4a574,
+
+  /**
+   * Border color of food source
+   */
+  FOOD_BORDER_COLOR: 0x8b6f47,
+
+  /**
+   * Border width in pixels
+   */
+  FOOD_BORDER_WIDTH: 2,
 } as const;
