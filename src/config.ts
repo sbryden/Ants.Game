@@ -274,3 +274,71 @@ export const SCENE_CONFIG = {
    */
   UI_DEPTH: 100,
 } as const;
+
+/**
+ * Pheromone system configuration
+ * Controls pheromone behavior, decay, and grid properties
+ */
+export const PHEROMONE_CONFIG = {
+  /**
+   * Grid cell size in pixels
+   * 1 = one pheromone unit per pixel (highest resolution)
+   */
+  GRID_CELL_SIZE: 1,
+
+  /**
+   * Decay rate per second for Food pheromone (0-1)
+   * Higher = faster decay. 0.1 = loses 10% strength per second
+   */
+  FOOD_DECAY_RATE: 0.1,
+
+  /**
+   * Decay rate per second for Nest pheromone (0-1)
+   * Nest trails should last longer than food trails
+   */
+  NEST_DECAY_RATE: 0.05,
+
+  /**
+   * Decay rate per second for Danger pheromone (0-1)
+   * Danger signals should fade relatively quickly
+   */
+  DANGER_DECAY_RATE: 0.15,
+
+  /**
+   * Deposition strength for idle ants
+   * Idle ants deposit minimal pheromone
+   */
+  DEPOSITION_IDLE: 0.0,
+
+  /**
+   * Deposition strength for wandering ants
+   * Wandering ants leave faint nest trails
+   */
+  DEPOSITION_WANDERING: 0.5,
+
+  /**
+   * Deposition strength for foraging ants
+   * Foraging ants leave weak food trails (searching, not returning)
+   */
+  DEPOSITION_FORAGING: 0.3,
+
+  /**
+   * Deposition strength for returning ants
+   * Returning ants leave strong trails (found something!)
+   */
+  DEPOSITION_RETURNING: 1.0,
+
+  /**
+   * Update interval for diffusion (in frames)
+   * Diffusion is expensive, run every N frames
+   * 3 = diffuse every 3 frames (~20 times per second at 60 FPS)
+   */
+  DIFFUSION_UPDATE_INTERVAL: 3,
+
+  /**
+   * Diffusion rate (0-1)
+   * Controls how quickly pheromones spread to adjacent cells
+   * Lower = more localized trails, higher = broader spread
+   */
+  DIFFUSION_RATE: 0.1,
+} as const;
