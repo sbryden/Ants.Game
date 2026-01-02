@@ -1,8 +1,9 @@
 import { Colony } from './Colony';
 import { Ant } from './Ant';
 import { Obstacle } from './Obstacle';
+import { FoodSource } from './FoodSource';
 import { PheromoneGrid } from './PheromoneGrid';
-import { PHEROMONE_CONFIG } from '../config';
+import { PHEROMONE_CONFIG, FOOD_CONFIG } from '../config';
 
 /**
  * World represents the entire simulation space
@@ -15,7 +16,9 @@ export class World {
   public colonies: Colony[];
   public obstacles: Obstacle[];
   public pheromoneGrid: PheromoneGrid;
+  public foodSource: FoodSource | null = null;
   private nextAntId: number;
+  private nextFoodSourceId: number;
   private cachedAnts: Ant[];
   private antsCacheDirty: boolean;
 
@@ -26,6 +29,7 @@ export class World {
     this.obstacles = [];
     this.pheromoneGrid = new PheromoneGrid(width, height, PHEROMONE_CONFIG.GRID_CELL_SIZE);
     this.nextAntId = 0;
+    this.nextFoodSourceId = 0;
     this.cachedAnts = [];
     this.antsCacheDirty = true;
   }
@@ -113,5 +117,95 @@ export class World {
       }
     }
     return nearby;
+  }
+
+  /**
+   * Spawn a new food source at a random valid location
+   * Avoids obstacles and colony entrance areas
+   * Returns the spawned FoodSource, or null if spawn failed
+   */
+  public spawnFoodSource(): FoodSource | null {
+    const sourceRadius = FOOD_CONFIG.SOURCE_RADIUS;
+    const padding = FOOD_CONFIG.SPAWN_EDGE_PADDING;
+    const maxAttempts = FOOD_CONFIG.SPAWN_ATTEMPTS;
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const x = padding + Math.random() * (this.width - 2 * padding);
+      const y = padding + Math.random() * (this.height - 2 * padding);
+
+      // Check if location is valid (not in obstacles, not in colony)
+      if (this.isValidFoodSourceLocation(x, y, sourceRadius)) {
+        const foodSource = new FoodSource(
+          `food_${this.nextFoodSourceId++}`,
+          x,
+          y,
+          FOOD_CONFIG.INITIAL_FOOD_AMOUNT,
+          sourceRadius
+        );
+        this.foodSource = foodSource;
+        return foodSource;
+      }
+    }
+
+    // Fallback: spawn in bottom-right area if random search fails
+    const fallbackX = this.width - sourceRadius - padding;
+    const fallbackY = this.height - sourceRadius - padding;
+    const fallbackFood = new FoodSource(
+      `food_${this.nextFoodSourceId++}`,
+      fallbackX,
+      fallbackY,
+      FOOD_CONFIG.INITIAL_FOOD_AMOUNT,
+      sourceRadius
+    );
+    this.foodSource = fallbackFood;
+    return fallbackFood;
+  }
+
+  /**
+   * Check if a location is valid for spawning a food source
+   * Valid = not in obstacle, not in colony entrance
+   */
+  private isValidFoodSourceLocation(x: number, y: number, radius: number): boolean {
+    const minDistance = radius + 15; // Buffer around food source
+
+    // Check against obstacles
+    for (const obstacle of this.obstacles) {
+      const dx = obstacle.x - x;
+      const dy = obstacle.y - y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance < minDistance + obstacle.radius) {
+        return false;
+      }
+    }
+
+    // Check against colony entrances
+    for (const colony of this.colonies) {
+      const dx = colony.x - x;
+      const dy = colony.y - y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const colonyEntranceRadius = 30; // Approximate entrance size
+      if (distance < minDistance + colonyEntranceRadius) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Get food sources near a location
+   * Currently supports only single food source, but returns array for future extensibility
+   */
+  public getFoodSourcesNear(x: number, y: number, range: number): FoodSource[] {
+    if (!this.foodSource) return [];
+
+    const dx = this.foodSource.x - x;
+    const dy = this.foodSource.y - y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance <= range) {
+      return [this.foodSource];
+    }
+    return [];
   }
 }

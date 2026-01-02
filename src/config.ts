@@ -443,3 +443,81 @@ export const PHEROMONE_BEHAVIOR_CONFIG = {
    */
   GRADIENT_THRESHOLD: 0.01,
 } as const;
+
+/**
+ * Food source configuration
+ * Controls food spawning, harvesting, and carrying mechanics
+ */
+export const FOOD_CONFIG = {
+  /**
+   * Initial food amount spawned in each source (units)
+   */
+  INITIAL_FOOD_AMOUNT: 100,
+
+  /**
+   * Radius of food source circle in pixels
+   */
+  SOURCE_RADIUS: 15,
+
+  /**
+   * Harvest rate in food units per second
+   * When ant is at food source
+   */
+  HARVEST_RATE: 1.0,
+
+  /**
+   * Distance threshold for ant to be "at" food source (pixels)
+   * Ant position distance + ant radius must be <= source radius + this threshold
+   */
+  HARVEST_DISTANCE: 20,
+
+  /**
+   * Minimum distance from world edges for food source spawn (pixels)
+   */
+  SPAWN_EDGE_PADDING: 30,
+
+  /**
+   * Maximum attempts to find valid spawn location before fallback
+   */
+  SPAWN_ATTEMPTS: 10,
+} as const;
+
+/**
+ * Ant carrying and inventory configuration
+ */
+export const ANT_CARRY_CONFIG = {
+  /**
+   * Maximum food units an ant can carry
+   */
+  MAX_CAPACITY: 5,
+
+  /**
+   * Radius of carrying indicator dot (pixels)
+   */
+  CARRYING_INDICATOR_RADIUS: 1.5,
+
+  /**
+   * Color of carrying indicator (red tint for food)
+   */
+  CARRYING_INDICATOR_COLOR: 0xff4444,
+} as const;
+
+/**
+ * Food source rendering configuration
+ */
+export const FOOD_RENDER_CONFIG = {
+  /**
+   * Color of food source (tan/brown)
+   */
+  FOOD_COLOR: 0xd4a574,
+
+  /**
+   * Border color of food source
+   */
+  FOOD_BORDER_COLOR: 0x8b6f47,
+
+  /**
+   * Border width in pixels
+   */
+  FOOD_BORDER_WIDTH: 2,
+} as const;
