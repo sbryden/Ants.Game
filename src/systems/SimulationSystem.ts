@@ -167,12 +167,18 @@ export class SimulationSystem {
         break;
 
       case AntState.RETURNING:
-        // Move towards home
-        moveTowardsPoint(ant, colony.x, colony.y, this.movementConfig);
-
-        // Check if reached home (deterministic transition)
+        // Check if ant has reached home
         if (isNearPoint(ant, colony.x, colony.y, COLONY_CONFIG.HOME_ARRIVAL_DISTANCE)) {
+          // Deposit food to colony if carrying any
+          if (ant.carriedFood > 0) {
+            colony.resourceCount += ant.carriedFood;
+            ant.carriedFood = 0;
+          }
+          // Transition to idle
           changeState(ant, AntState.IDLE);
+        } else {
+          // Move towards home
+          moveTowardsPoint(ant, colony.x, colony.y, this.movementConfig);
         }
         break;
     }
