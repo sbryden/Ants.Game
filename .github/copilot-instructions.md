@@ -73,9 +73,40 @@ Follow this naming scheme consistently:
   /render    - Phaser rendering layer
   /scenes    - Phaser scene definitions
   /types     - Shared TypeScript types
+  config.ts  - Global configuration constants
 ```
 
 ## Common Patterns
+
+### Configuration Constants
+
+**Use `src/config.ts` for all magic numbers and tunable values.**
+
+**Pattern:**
+```typescript
+export const CATEGORY_CONFIG = {
+  CONSTANT_NAME: value,
+  ANOTHER_CONSTANT: value,
+} as const;
+```
+
+**Guidelines:**
+- Group constants by concern (WORLD_CONFIG, MOVEMENT_CONFIG, RENDER_CONFIG, etc.)
+- Use SCREAMING_SNAKE_CASE for constant names
+- Add JSDoc comments explaining purpose and impact
+- Use `as const` for type safety
+- Import and use: `import { WORLD_CONFIG } from '../config'`
+
+**Move to config.ts when:**
+- Value appears as a magic number in code
+- Value might need tuning or experimentation
+- Value is used in multiple places
+- Value represents a game design decision
+
+**Examples:**
+- ✅ `WORLD_CONFIG.INITIAL_ANT_COUNT` instead of `20`
+- ✅ `MOVEMENT_CONFIG.DEFAULT_SPEED` instead of `50`
+- ✅ `RENDER_CONFIG.ANT_BODY_RADIUS` instead of `3`
 
 ### Simulation Entities
 
