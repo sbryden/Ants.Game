@@ -415,8 +415,9 @@ export const PHEROMONE_BEHAVIOR_CONFIG = {
    * Distance in pixels to sample pheromones in each of 8 directions
    * Larger = ants sense further but less precisely (requires more computation)
    * Smaller = ants only sense nearby pheromones (more localized)
+   * Increased to 80 to help wandering ants detect trails from further away
    */
-  SAMPLE_DISTANCE: 60,
+  SAMPLE_DISTANCE: 80,
 
   /**
    * Strength of pheromone influence on foraging ant movement (0-1)
@@ -430,18 +431,20 @@ export const PHEROMONE_BEHAVIOR_CONFIG = {
    * Randomness factor for pheromone following (0-1)
    * 0 = purely greedy (always choose best direction)
    * 1 = random (never follow pheromones)
-   * 0.15 = 15% chance to explore randomly despite pheromone signal
+   * 0.08 = 8% chance to explore randomly despite pheromone signal
    * 
    * This adds natural variation: ants sometimes ignore trails to explore new areas
+   * Reduced from 0.15 to make ants more responsive to trails
    */
-  EXPLORATION_RANDOMNESS: 0.15,
+  EXPLORATION_RANDOMNESS: 0.08,
 
   /**
    * Minimum pheromone concentration threshold for gradient detection (0-1)
    * Signal below this is considered noise and ignored
    * Prevents ants from getting stuck on stale/weak pheromones
+   * Lowered to 0.005 to make wandering ants more responsive to trails
    */
-  GRADIENT_THRESHOLD: 0.01,
+  GRADIENT_THRESHOLD: 0.005,
 } as const;
 
 /**

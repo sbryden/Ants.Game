@@ -136,10 +136,44 @@ export class SimulationSystem {
         break;
 
       case AntState.WANDERING:
-        // Change direction periodically while wandering
-        if (ant.timeSinceDirectionChange >= this.movementConfig.changeDirectionInterval) {
-          applyRandomWander(ant, this.movementConfig);
-          ant.timeSinceDirectionChange = 0;
+        // Sample pheromones to guide wandering
+        const perception = perceiveEnvironment(
+          ant,
+          this.world,
+          this.pheromoneBehaviorConfig.sampleDistance
+        );
+
+        // Check for food pheromone gradient (ants respond to trails even while wandering)
+        const foodGradient = perception.pheromoneGradients.get(PheromoneType.FOOD);
+        
+        if (foodGradient) {
+          // Calculate direction to strongest food pheromone
+          const gradientDirection = calculateGradientDirection(
+            foodGradient,
+            PHEROMONE_BEHAVIOR_CONFIG.GRADIENT_THRESHOLD
+          );
+
+          if (gradientDirection !== null) {
+            // Follow pheromone with exploration randomness (lets ants discover new paths)
+            followPheromone(
+              ant,
+              gradientDirection,
+              this.movementConfig.speed,
+              this.pheromoneBehaviorConfig
+            );
+          } else {
+            // No clear gradient direction, continue wandering
+            if (ant.timeSinceDirectionChange >= this.movementConfig.changeDirectionInterval) {
+              applyRandomWander(ant, this.movementConfig);
+              ant.timeSinceDirectionChange = 0;
+            }
+          }
+        } else {
+          // No food pheromone detected, random wander
+          if (ant.timeSinceDirectionChange >= this.movementConfig.changeDirectionInterval) {
+            applyRandomWander(ant, this.movementConfig);
+            ant.timeSinceDirectionChange = 0;
+          }
         }
         break;
 

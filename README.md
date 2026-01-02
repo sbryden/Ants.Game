@@ -144,6 +144,60 @@ Simple individual rules create complex group behaviors:
 - Efficient grid-based pathfinding
 - No per-frame allocations in hot loops
 
+## Ant States & Behavior
+
+Ants are state machines that transition between four distinct behavioral modes, each with a clear objective:
+
+### IDLE
+
+**Goal:** Rest and wait at the colony.
+
+An ant enters IDLE when it returns home and has no food to deposit. Idle ants remain at the nest, depositing weak pheromones to mark the colony location. They occasionally transition to WANDERING to explore or forage.
+
+**Visual cue:** Ants rendered in blue
+
+### WANDERING
+
+**Goal:** Explore the environment and search for food.
+
+Wandering ants move randomly throughout the world, avoiding obstacles. They deposit weak NEST pheromones to create breadcrumb trails back home. If they detect a food source or follow a strong food pheromone trail, they transition to FORAGING.
+
+**Visual cue:** Ants rendered in green
+
+### FORAGING
+
+**Goal:** Find food, harvest it, and fill carrying capacity.
+
+Foraging ants actively search for food sources within their perception range. Once food is detected, they move toward it and harvest automatically while nearby. As they harvest and fill their inventory, they deposit **strong food pheromones** (if carrying food) to mark successful routes back home. When full or when the food source is depleted, they transition to RETURNING.
+
+**Visual cue:** Ants rendered in orange; red indicator dot appears when carrying food
+
+### RETURNING
+
+**Goal:** Bring food back to the colony and deposit it.
+
+Returning ants navigate home using nest pheromone trails and their internal sense of colony location. While carrying food, they deposit strong food pheromones to reinforce the successful foraging route. Upon arrival at the colony, they automatically deposit their food into shared storage and transition back to IDLE. If they lose their food (or never had any), they transition directly to IDLE.
+
+**Visual cue:** Ants rendered in red; red indicator shows carried food amount
+
+### State Transitions
+
+```
+IDLE → WANDERING (probability-based or when colony needs resources)
+WANDERING → FORAGING (food detected within perception range)
+FORAGING → RETURNING (inventory full OR food source depleted)
+RETURNING → IDLE (arrived at colony AND deposited food)
+RETURNING → IDLE (arrived at colony with no food)
+```
+
+### Emergent Trail Formation
+
+Individual state transitions create emergent colony behavior:
+- Ants leaving food trails (FORAGING ants with cargo) + ants following those trails (WANDERING ants) = **self-reinforcing food highways**
+- Repeated foraging routes strengthen pheromone signals
+- New routes emerge as ants explore different paths
+- The colony collectively "learns" the most efficient routes without centralized planning
+
 ## Contributing
 
 See [.github/copilot-instructions.md](.github/copilot-instructions.md) for architectural guidelines and code style conventions.
