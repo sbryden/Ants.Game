@@ -30,9 +30,17 @@ Currently implementing the foundational simulation architecture and basic ant be
 - ✅ Basic ant behaviors (wandering, foraging, returning to colony)
 - ✅ Finite state machine with smooth transitions
 - ✅ Obstacle avoidance and perception system
+- ✅ Pheromone grid infrastructure (deposit, sample, decay)
+- ✅ Pheromone visualization overlay (toggleable)
+
+### In Development
+- 🚧 Pheromone-based ant communication (Phase 2)
+  - ✅ Core grid system with decay
+  - 🚧 Ant deposition by state
+  - 🚧 Grid diffusion
+  - 🚧 Gradient following behavior
 
 ### Future
-- Pheromone system (grid-based diffusion and decay)
 - Food sources and resource gathering
 - Ant roles (workers, soldiers, queens)
 - Multiple colonies with territorial behavior
@@ -203,25 +211,35 @@ Exit criteria:
 * ✅ States are easy to inspect and reason about
 * ✅ No pheromones yet — behavior is still local
 
-### Phase 2 — Pheromone System (The Heart of the Game) (Current)
+### Phase 2 — Pheromone System (The Heart of the Game) 🚧 **IN PROGRESS**
 
 **Goal:** Emergent colony behavior via indirect communication.
 
-* Pheromone grid data structure
-* Pheromone types:
-  * Food
-  * Nest
-  * Danger (future)
-* Deposit rules tied to ant state
-* Decay and diffusion over time
-* Pheromone-following behavior
-* Toggleable pheromone heatmap overlay
+**Status:** Segment 1 of 5 complete
+
+**Completed:**
+- ✅ Pheromone grid data structure (Float32Array-based)
+- ✅ Pheromone types: Food, Nest, Danger
+- ✅ Core operations: deposit, sample, decay
+- ✅ Toggleable pheromone heatmap overlay (press 'P' key)
+- ✅ Configuration-driven parameters (PHEROMONE_CONFIG)
+
+**In Progress:**
+- 🚧 Deposit rules tied to ant state
+- 🚧 Diffusion over time
+- 🚧 Pheromone-following behavior
+
+**Remaining Work:**
+- Ant-based automatic deposition (Segment 2)
+- Grid diffusion system (Segment 3)
+- Gradient following behavior (Segment 4)
+- Polish and tuning (Segment 5)
 
 Exit criteria:
 
-* Ants form visible trails
-* Trails strengthen and decay naturally
-* Emergent path optimization occurs without hardcoding
+* ⏳ Ants form visible trails
+* ⏳ Trails strengthen and decay naturally
+* ⏳ Emergent path optimization occurs without hardcoding
 
 ### Phase 3 — Emergent Worker Specialization
 
