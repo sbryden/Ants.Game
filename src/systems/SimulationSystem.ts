@@ -37,17 +37,18 @@ export class SimulationSystem {
   private updateAnt(ant: Ant, deltaTime: number): void {
     // Track time for direction changes
     const timeSinceChange = this.timeSinceLastChange.get(ant.id) || 0;
-    this.timeSinceLastChange.set(ant.id, timeSinceChange + deltaTime);
+    const updatedTimeSinceChange = timeSinceChange + deltaTime;
 
     // Change direction periodically for wandering behavior
-    if (timeSinceChange >= this.changeDirectionInterval) {
+    if (updatedTimeSinceChange >= this.changeDirectionInterval) {
       ant.setRandomVelocity(this.antSpeed);
       this.timeSinceLastChange.set(ant.id, 0);
-    }
-
-    // If idle, start moving
-    if (ant.state === AntState.IDLE) {
-      ant.setRandomVelocity(this.antSpeed);
+    } else {
+      this.timeSinceLastChange.set(ant.id, updatedTimeSinceChange);
+      // If idle and we didn't just change direction, start moving
+      if (ant.state === AntState.IDLE) {
+        ant.setRandomVelocity(this.antSpeed);
+      }
     }
 
     // Update position
@@ -60,14 +61,15 @@ export class SimulationSystem {
   /**
    * Bounce ant off world boundaries
    * Simple collision response - reverses velocity component when hitting a wall
+   * Boundaries are exclusive (0 and width/height are valid positions)
    */
   private bounceOffWalls(ant: Ant): void {
-    if (ant.x <= 0 || ant.x >= this.world.width) {
+    if (ant.x < 0 || ant.x > this.world.width) {
       ant.vx *= -1;
       ant.x = Math.max(0, Math.min(this.world.width, ant.x));
     }
 
-    if (ant.y <= 0 || ant.y >= this.world.height) {
+    if (ant.y < 0 || ant.y > this.world.height) {
       ant.vy *= -1;
       ant.y = Math.max(0, Math.min(this.world.height, ant.y));
     }

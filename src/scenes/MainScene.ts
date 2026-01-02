@@ -58,4 +58,9 @@ export class MainScene extends Phaser.Scene {
     // Render ants
     this.antRenderer.render(this.world.getAllAnts());
   }
+
+  shutdown(): void {
+    // Clean up renderer resources
+    this.antRenderer.destroy();
+  }
 }

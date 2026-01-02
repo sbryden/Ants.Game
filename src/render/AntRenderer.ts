@@ -7,7 +7,6 @@ import { Ant } from '../sim/Ant';
  * Renders ants as simple shapes for MVP clarity
  */
 export class AntRenderer {
-  private scene: Phaser.Scene;
   private graphics: Phaser.GameObjects.Graphics;
 
   // Ant visual properties
@@ -17,7 +16,6 @@ export class AntRenderer {
   private readonly antHeadColor = 0x654321; // Darker brown
 
   constructor(scene: Phaser.Scene) {
-    this.scene = scene;
     this.graphics = scene.add.graphics();
   }
 

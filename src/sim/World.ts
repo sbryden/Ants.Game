@@ -11,12 +11,16 @@ export class World {
   public height: number;
   public colonies: Colony[];
   private nextAntId: number;
+  private cachedAnts: Ant[];
+  private antsCacheDirty: boolean;
 
   constructor(width: number, height: number) {
     this.width = width;
     this.height = height;
     this.colonies = [];
     this.nextAntId = 0;
+    this.cachedAnts = [];
+    this.antsCacheDirty = true;
   }
 
   /**
@@ -31,32 +35,28 @@ export class World {
 
   /**
    * Spawn an ant in a specific colony
+   * Invalidates ant cache since the collection has changed
    */
   public spawnAnt(colony: Colony): Ant {
     const ant = colony.spawnAnt(this.nextAntId++);
+    this.antsCacheDirty = true;
     return ant;
   }
 
   /**
    * Get all ants across all colonies
    * Useful for global operations like rendering or collision detection
+   * Returns cached array to avoid per-frame allocations
+   * Note: Cache is invalidated only on ant spawn (MVP does not support removal)
    */
   public getAllAnts(): Ant[] {
-    const allAnts: Ant[] = [];
-    for (const colony of this.colonies) {
-      allAnts.push(...colony.getAnts());
+    if (this.antsCacheDirty) {
+      this.cachedAnts = [];
+      for (const colony of this.colonies) {
+        this.cachedAnts.push(...colony.getAnts());
+      }
+      this.antsCacheDirty = false;
     }
-    return allAnts;
-  }
-
-  /**
-   * Clamp position to world bounds
-   * Prevents ants from leaving the simulation space
-   */
-  public clampPosition(x: number, y: number): { x: number; y: number } {
-    return {
-      x: Math.max(0, Math.min(this.width, x)),
-      y: Math.max(0, Math.min(this.height, y)),
-    };
+    return this.cachedAnts;
   }
 }
