@@ -35,7 +35,7 @@ export const WORLD_CONFIG = {
    * Number of ants spawned at world initialization
    * Affects initial colony population
    */
-  INITIAL_ANT_COUNT: 20,
+  INITIAL_ANT_COUNT: 40,
 } as const;
 
 /**
