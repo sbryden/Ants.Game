@@ -69,11 +69,11 @@ export function evaluateStateTransition(
     case AntState.WANDERING:
       // Only consider transitions after minimum duration
       if (timeInState >= config.wanderingMinDuration) {
-        // Check foraging transition
+        // Check foraging transition (evaluate first, return early if triggered)
         if (Math.random() < config.wanderingToForagingChance * deltaTime) {
           return AntState.FORAGING;
         }
-        // Check returning transition
+        // Check returning transition (only if foraging didn't trigger)
         if (Math.random() < config.wanderingToReturningChance * deltaTime) {
           return AntState.RETURNING;
         }
