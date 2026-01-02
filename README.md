@@ -332,7 +332,35 @@ Exit criteria:
 * Colony state meaningfully changes over time
 * Player can visually understand resource flow
 
-### Phase 5 — Player Interaction (Indirect Control)
+### Phase 5 — Menu / Title Screen
+
+**Goal:** Create a calm, minimal entry point that reflects the game's observational nature.
+
+The menu system acts as both the **first screen** players see and a **lightweight configuration step** before entering the simulation.
+
+#### Design Principles
+
+* **Minimal and observational** — Text and UI elements are kept simple
+* **Living background** — Ants are visible and moving behind the menu overlay
+* **Defaults-first** — Players can start immediately without changing any settings
+
+#### Initial Configuration Options
+
+* **Starting ant amount** — Select how many ants the simulation begins with
+* **Theme selection** — Visual-only themes affecting colors and contrast
+  * Default (current look and feel)
+  * High Contrast (improved readability and accessibility)
+  * Black & White (minimal / experimental)
+  * Future themes (intentionally extensible)
+
+Exit criteria:
+
+* Menu serves as an inviting, calm entry point
+* Players can configure basic simulation parameters
+* Sensible defaults allow immediate play
+* Theme system is extensible for future options
+
+### Phase 6 — Player Interaction (Indirect Control)
 
 **Goal:** Player influences the system without direct unit control.
 
@@ -347,7 +375,7 @@ Exit criteria:
 * Player feels like an observer / influencer, not a micromanager
 * Interactions reinforce simulation learning
 
-### Phase 6 — World Depth
+### Phase 7 — World Depth
 
 **Goal:** Add environmental complexity.
 
@@ -361,7 +389,7 @@ Exit criteria:
 * Exploration becomes meaningful
 * The map feels like a system, not a backdrop
 
-### Phase 7 — Other Colonies & Threats
+### Phase 8 — Other Colonies & Threats
 
 **Goal:** Introduce conflict and competition.
 
@@ -375,7 +403,7 @@ Exit criteria:
 * Emergent conflict arises naturally
 * No hard-scripted battles
 
-### Phase 8 — Systems & Scale
+### Phase 9 — Systems & Scale
 
 **Goal:** Stress-test the simulation.
 
@@ -389,7 +417,7 @@ Exit criteria:
 * Simulation remains stable under load
 * Performance issues are understood and controlled
 
-### Phase 9 — Persistence & Replayability
+### Phase 10 — Persistence & Replayability
 
 **Goal:** Make simulations meaningful over time.
 
@@ -403,7 +431,7 @@ Exit criteria:
 * Simulations can be revisited and compared
 * Player can experiment intentionally
 
-### Phase 10 — Polish (Only If It Serves Clarity)
+### Phase 11 — Polish (Only If It Serves Clarity)
 
 **Goal:** Improve readability, not flash.
 
