@@ -203,7 +203,27 @@ Exit criteria:
 * ✅ States are easy to inspect and reason about
 * ✅ No pheromones yet — behavior is still local
 
-### Phase 2 — Emergent Worker Specialization (Current)
+### Phase 2 — Pheromone System (The Heart of the Game) (Current)
+
+**Goal:** Emergent colony behavior via indirect communication.
+
+* Pheromone grid data structure
+* Pheromone types:
+  * Food
+  * Nest
+  * Danger (future)
+* Deposit rules tied to ant state
+* Decay and diffusion over time
+* Pheromone-following behavior
+* Toggleable pheromone heatmap overlay
+
+Exit criteria:
+
+* Ants form visible trails
+* Trails strengthen and decay naturally
+* Emergent path optimization occurs without hardcoding
+
+### Phase 3 — Emergent Worker Specialization
 
 **Goal:** Ants develop distinct behavioral patterns through experience.
 
@@ -270,34 +290,14 @@ Exit criteria:
 #### Caste Notes (concise)
 
 * While the Phase name focuses on worker specialization, the game will include multiple ant castes over time: **workers**, **soldiers**, **scouts**, **queens**, **princesses**, and potentially others.
-* For roadmap simplicity, Phase 2 emphasizes worker specialization first. Other castes exist conceptually but their deep specialization systems belong to later phases.
+* For roadmap simplicity, Phase 3 emphasizes worker specialization first. Other castes exist conceptually but their deep specialization systems belong to later phases.
 * All castes can perform core tasks (gathering food, caring for young, fighting), but castes differ by efficiency via trait multipliers. Example: a worker might fight at ~10% effectiveness of a soldier, while a soldier might perform worker tasks at ~10% of a worker's efficiency.
 * Specialization is expressed as trait multipliers rather than hard roles; this lets any ant perform any task with varying effectiveness.
 
 #### Future Flexibility
 
-* The system should allow ants to shift their effective specialization over time if colony needs change (e.g., temporary role drift or deliberate retraining). This is a "future feature" to keep Phase 2 focused and lightweight.
+* The system should allow ants to shift their effective specialization over time if colony needs change (e.g., temporary role drift or deliberate retraining). This is a "future feature" to keep Phase 3 focused and lightweight.
 * Deeper caste mechanics, lifecycle rules (e.g., queens/princesses spawning new castes), and caste-specific behaviors will be introduced in later phases when the simulation and pheromone systems are stable.
-
-### Phase 3 — Pheromone System (The Heart of the Game)
-
-**Goal:** Emergent colony behavior via indirect communication.
-
-* Pheromone grid data structure
-* Pheromone types:
-  * Food
-  * Nest
-  * Danger (future)
-* Deposit rules tied to ant state
-* Decay and diffusion over time
-* Pheromone-following behavior
-* Toggleable pheromone heatmap overlay
-
-Exit criteria:
-
-* Ants form visible trails
-* Trails strengthen and decay naturally
-* Emergent path optimization occurs without hardcoding
 
 ### Phase 4 — Colony & Resources
 
