@@ -143,7 +143,8 @@ export class SimulationSystem {
           this.pheromoneBehaviorConfig.sampleDistance
         );
 
-        // Check for food pheromone gradient (ants respond to trails even while wandering)
+        // Check for food pheromone gradient only (ignore nest pheromones)
+        // Wanderers explore for food, nest pheromones would just pull them back home
         const foodGradient = perception.pheromoneGradients.get(PheromoneType.FOOD);
         
         if (foodGradient) {
@@ -154,7 +155,8 @@ export class SimulationSystem {
           );
 
           if (gradientDirection !== null) {
-            // Follow pheromone with exploration randomness (lets ants discover new paths)
+            // Follow food pheromone with exploration randomness
+            // This naturally transitions to foraging when food is found
             followPheromone(
               ant,
               gradientDirection,
@@ -162,14 +164,14 @@ export class SimulationSystem {
               this.pheromoneBehaviorConfig
             );
           } else {
-            // No clear gradient direction, continue wandering
+            // No clear gradient direction, continue random wandering
             if (ant.timeSinceDirectionChange >= this.movementConfig.changeDirectionInterval) {
               applyRandomWander(ant, this.movementConfig);
               ant.timeSinceDirectionChange = 0;
             }
           }
         } else {
-          // No food pheromone detected, random wander
+          // No food pheromone detected, random wander and explore
           if (ant.timeSinceDirectionChange >= this.movementConfig.changeDirectionInterval) {
             applyRandomWander(ant, this.movementConfig);
             ant.timeSinceDirectionChange = 0;

@@ -77,8 +77,9 @@ export const BEHAVIOR_CONFIG = {
   /**
    * Minimum time (seconds) ant must wander before considering other states
    * Prevents rapid state flickering
+   * Increased to 5 (from 3) to allow longer exploration periods
    */
-  WANDERING_MIN_DURATION: 3,
+  WANDERING_MIN_DURATION: 5,
 
   /**
    * Chance per second for wandering ant to transition to foraging
@@ -89,8 +90,9 @@ export const BEHAVIOR_CONFIG = {
   /**
    * Chance per second for wandering ant to return home
    * Evaluated after minimum wandering duration
+   * Lowered to 0.02 (from 0.05) to encourage more exploration
    */
-  WANDERING_TO_RETURNING_CHANCE: 0.05,
+  WANDERING_TO_RETURNING_CHANCE: 0.02,
 
   /**
    * Minimum time (seconds) ant must forage before considering return
