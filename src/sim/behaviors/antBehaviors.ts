@@ -232,6 +232,50 @@ export function avoidObstacle(
 }
 
 /**
+ * Resolve collision if ant is inside an obstacle
+ * Pushes ant out to the nearest edge of the obstacle
+ * 
+ * @param ant - Ant to check and resolve collision for
+ * @param world - World containing obstacles
+ */
+export function resolveObstacleCollisions(ant: Ant, world: World): void {
+  const nearbyObstacles = world.getObstaclesNear(ant.x, ant.y, 100); // Check nearby
+
+  for (const obstacle of nearbyObstacles) {
+    if (obstacle.containsPoint(ant.x, ant.y)) {
+      // Ant is inside obstacle - push it out
+      const dx = ant.x - obstacle.x;
+      const dy = ant.y - obstacle.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance === 0) {
+        // Ant exactly at obstacle center - push in random direction
+        const angle = Math.random() * Math.PI * 2;
+        ant.x = obstacle.x + Math.cos(angle) * (obstacle.radius + 1);
+        ant.y = obstacle.y + Math.sin(angle) * (obstacle.radius + 1);
+      } else {
+        // Push ant out along the line from obstacle center to ant
+        const normalX = dx / distance;
+        const normalY = dy / distance;
+        ant.x = obstacle.x + normalX * (obstacle.radius + 1);
+        ant.y = obstacle.y + normalY * (obstacle.radius + 1);
+      }
+
+      // Stop ant from moving further into obstacle
+      // (zero out velocity component toward obstacle)
+      const dotProduct = ant.vx * dx + ant.vy * dy;
+      if (dotProduct < 0) {
+        // Velocity is toward obstacle, remove that component
+        ant.vx -= (dotProduct / (distance * distance)) * dx;
+        ant.vy -= (dotProduct / (distance * distance)) * dy;
+        ant.targetVx = ant.vx;
+        ant.targetVy = ant.vy;
+      }
+    }
+  }
+}
+
+/**
  * Gather all sensory information available to an ant from its environment.
  * This creates a PerceptionData snapshot that can be used by decision-making systems.
  * 

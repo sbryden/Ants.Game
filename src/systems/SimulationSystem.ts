@@ -11,6 +11,7 @@ import {
   applyInertia,
   detectObstacles,
   avoidObstacle,
+  resolveObstacleCollisions,
   MovementConfig,
 } from '../sim/behaviors/antBehaviors';
 import {
@@ -150,6 +151,9 @@ export class SimulationSystem {
 
     // Apply movement based on current velocity
     updatePosition(ant, deltaTime);
+
+    // Resolve collisions if ant moved into an obstacle
+    resolveObstacleCollisions(ant, this.world);
 
     // Constrain to world bounds
     constrainToWorld(ant, this.world);
