@@ -150,15 +150,263 @@ See [.github/copilot-instructions.md](.github/copilot-instructions.md) for archi
 
 ## Roadmap
 
-- [x] Project scaffolding and architecture design
-- [ ] Basic simulation loop and ant entities
-- [ ] Grid-based world representation
-- [ ] Simple ant movement behaviors
-- [ ] Colony structure and ant spawning
-- [ ] Pheromone system implementation
-- [ ] Food sources and gathering mechanics
-- [ ] Multiple colony support
-- [ ] Combat and territorial behavior
+This roadmap outlines the evolution of Ants.Game from its current foundation into a deep, emergent ant colony simulation. It is intentionally **system-focused**, not feature-bloated, and prioritizes clarity, iteration, and learning.
+
+The roadmap is organized by **phases**, not strict timelines. Each phase should result in a playable, observable simulation with clear new behaviors.
+
+### Phase 0 — Foundation (Current)
+
+**Goal:** A stable simulation loop with visible agents.
+
+Status: ✅ *In progress / mostly complete*
+
+* Phaser + TypeScript scaffold
+* Deterministic update loop
+* Basic world bounds
+* Ant data model
+* Simple ant movement / wandering
+* Procedural rendering (no assets)
+* Project structure aligned with simulation-first architecture
+
+Exit criteria:
+
+* Ants move consistently and deterministically
+* Simulation logic is decoupled from rendering
+* Codebase feels easy to reason about
+
+### Phase 1 — Core Ant Behavior
+
+**Goal:** Ants exhibit purposeful individual behavior.
+
+* Ant finite state machine (FSM)
+  * Idle
+  * Wandering
+  * Foraging
+  * Returning
+* Directional movement with inertia
+* Simple obstacle avoidance
+* Randomized but bounded decision-making
+* Debug visualization of ant state (color / indicator)
+
+Exit criteria:
+
+* Individual ants feel "alive"
+* States are easy to inspect and reason about
+* No pheromones yet — behavior is still local
+
+### Phase 2 — Emergent Worker Specialization
+
+**Goal:** Ants develop distinct behavioral patterns through experience.
+
+**Core Principle:** All ants are workers, but they diverge over time through **traits**, not hard-coded classes. Specialization is **expressed**, not assigned.
+
+> Ants become better at what they do most.
+
+#### Trait-Based Model
+
+Each ant has a small numeric trait profile:
+
+* `taskAffinity` — Bias toward gathering, nursing, digging, building
+* `movementSpeed`
+* `carryCapacity`
+* `energyEfficiency`
+* `pheromoneSensitivity`
+* `wanderingRadius`
+
+Traits are **multipliers**, not gates.
+
+#### Emergent "Roles" (Labels Only)
+
+Roles are **derived**, never stored.
+
+* **Food Gatherer**
+  * High movement speed
+  * High food-pheromone sensitivity
+  * Increased carry capacity
+
+* **Nursery Worker**
+  * Strong brood-task affinity
+  * Small wandering radius
+  * High energy efficiency when idle
+
+* **Builder / Digger**
+  * Faster terrain modification
+  * Lower movement speed
+  * Reduced attraction to food trails
+
+> An ant may partially fit multiple roles.
+
+#### How Specialization Emerges
+
+* Ants start as near-generalists
+* Performing a task slightly increases related traits
+* Colony needs bias task-selection probabilities
+* New ants may spawn with mild trait bias based on colony state
+* No instant role-switching — behavior **drifts** over time
+
+#### Technical Implementation
+
+* Traits live in `sim/traits`
+* Tasks query traits, **never roles**
+* Ants do not know what "type" they are
+* Rendering may tint ants **only for debug**
+
+Exit criteria:
+
+* Ants visibly specialize over time
+* Behavior feels organic, not scripted
+* Colony efficiency improves naturally through specialization
+* System is observable and debuggable
+
+#### Caste Notes (concise)
+
+* While the Phase name focuses on worker specialization, the game will include multiple ant castes over time: **workers**, **soldiers**, **scouts**, **queens**, **princesses**, and potentially others.
+* For roadmap simplicity, Phase 2 emphasizes worker specialization first. Other castes exist conceptually but their deep specialization systems belong to later phases.
+* All castes can perform core tasks (gathering food, caring for young, fighting), but castes differ by efficiency via trait multipliers. Example: a worker might fight at ~10% effectiveness of a soldier, while a soldier might perform worker tasks at ~10% of a worker's efficiency.
+* Specialization is expressed as trait multipliers rather than hard roles; this lets any ant perform any task with varying effectiveness.
+
+#### Future Flexibility
+
+* The system should allow ants to shift their effective specialization over time if colony needs change (e.g., temporary role drift or deliberate retraining). This is a "future feature" to keep Phase 2 focused and lightweight.
+* Deeper caste mechanics, lifecycle rules (e.g., queens/princesses spawning new castes), and caste-specific behaviors will be introduced in later phases when the simulation and pheromone systems are stable.
+
+### Phase 3 — Pheromone System (The Heart of the Game)
+
+**Goal:** Emergent colony behavior via indirect communication.
+
+* Pheromone grid data structure
+* Pheromone types:
+  * Food
+  * Nest
+  * Danger (future)
+* Deposit rules tied to ant state
+* Decay and diffusion over time
+* Pheromone-following behavior
+* Toggleable pheromone heatmap overlay
+
+Exit criteria:
+
+* Ants form visible trails
+* Trails strengthen and decay naturally
+* Emergent path optimization occurs without hardcoding
+
+### Phase 4 — Colony & Resources
+
+**Goal:** The colony becomes a persistent system.
+
+* Nest location
+* Food sources placed in the world
+* Food pickup and delivery
+* Shared colony food store
+* Simple success / failure conditions (e.g. starvation)
+
+Exit criteria:
+
+* Ants successfully gather and return food
+* Colony state meaningfully changes over time
+* Player can visually understand resource flow
+
+### Phase 5 — Player Interaction (Indirect Control)
+
+**Goal:** Player influences the system without direct unit control.
+
+* Place / remove food sources
+* Disturb terrain (block paths, create obstacles)
+* View colony statistics
+* Time controls (pause, speed up, slow down)
+* Debug UI becomes intentional UI
+
+Exit criteria:
+
+* Player feels like an observer / influencer, not a micromanager
+* Interactions reinforce simulation learning
+
+### Phase 6 — World Depth
+
+**Goal:** Add environmental complexity.
+
+* Above-ground vs underground layers
+* Fog of war / unexplored areas
+* Terrain types (soft soil, rock, impassable)
+* Environmental hazards
+
+Exit criteria:
+
+* Exploration becomes meaningful
+* The map feels like a system, not a backdrop
+
+### Phase 7 — Other Colonies & Threats
+
+**Goal:** Introduce conflict and competition.
+
+* Rival ant colonies
+* Territory pheromones
+* Simple combat interactions
+* Predators or environmental threats
+
+Exit criteria:
+
+* Emergent conflict arises naturally
+* No hard-scripted battles
+
+### Phase 8 — Systems & Scale
+
+**Goal:** Stress-test the simulation.
+
+* Hundreds to thousands of ants
+* Performance profiling and optimization
+* System batching and update throttling
+* Optional headless / fast-forward simulation
+
+Exit criteria:
+
+* Simulation remains stable under load
+* Performance issues are understood and controlled
+
+### Phase 9 — Persistence & Replayability
+
+**Goal:** Make simulations meaningful over time.
+
+* Save / load colony state
+* Replay or time-lapse viewing
+* Scenario presets
+* Parameterized world generation
+
+Exit criteria:
+
+* Simulations can be revisited and compared
+* Player can experiment intentionally
+
+### Phase 10 — Polish (Only If It Serves Clarity)
+
+**Goal:** Improve readability, not flash.
+
+* Subtle animations
+* Improved color language
+* Sound cues tied to system events
+* Optional visual themes
+
+Exit criteria:
+
+* Visuals enhance understanding
+* No system complexity added purely for aesthetics
+
+### Guiding Principles (Do Not Break)
+
+* Simulation logic is always engine-agnostic
+* Emergence > scripting
+* Debug views are first-class features
+* Clarity beats realism
+* Systems should explain themselves visually
+
+### Non-Goals (Intentionally Out of Scope)
+
+* Direct unit control
+* Heavy narrative
+* High-fidelity art
+* Twitch-reflex gameplay
+
+**Ants.Game is not about winning fast — it is about *watching intelligence emerge*.**
 
 ---
 
