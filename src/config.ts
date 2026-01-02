@@ -173,6 +173,24 @@ export const ANT_RENDER_CONFIG = {
 } as const;
 
 /**
+ * Rendering layer depth configuration
+ * Controls z-index ordering of visual elements
+ */
+export const RENDER_CONFIG = {
+  /**
+   * Depth for pheromone overlay
+   * Rendered above obstacles but below ants
+   */
+  PHEROMONE_DEPTH: 5,
+
+  /**
+   * Depth for UI elements
+   * Rendered on top of all game elements
+   */
+  UI_DEPTH: 100,
+} as const;
+
+/**
  * Colony nest rendering configuration
  * Visual properties for colony nest appearance
  */
@@ -273,4 +291,112 @@ export const SCENE_CONFIG = {
    * UI text depth to appear above game elements
    */
   UI_DEPTH: 100,
+} as const;
+
+/**
+ * Pheromone system configuration
+ * Controls pheromone behavior, decay, and grid properties
+ */
+export const PHEROMONE_CONFIG = {
+  /**
+   * Grid cell size in pixels
+   * 1 = one pheromone unit per pixel (highest resolution)
+   */
+  GRID_CELL_SIZE: 1,
+
+  /**
+   * Decay rate per second for Food pheromone (0-1)
+   * Higher = faster decay. 0.1 = loses 10% strength per second
+   */
+  FOOD_DECAY_RATE: 0.1,
+
+  /**
+   * Decay rate per second for Nest pheromone (0-1)
+   * Nest trails should last longer than food trails
+   */
+  NEST_DECAY_RATE: 0.05,
+
+  /**
+   * Decay rate per second for Danger pheromone (0-1)
+   * Danger signals should fade relatively quickly
+   */
+  DANGER_DECAY_RATE: 0.15,
+
+  /**
+   * Deposition strength for idle ants
+   * Idle ants deposit minimal pheromone
+   */
+  DEPOSITION_IDLE: 0.0,
+
+  /**
+   * Deposition strength for wandering ants
+   * Wandering ants leave faint nest trails
+   */
+  DEPOSITION_WANDERING: 0.5,
+
+  /**
+   * Deposition strength for foraging ants
+   * Foraging ants leave weak food trails (searching, not returning)
+   */
+  DEPOSITION_FORAGING: 0.3,
+
+  /**
+   * Deposition strength for returning ants
+   * Returning ants leave strong trails (found something!)
+   */
+  DEPOSITION_RETURNING: 1.0,
+
+  /**
+   * Update interval for diffusion (in frames)
+   * Diffusion is expensive, run every N frames
+   * 3 = diffuse every 3 frames (~20 times per second at 60 FPS)
+   */
+  DIFFUSION_UPDATE_INTERVAL: 3,
+
+  /**
+   * Diffusion rate (0-1)
+   * Controls how quickly pheromones spread to adjacent cells
+   * Lower = more localized trails, higher = broader spread
+   */
+  DIFFUSION_RATE: 0.1,
+
+  /**
+   * Maximum pheromone strength cap
+   * Prevents overflow from repeated depositions
+   */
+  MAX_STRENGTH: 10.0,
+
+  /**
+   * Minimum pheromone strength threshold for decay clamping
+   * Values below this are set to zero to avoid floating point precision issues
+   */
+  MIN_STRENGTH: 0.001,
+
+  /**
+   * Minimum visible strength threshold for rendering
+   * Cells below this strength are not rendered (performance optimization)
+   */
+  RENDER_THRESHOLD: 0.01,
+
+  /**
+   * Visualization power curve exponent
+   * Controls how pheromone strength maps to visual opacity
+   * 0.5 = square root (emphasizes weaker pheromones for better visibility)
+   */
+  VISUALIZATION_POWER: 0.5,
+
+  /**
+   * Maximum opacity for pheromone visualization (0-1)
+   * Prevents pheromones from completely obscuring the game view
+   */
+  MAX_OPACITY: 0.6,
+
+  /**
+   * Visualization colors for pheromone types (hex)
+   */
+  COLORS: {
+    FOOD: 0xff0000,    // Red
+    NEST: 0x0000ff,    // Blue
+    DANGER: 0xffff00,  // Yellow
+  },
 } as const;

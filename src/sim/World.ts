@@ -1,6 +1,8 @@
 import { Colony } from './Colony';
 import { Ant } from './Ant';
 import { Obstacle } from './Obstacle';
+import { PheromoneGrid } from './PheromoneGrid';
+import { PHEROMONE_CONFIG } from '../config';
 
 /**
  * World represents the entire simulation space
@@ -12,6 +14,7 @@ export class World {
   public height: number;
   public colonies: Colony[];
   public obstacles: Obstacle[];
+  public pheromoneGrid: PheromoneGrid;
   private nextAntId: number;
   private cachedAnts: Ant[];
   private antsCacheDirty: boolean;
@@ -21,6 +24,7 @@ export class World {
     this.height = height;
     this.colonies = [];
     this.obstacles = [];
+    this.pheromoneGrid = new PheromoneGrid(width, height, PHEROMONE_CONFIG.GRID_CELL_SIZE);
     this.nextAntId = 0;
     this.cachedAnts = [];
     this.antsCacheDirty = true;
