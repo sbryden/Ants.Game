@@ -5,6 +5,7 @@ import { AntRenderer } from '../render/AntRenderer';
 import { ColonyRenderer } from '../render/ColonyRenderer';
 import { AntState } from '../sim/AntState';
 import { Ant } from '../sim/Ant';
+import { SCENE_CONFIG, PHASER_CONFIG } from '../config';
 
 /**
  * Main game scene for Ants!
@@ -23,7 +24,7 @@ export class MainScene extends Phaser.Scene {
 
   create(): void {
     // Set up camera and background
-    this.cameras.main.setBackgroundColor('#2d4a2e');
+    this.cameras.main.setBackgroundColor(PHASER_CONFIG.BACKGROUND_COLOR);
 
     // Initialize simulation
     const worldWidth = this.scale.width;
@@ -38,38 +39,38 @@ export class MainScene extends Phaser.Scene {
 
     // Display title
     this.add
-      .text(16, 16, 'Ants!', {
-        fontSize: '32px',
-        color: '#ffffff',
+      .text(SCENE_CONFIG.TITLE.X, SCENE_CONFIG.TITLE.Y, SCENE_CONFIG.TITLE.TEXT, {
+        fontSize: SCENE_CONFIG.TITLE.FONT_SIZE,
+        color: SCENE_CONFIG.TITLE.COLOR,
         fontStyle: 'bold',
       })
-      .setDepth(100);
+      .setDepth(SCENE_CONFIG.UI_DEPTH);
 
     // Display instructions
     this.add
-      .text(16, 56, 'Watch the ants wander and return home...', {
-        fontSize: '16px',
-        color: '#cccccc',
+      .text(SCENE_CONFIG.INSTRUCTIONS.X, SCENE_CONFIG.INSTRUCTIONS.Y, SCENE_CONFIG.INSTRUCTIONS.TEXT, {
+        fontSize: SCENE_CONFIG.INSTRUCTIONS.FONT_SIZE,
+        color: SCENE_CONFIG.INSTRUCTIONS.COLOR,
       })
-      .setDepth(100);
+      .setDepth(SCENE_CONFIG.UI_DEPTH);
 
     // State color legend
     this.add
-      .text(16, 84, 'Colors: Gray=Idle, Brown=Wandering, Green=Foraging, Blue=Returning', {
-        fontSize: '12px',
-        color: '#aaaaaa',
+      .text(SCENE_CONFIG.LEGEND.X, SCENE_CONFIG.LEGEND.Y, SCENE_CONFIG.LEGEND.TEXT, {
+        fontSize: SCENE_CONFIG.LEGEND.FONT_SIZE,
+        color: SCENE_CONFIG.LEGEND.COLOR,
       })
-      .setDepth(100);
+      .setDepth(SCENE_CONFIG.UI_DEPTH);
 
     // Debug: State distribution counter
     this.debugText = this.add
-      .text(16, this.scale.height - 40, '', {
-        fontSize: '14px',
-        color: '#ffffff',
-        backgroundColor: '#00000088',
-        padding: { x: 8, y: 4 },
+      .text(SCENE_CONFIG.DEBUG.X, this.scale.height - SCENE_CONFIG.DEBUG.Y_OFFSET_FROM_BOTTOM, '', {
+        fontSize: SCENE_CONFIG.DEBUG.FONT_SIZE,
+        color: SCENE_CONFIG.DEBUG.COLOR,
+        backgroundColor: SCENE_CONFIG.DEBUG.BACKGROUND_COLOR,
+        padding: SCENE_CONFIG.DEBUG.PADDING,
       })
-      .setDepth(100);
+      .setDepth(SCENE_CONFIG.UI_DEPTH);
   }
 
   update(_time: number, delta: number): void {

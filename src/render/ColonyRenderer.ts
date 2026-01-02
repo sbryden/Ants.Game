@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { Colony } from '../sim/Colony';
+import { COLONY_RENDER_CONFIG } from '../config';
 
 /**
  * ColonyRenderer handles procedural rendering of colony nests
@@ -8,12 +9,6 @@ import { Colony } from '../sim/Colony';
  */
 export class ColonyRenderer {
   private graphics: Phaser.GameObjects.Graphics;
-
-  // Colony visual properties
-  private readonly nestRadius = 20;
-  private readonly nestColor = 0x704214; // Dark brown/tan for nest
-  private readonly nestBorderColor = 0x8b4513; // Brown border
-  private readonly nestBorderWidth = 2;
 
   constructor(scene: Phaser.Scene) {
     this.graphics = scene.add.graphics();
@@ -38,16 +33,16 @@ export class ColonyRenderer {
    */
   private drawColony(colony: Colony): void {
     // Draw nest base (filled circle)
-    this.graphics.fillStyle(this.nestColor, 0.6); // Semi-transparent
-    this.graphics.fillCircle(colony.x, colony.y, this.nestRadius);
+    this.graphics.fillStyle(COLONY_RENDER_CONFIG.NEST_COLOR, COLONY_RENDER_CONFIG.NEST_OPACITY);
+    this.graphics.fillCircle(colony.x, colony.y, COLONY_RENDER_CONFIG.NEST_RADIUS);
 
     // Draw nest border
-    this.graphics.lineStyle(this.nestBorderWidth, this.nestBorderColor, 1);
-    this.graphics.strokeCircle(colony.x, colony.y, this.nestRadius);
+    this.graphics.lineStyle(COLONY_RENDER_CONFIG.NEST_BORDER_WIDTH, COLONY_RENDER_CONFIG.NEST_BORDER_COLOR, 1);
+    this.graphics.strokeCircle(colony.x, colony.y, COLONY_RENDER_CONFIG.NEST_RADIUS);
 
     // Optional: Draw entrance (small inner circle for detail)
-    this.graphics.fillStyle(0x000000, 0.3); // Dark entrance
-    this.graphics.fillCircle(colony.x, colony.y, this.nestRadius * 0.4);
+    this.graphics.fillStyle(COLONY_RENDER_CONFIG.ENTRANCE_COLOR, COLONY_RENDER_CONFIG.ENTRANCE_OPACITY);
+    this.graphics.fillCircle(colony.x, colony.y, COLONY_RENDER_CONFIG.NEST_RADIUS * COLONY_RENDER_CONFIG.ENTRANCE_RADIUS_MULTIPLIER);
 
     // TODO: Future phases could add nest structure visualization
     // TODO: Show resource count or colony health as visual indicator

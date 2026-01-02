@@ -1,5 +1,6 @@
 import { Ant } from '../Ant';
 import { AntState } from '../AntState';
+import { BEHAVIOR_CONFIG } from '../../config';
 
 /**
  * Behavior State Machine for ants
@@ -37,12 +38,12 @@ export interface StateTransitionConfig {
  * Tuned for natural-looking behavior
  */
 export const DEFAULT_TRANSITION_CONFIG: StateTransitionConfig = {
-  idleToWanderingChance: 0.5, // 50% per second = ~2 second average idle time
-  wanderingMinDuration: 3,
-  wanderingToForagingChance: 0.1, // 10% per second after min duration
-  wanderingToReturningChance: 0.05, // 5% per second after min duration
-  foragingMinDuration: 5,
-  foragingToReturningChance: 0.1, // 10% per second after min duration
+  idleToWanderingChance: BEHAVIOR_CONFIG.IDLE_TO_WANDERING_CHANCE,
+  wanderingMinDuration: BEHAVIOR_CONFIG.WANDERING_MIN_DURATION,
+  wanderingToForagingChance: BEHAVIOR_CONFIG.WANDERING_TO_FORAGING_CHANCE,
+  wanderingToReturningChance: BEHAVIOR_CONFIG.WANDERING_TO_RETURNING_CHANCE,
+  foragingMinDuration: BEHAVIOR_CONFIG.FORAGING_MIN_DURATION,
+  foragingToReturningChance: BEHAVIOR_CONFIG.FORAGING_TO_RETURNING_CHANCE,
 };
 
 /**

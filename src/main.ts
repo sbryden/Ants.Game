@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { MainScene } from './scenes/MainScene';
+import { PHASER_CONFIG } from './config';
 
 /**
  * Main entry point for Ants! game
@@ -8,10 +9,10 @@ import { MainScene } from './scenes/MainScene';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  width: 1024,
-  height: 768,
+  width: PHASER_CONFIG.CANVAS_WIDTH,
+  height: PHASER_CONFIG.CANVAS_HEIGHT,
   parent: 'game-container',
-  backgroundColor: '#2d4a2e',
+  backgroundColor: PHASER_CONFIG.BACKGROUND_COLOR,
   scene: [MainScene],
   scale: {
     mode: Phaser.Scale.FIT,

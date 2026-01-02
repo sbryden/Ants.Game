@@ -16,7 +16,7 @@ import {
   StateTransitionConfig,
   DEFAULT_TRANSITION_CONFIG,
 } from '../sim/behaviors/BehaviorStateMachine';
-import { WORLD_CONFIG } from '../config';
+import { WORLD_CONFIG, MOVEMENT_CONFIG, COLONY_CONFIG } from '../config';
 
 /**
  * SimulationSystem orchestrates the deterministic simulation update loop
@@ -35,9 +35,9 @@ export class SimulationSystem {
   constructor(world: World) {
     this.world = world;
     this.movementConfig = {
-      speed: 50, // pixels per second
-      changeDirectionInterval: 2, // seconds (now mostly unused, kept for compatibility)
-      turnSpeed: 0.3, // How quickly ants can turn (0-1, lower = more realistic)
+      speed: MOVEMENT_CONFIG.SPEED,
+      changeDirectionInterval: MOVEMENT_CONFIG.CHANGE_DIRECTION_INTERVAL,
+      turnSpeed: MOVEMENT_CONFIG.TURN_SPEED,
     };
     this.transitionConfig = DEFAULT_TRANSITION_CONFIG;
   }
@@ -116,7 +116,7 @@ export class SimulationSystem {
         moveTowardsPoint(ant, colony.x, colony.y, this.movementConfig);
 
         // Check if reached home (deterministic transition)
-        if (isNearPoint(ant, colony.x, colony.y, 15)) {
+        if (isNearPoint(ant, colony.x, colony.y, COLONY_CONFIG.HOME_ARRIVAL_DISTANCE)) {
           changeState(ant, AntState.IDLE);
         }
         break;

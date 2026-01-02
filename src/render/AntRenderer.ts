@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Ant } from '../sim/Ant';
 import { AntState } from '../sim/AntState';
+import { ANT_RENDER_CONFIG } from '../config';
 
 /**
  * AntRenderer handles procedural rendering of ants using Phaser.Graphics
@@ -9,19 +10,6 @@ import { AntState } from '../sim/AntState';
  */
 export class AntRenderer {
   private graphics: Phaser.GameObjects.Graphics;
-
-  // Ant visual properties
-  private readonly antBodyRadius = 3;
-  private readonly antHeadRadius = 2;
-  private readonly antHeadColor = 0x654321; // Darker brown
-
-  // State-based body colors for debug visualization
-  private readonly stateColors = {
-    [AntState.IDLE]: 0x808080,      // Gray - idle/resting
-    [AntState.WANDERING]: 0x8b4513, // Brown - normal wandering
-    [AntState.FORAGING]: 0x4a7c4e,  // Green - searching for food
-    [AntState.RETURNING]: 0x4169a1, // Blue - returning home
-  };
 
   constructor(scene: Phaser.Scene) {
     this.graphics = scene.add.graphics();
@@ -54,21 +42,21 @@ export class AntRenderer {
     if (speed > 0) {
       const normalizedVx = ant.vx / speed;
       const normalizedVy = ant.vy / speed;
-      headOffsetX = normalizedVx * (this.antBodyRadius + this.antHeadRadius);
-      headOffsetY = normalizedVy * (this.antBodyRadius + this.antHeadRadius);
+      headOffsetX = normalizedVx * (ANT_RENDER_CONFIG.BODY_RADIUS + ANT_RENDER_CONFIG.HEAD_RADIUS);
+      headOffsetY = normalizedVy * (ANT_RENDER_CONFIG.BODY_RADIUS + ANT_RENDER_CONFIG.HEAD_RADIUS);
     }
 
     // Draw body with state-based color
-    const bodyColor = this.stateColors[ant.state] || 0x8b4513; // Default to brown
+    const bodyColor = ANT_RENDER_CONFIG.STATE_COLORS[ant.state] || ANT_RENDER_CONFIG.DEFAULT_BODY_COLOR;
     this.graphics.fillStyle(bodyColor, 1);
-    this.graphics.fillCircle(ant.x, ant.y, this.antBodyRadius);
+    this.graphics.fillCircle(ant.x, ant.y, ANT_RENDER_CONFIG.BODY_RADIUS);
 
     // Draw head
-    this.graphics.fillStyle(this.antHeadColor, 1);
+    this.graphics.fillStyle(ANT_RENDER_CONFIG.HEAD_COLOR, 1);
     this.graphics.fillCircle(
       ant.x + headOffsetX,
       ant.y + headOffsetY,
-      this.antHeadRadius
+      ANT_RENDER_CONFIG.HEAD_RADIUS
     );
 
     // TODO: Add legs, antennae for more realistic appearance

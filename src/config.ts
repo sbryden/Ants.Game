@@ -7,6 +7,27 @@
  */
 
 /**
+ * Phaser game engine configuration
+ * Canvas dimensions and display settings
+ */
+export const PHASER_CONFIG = {
+  /**
+   * Game canvas width in pixels
+   */
+  CANVAS_WIDTH: 1024,
+
+  /**
+   * Game canvas height in pixels
+   */
+  CANVAS_HEIGHT: 768,
+
+  /**
+   * Background color for the game canvas
+   */
+  BACKGROUND_COLOR: '#2d4a2e',
+} as const;
+
+/**
  * World and simulation setup configuration
  */
 export const WORLD_CONFIG = {
@@ -22,15 +43,216 @@ export const WORLD_CONFIG = {
  * Used by SimulationSystem and behavior functions
  */
 export const MOVEMENT_CONFIG = {
-  // Add movement constants here as needed
-  // Example: DEFAULT_SPEED: 50,
+  /**
+   * Ant movement speed in pixels per second
+   * Controls how fast ants move across the world
+   */
+  SPEED: 50,
+
+  /**
+   * Time interval (in seconds) between random direction changes
+   * Lower values = more erratic movement, higher = smoother paths
+   */
+  CHANGE_DIRECTION_INTERVAL: 2,
+
+  /**
+   * Turn speed coefficient (0-1)
+   * Controls how quickly ants can change direction
+   * Lower values = more realistic, gradual turns
+   */
+  TURN_SPEED: 0.3,
 } as const;
 
 /**
- * Rendering configuration
- * Visual properties that might be tweaked
+ * Behavior state machine configuration
+ * Probabilities and durations for ant state transitions
  */
-export const RENDER_CONFIG = {
-  // Add rendering constants here as needed
-  // Example: ANT_BODY_RADIUS: 3,
+export const BEHAVIOR_CONFIG = {
+  /**
+   * Chance per second for idle ant to start wandering
+   * Higher = ants leave home more frequently
+   */
+  IDLE_TO_WANDERING_CHANCE: 0.5,
+
+  /**
+   * Minimum time (seconds) ant must wander before considering other states
+   * Prevents rapid state flickering
+   */
+  WANDERING_MIN_DURATION: 3,
+
+  /**
+   * Chance per second for wandering ant to transition to foraging
+   * Evaluated after minimum wandering duration
+   */
+  WANDERING_TO_FORAGING_CHANCE: 0.1,
+
+  /**
+   * Chance per second for wandering ant to return home
+   * Evaluated after minimum wandering duration
+   */
+  WANDERING_TO_RETURNING_CHANCE: 0.05,
+
+  /**
+   * Minimum time (seconds) ant must forage before considering return
+   * Prevents giving up too quickly
+   */
+  FORAGING_MIN_DURATION: 5,
+
+  /**
+   * Chance per second for foraging ant to give up and return home
+   * Evaluated after minimum foraging duration
+   */
+  FORAGING_TO_RETURNING_CHANCE: 0.1,
+} as const;
+
+/**
+ * Colony configuration
+ * Colony behavior and interaction distances
+ */
+export const COLONY_CONFIG = {
+  /**
+   * Distance threshold (pixels) for ant to be considered "at home"
+   * Used to trigger state transitions when returning to nest
+   */
+  HOME_ARRIVAL_DISTANCE: 15,
+} as const;
+
+/**
+ * Ant rendering configuration
+ * Visual properties for ant appearance
+ */
+export const ANT_RENDER_CONFIG = {
+  /**
+   * Radius of ant body circle in pixels
+   */
+  BODY_RADIUS: 3,
+
+  /**
+   * Radius of ant head circle in pixels
+   */
+  HEAD_RADIUS: 2,
+
+  /**
+   * Color of ant head (hex)
+   */
+  HEAD_COLOR: 0x654321,
+
+  /**
+   * Body colors by state (for debug visualization)
+   * Each state gets a distinct color to make behavior visible
+   */
+  STATE_COLORS: {
+    IDLE: 0x808080,      // Gray - resting
+    WANDERING: 0x8b4513, // Brown - exploring
+    FORAGING: 0x4a7c4e,  // Green - searching for food
+    RETURNING: 0x4169a1, // Blue - heading home
+  },
+
+  /**
+   * Default body color (fallback when state color not found)
+   */
+  DEFAULT_BODY_COLOR: 0x8b4513,
+} as const;
+
+/**
+ * Colony nest rendering configuration
+ * Visual properties for colony nest appearance
+ */
+export const COLONY_RENDER_CONFIG = {
+  /**
+   * Radius of colony nest circle in pixels
+   */
+  NEST_RADIUS: 20,
+
+  /**
+   * Base fill color of nest (hex)
+   */
+  NEST_COLOR: 0x704214,
+
+  /**
+   * Border color of nest (hex)
+   */
+  NEST_BORDER_COLOR: 0x8b4513,
+
+  /**
+   * Border thickness in pixels
+   */
+  NEST_BORDER_WIDTH: 2,
+
+  /**
+   * Opacity of nest fill (0-1)
+   */
+  NEST_OPACITY: 0.6,
+
+  /**
+   * Multiplier for inner entrance radius (relative to nest radius)
+   * 0.4 = entrance is 40% of nest size
+   */
+  ENTRANCE_RADIUS_MULTIPLIER: 0.4,
+
+  /**
+   * Color of nest entrance (hex)
+   */
+  ENTRANCE_COLOR: 0x000000,
+
+  /**
+   * Opacity of nest entrance (0-1)
+   */
+  ENTRANCE_OPACITY: 0.3,
+} as const;
+
+/**
+ * Scene UI configuration
+ * Text positions, sizes, and styling for main scene UI
+ */
+export const SCENE_CONFIG = {
+  /**
+   * Title text configuration
+   */
+  TITLE: {
+    X: 16,
+    Y: 16,
+    FONT_SIZE: '32px',
+    COLOR: '#ffffff',
+    TEXT: 'Ants!',
+  },
+
+  /**
+   * Instructions text configuration
+   */
+  INSTRUCTIONS: {
+    X: 16,
+    Y: 56,
+    FONT_SIZE: '16px',
+    COLOR: '#cccccc',
+    TEXT: 'Watch the ants wander and return home...',
+  },
+
+  /**
+   * State legend text configuration
+   */
+  LEGEND: {
+    X: 16,
+    Y: 84,
+    FONT_SIZE: '12px',
+    COLOR: '#aaaaaa',
+    TEXT: 'Colors: Gray=Idle, Brown=Wandering, Green=Foraging, Blue=Returning',
+  },
+
+  /**
+   * Debug info text configuration
+   */
+  DEBUG: {
+    X: 16,
+    Y_OFFSET_FROM_BOTTOM: 40,
+    FONT_SIZE: '14px',
+    COLOR: '#ffffff',
+    BACKGROUND_COLOR: '#00000088',
+    PADDING: { x: 8, y: 4 },
+  },
+
+  /**
+   * UI text depth to appear above game elements
+   */
+  UI_DEPTH: 100,
 } as const;
