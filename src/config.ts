@@ -306,21 +306,22 @@ export const PHEROMONE_CONFIG = {
 
   /**
    * Decay rate per second for Food pheromone (0-1)
-   * Higher = faster decay. 0.1 = loses 10% strength per second
+   * Higher = faster decay. 0.05 = loses 5% strength per second
+   * Lowered to allow trails to persist longer and accumulate
    */
-  FOOD_DECAY_RATE: 0.1,
+  FOOD_DECAY_RATE: 0.05,
 
   /**
    * Decay rate per second for Nest pheromone (0-1)
    * Nest trails should last longer than food trails
    */
-  NEST_DECAY_RATE: 0.05,
+  NEST_DECAY_RATE: 0.03,
 
   /**
    * Decay rate per second for Danger pheromone (0-1)
    * Danger signals should fade relatively quickly
    */
-  DANGER_DECAY_RATE: 0.15,
+  DANGER_DECAY_RATE: 0.10,
 
   /**
    * Deposition strength for idle ants
@@ -337,14 +338,16 @@ export const PHEROMONE_CONFIG = {
   /**
    * Deposition strength for foraging ants
    * Foraging ants leave weak food trails (searching, not returning)
+   * Increased to 0.5 for better visibility while still weaker than returning
    */
-  DEPOSITION_FORAGING: 0.3,
+  DEPOSITION_FORAGING: 0.5,
 
   /**
    * Deposition strength for returning ants
    * Returning ants leave strong trails (found something!)
+   * Increased to 2.0 so multiple ants create visibly saturated trails
    */
-  DEPOSITION_RETURNING: 1.0,
+  DEPOSITION_RETURNING: 2.0,
 
   /**
    * Update interval for diffusion (in frames)
@@ -357,14 +360,16 @@ export const PHEROMONE_CONFIG = {
    * Diffusion rate (0-1)
    * Controls how quickly pheromones spread to adjacent cells
    * Lower = more localized trails, higher = broader spread
+   * Lowered to 0.05 to concentrate pheromones instead of spreading too thin
    */
-  DIFFUSION_RATE: 0.1,
+  DIFFUSION_RATE: 0.05,
 
   /**
    * Maximum pheromone strength cap
    * Prevents overflow from repeated depositions
+   * Increased to 20.0 to allow visible saturation when multiple ants traverse same path
    */
-  MAX_STRENGTH: 10.0,
+  MAX_STRENGTH: 20.0,
 
   /**
    * Minimum pheromone strength threshold for decay clamping

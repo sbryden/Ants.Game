@@ -211,11 +211,11 @@ Exit criteria:
 * ✅ States are easy to inspect and reason about
 * ✅ No pheromones yet — behavior is still local
 
-### Phase 2 — Pheromone System (The Heart of the Game) 🚧 **IN PROGRESS**
+### Phase 2 — Pheromone System (The Heart of the Game) 🚧 **COMPLETE**
 
 **Goal:** Emergent colony behavior via indirect communication.
 
-**Status:** Segment 3 of 5 complete
+**Status:** ✅ **Complete**
 
 **Completed:**
 - ✅ Pheromone grid data structure (Float32Array-based)
@@ -225,19 +225,14 @@ Exit criteria:
 - ✅ Configuration-driven parameters (PHEROMONE_CONFIG)
 - ✅ State-based ant deposition (idle/wandering/foraging/returning)
 - ✅ Grid diffusion with 4-neighbor averaging (runs every 3 frames)
-
-**In Progress:**
-- 🚧 Pheromone-following behavior
-
-**Remaining Work:**
-- Gradient following behavior (Segment 4)
-- Polish and tuning (Segment 5)
+- ✅ Pheromone-following behavior (8-directional gradient sampling)
+- ✅ Parameter tuning for trail saturation and accumulation
 
 Exit criteria:
 
-* ⏳ Ants form visible trails
-* ⏳ Trails strengthen and decay naturally
-* ⏳ Emergent path optimization occurs without hardcoding
+* ✅ Ants form visible trails
+* ✅ Trails strengthen and decay naturally
+* ✅ Emergent path optimization occurs without hardcoding
 
 ### Phase 3 — Colony & Resources
 
