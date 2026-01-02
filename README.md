@@ -154,7 +154,7 @@ Ants are state machines that transition between four distinct behavioral modes, 
 
 An ant enters IDLE when it returns home and has no food to deposit. Idle ants remain at the nest, depositing weak pheromones to mark the colony location. They occasionally transition to WANDERING to explore or forage.
 
-**Visual cue:** Ants rendered in blue
+**Visual cue:** Ants rendered in gray
 
 ### WANDERING
 
@@ -162,7 +162,7 @@ An ant enters IDLE when it returns home and has no food to deposit. Idle ants re
 
 Wandering ants move randomly throughout the world, avoiding obstacles. They deposit weak NEST pheromones to create breadcrumb trails back home. If they detect a food source or follow a strong food pheromone trail, they transition to FORAGING.
 
-**Visual cue:** Ants rendered in green
+**Visual cue:** Ants rendered in brown
 
 ### FORAGING
 
@@ -170,7 +170,7 @@ Wandering ants move randomly throughout the world, avoiding obstacles. They depo
 
 Foraging ants actively search for food sources within their perception range. Once food is detected, they move toward it and harvest automatically while nearby. As they harvest and fill their inventory, they deposit **strong food pheromones** (if carrying food) to mark successful routes back home. When full or when the food source is depleted, they transition to RETURNING.
 
-**Visual cue:** Ants rendered in orange; red indicator dot appears when carrying food
+**Visual cue:** Ants rendered in green; red indicator dot appears when carrying food
 
 ### RETURNING
 
@@ -178,7 +178,7 @@ Foraging ants actively search for food sources within their perception range. On
 
 Returning ants navigate home using nest pheromone trails and their internal sense of colony location. While carrying food, they deposit strong food pheromones to reinforce the successful foraging route. Upon arrival at the colony, they automatically deposit their food into shared storage and transition back to IDLE. If they lose their food (or never had any), they transition directly to IDLE.
 
-**Visual cue:** Ants rendered in red; red indicator shows carried food amount
+**Visual cue:** Ants rendered in blue; red indicator shows carried food amount
 
 ### State Transitions
 

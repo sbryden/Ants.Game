@@ -188,7 +188,7 @@ export class SimulationSystem {
           
           if (isAtFoodSource(ant, food)) {
             // Harvest food from source (automatic while nearby)
-            harvestFood(ant, food, FOOD_CONFIG.HARVEST_RATE * 0.016); // deltaTime approximation for per-frame rate
+            harvestFood(ant, food, FOOD_CONFIG.HARVEST_RATE * deltaTime);
             
             // Transition to returning if full or source depleted
             if (isCarryingFull(ant) || food.isDepleted()) {
