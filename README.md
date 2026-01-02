@@ -292,17 +292,24 @@ Exit criteria:
 
 **Goal:** The colony becomes a persistent system.
 
-* Nest location
-* Food sources placed in the world
-* Food pickup and delivery
-* Shared colony food store
-* Resource accumulation
+**Status:** ✅ **Complete**
+
+**Completed:**
+- ✅ Food source entities with spawn/respawn mechanics
+- ✅ Ant carrying capacity (5 units per ant)
+- ✅ Visual carrying indicators (red dot scaled by inventory)
+- ✅ Foraging behavior with food detection
+- ✅ Food harvesting at sources
+- ✅ Food deposit to colony storage (colony.resourceCount)
+- ✅ Pheromone trail formation (strong trails when carrying food)
+- ✅ Automatic food respawn when depleted
+- ✅ Procedural food rendering with opacity feedback
 
 Exit criteria:
 
-* Ants successfully gather and return food
-* Colony state meaningfully changes over time
-* Player can visually understand resource flow
+* ✅ Ants successfully gather and return food
+* ✅ Colony state meaningfully changes over time
+* ✅ Player can visually understand resource flow
 
 ### Phase 4 — Health & Eating
 
