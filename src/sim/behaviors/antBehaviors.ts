@@ -15,19 +15,81 @@ import { World } from '../World';
 export interface MovementConfig {
   speed: number; // pixels per second
   changeDirectionInterval: number; // seconds between direction changes
+  turnSpeed: number; // How quickly ant can change direction (0-1, lower = slower turns)
 }
 
 /**
  * Apply random wandering movement to an ant
- * Updates velocity to a random direction at configured speed
+ * Updates target velocity to a random direction at configured speed
+ * Actual velocity will interpolate toward target (smooth turning)
  * 
  * Extension point: Future behaviors (pheromone following, pathfinding) can replace this
  */
 export function applyRandomWander(ant: Ant, config: MovementConfig): void {
   const angle = Math.random() * Math.PI * 2;
-  ant.vx = Math.cos(angle) * config.speed;
-  ant.vy = Math.sin(angle) * config.speed;
-  ant.state = AntState.MOVING;
+  ant.targetVx = Math.cos(angle) * config.speed;
+  ant.targetVy = Math.sin(angle) * config.speed;
+}
+
+/**
+ * Move ant towards a target point at configured speed
+ * Sets target velocity (actual velocity will interpolate)
+ * Used for returning home or goal-directed movement
+ */
+export function moveTowardsPoint(
+  ant: Ant,
+  targetX: number,
+  targetY: number,
+  config: MovementConfig
+): void {
+  const dx = targetX - ant.x;
+  const dy = targetY - ant.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance > 0) {
+    // Normalize direction and apply speed
+    ant.targetVx = (dx / distance) * config.speed;
+    ant.targetVy = (dy / distance) * config.speed;
+  }
+}
+
+/**
+ * Check if ant is near a target point
+ * Returns true if within threshold distance
+ */
+export function isNearPoint(
+  ant: Ant,
+  targetX: number,
+  targetY: number,
+  threshold: number = 10
+): boolean {
+  const dx = targetX - ant.x;
+  const dy = targetY - ant.y;
+  const distanceSquared = dx * dx + dy * dy;
+  return distanceSquared < threshold * threshold;
+}
+
+/**
+ * Apply inertia/smooth turning to ant movement
+ * Interpolates current velocity toward target velocity
+ * Creates realistic turning behavior instead of instant direction changes
+ * 
+ * @param ant - Ant to apply inertia to
+ * @param config - Movement configuration with turnSpeed
+ * @param deltaTime - Time step for interpolation
+ */
+export function applyInertia(
+  ant: Ant,
+  config: MovementConfig,
+  deltaTime: number
+): void {
+  // Lerp factor based on turn speed and delta time
+  // Lower turnSpeed = slower, more gradual turns
+  const lerpFactor = Math.min(1, config.turnSpeed * deltaTime * 10);
+
+  // Interpolate toward target velocity
+  ant.vx += (ant.targetVx - ant.vx) * lerpFactor;
+  ant.vy += (ant.targetVy - ant.vy) * lerpFactor;
 }
 
 /**

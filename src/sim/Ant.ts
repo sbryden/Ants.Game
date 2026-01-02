@@ -11,14 +11,17 @@ export class Ant {
   public id: number;
   public x: number;
   public y: number;
-  public vx: number;
+  public vx: number; // Current velocity
   public vy: number;
+  public targetVx: number; // Desired velocity (for inertia/smooth turning)
+  public targetVy: number;
   public state: AntState;
   public colonyId: number;
 
   // Behavior timing state
   // Stored here instead of in the system to support deterministic simulation
   public timeSinceDirectionChange: number;
+  public timeInCurrentState: number; // Time spent in current state (for transitions)
 
   // Extension points for future systems (not yet implemented)
   // These will remain unused until Phase 2+
@@ -32,8 +35,11 @@ export class Ant {
     this.y = y;
     this.vx = 0;
     this.vy = 0;
+    this.targetVx = 0;
+    this.targetVy = 0;
     this.state = AntState.IDLE;
     this.colonyId = colonyId;
     this.timeSinceDirectionChange = 0;
+    this.timeInCurrentState = 0;
   }
 }
