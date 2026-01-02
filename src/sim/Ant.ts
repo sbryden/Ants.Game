@@ -2,9 +2,12 @@ import { AntState } from './AntState';
 
 /**
  * Pure data structure representing a single ant
+ * No methods, no behavior logic - just state
+ * Behavior is applied via pure functions in behaviors/
  * No Phaser dependencies - this is engine-agnostic simulation data
  */
 export class Ant {
+  // Core identity and position
   public id: number;
   public x: number;
   public y: number;
@@ -12,6 +15,16 @@ export class Ant {
   public vy: number;
   public state: AntState;
   public colonyId: number;
+
+  // Behavior timing state
+  // Stored here instead of in the system to support deterministic simulation
+  public timeSinceDirectionChange: number;
+
+  // Extension points for future systems (not yet implemented)
+  // These will remain unused until Phase 2+
+  // TODO: Add pheromone detection data structure
+  // TODO: Add trait/role enum
+  // TODO: Add task/goal reference
 
   constructor(id: number, x: number, y: number, colonyId: number) {
     this.id = id;
@@ -21,26 +34,6 @@ export class Ant {
     this.vy = 0;
     this.state = AntState.IDLE;
     this.colonyId = colonyId;
-  }
-
-  /**
-   * Update ant position based on velocity
-   * Simple integration for MVP - no ant-to-ant collision detection here;
-   * boundary (wall) collisions are handled by the simulation system.
-   */
-  public updatePosition(deltaTime: number): void {
-    this.x += this.vx * deltaTime;
-    this.y += this.vy * deltaTime;
-  }
-
-  /**
-   * Set random movement direction
-   * Used for basic wandering behavior in MVP
-   */
-  public setRandomVelocity(speed: number): void {
-    const angle = Math.random() * Math.PI * 2;
-    this.vx = Math.cos(angle) * speed;
-    this.vy = Math.sin(angle) * speed;
-    this.state = AntState.MOVING;
+    this.timeSinceDirectionChange = 0;
   }
 }

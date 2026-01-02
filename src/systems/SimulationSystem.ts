@@ -1,78 +1,97 @@
 import { World } from '../sim/World';
 import { Ant } from '../sim/Ant';
 import { AntState } from '../sim/AntState';
+import {
+  applyRandomWander,
+  updatePosition,
+  constrainToWorld,
+  shouldChangeDirection,
+  initializeMovementIfIdle,
+  MovementConfig,
+} from '../sim/behaviors/antBehaviors';
 
 /**
- * SimulationSystem orchestrates the simulation update loop
- * Deterministic updates for ants, movement, and future pheromone logic
- * Operates on engine-agnostic simulation data
+ * SimulationSystem orchestrates the deterministic simulation update loop
+ * Operates on engine-agnostic simulation data using pure behavior functions
+ * 
+ * Responsibilities:
+ * - Tick the simulation forward in time
+ * - Coordinate behavior updates across all ants
+ * - Provide extension points for future systems (pheromones, tasks, etc.)
  */
 export class SimulationSystem {
   private world: World;
-  private antSpeed: number = 50; // pixels per second
-  private changeDirectionInterval: number = 2; // seconds
-  private timeSinceLastChange: Map<number, number>;
+  private movementConfig: MovementConfig;
 
   constructor(world: World) {
     this.world = world;
-    this.timeSinceLastChange = new Map();
+    this.movementConfig = {
+      speed: 50, // pixels per second
+      changeDirectionInterval: 2, // seconds
+    };
   }
 
   /**
-   * Main update loop called each frame
-   * @param deltaTime - time elapsed since last frame in seconds
+   * Main simulation tick - advances simulation by deltaTime seconds
+   * Deterministic: given same initial state and deltaTime, produces same output
+   * 
+   * @param deltaTime - time elapsed since last tick in seconds
+   * 
+   * Extension points:
+   * - Pheromone diffusion/decay would happen here
+   * - Colony-level updates (resource management) would happen here
+   * - Global events (food spawning, threats) would happen here
    */
-  public update(deltaTime: number): void {
+  public tick(deltaTime: number): void {
     const ants = this.world.getAllAnts();
 
+    // Update ant behaviors
     for (const ant of ants) {
-      this.updateAnt(ant, deltaTime);
+      this.updateAntBehavior(ant, deltaTime);
     }
+
+    // Extension point: Pheromone system update
+    // Extension point: Colony resource updates
+    // Extension point: Task assignment system
   }
 
   /**
-   * Update a single ant's state and position
-   * For MVP: simple random walk behavior with periodic direction changes
+   * Update a single ant's behavior and state
+   * Uses pure functions from behaviors/ to maintain separation of concerns
+   * 
+   * Future: This could be generalized to support different behavior sets
+   * based on ant role, traits, or tasks
    */
-  private updateAnt(ant: Ant, deltaTime: number): void {
-    // Track time for direction changes
-    const timeSinceChange = this.timeSinceLastChange.get(ant.id) || 0;
-    const updatedTimeSinceChange = timeSinceChange + deltaTime;
+  private updateAntBehavior(ant: Ant, deltaTime: number): void {
+    // Update behavior timing
+    ant.timeSinceDirectionChange += deltaTime;
 
-    // Change direction periodically for wandering behavior
-    if (updatedTimeSinceChange >= this.changeDirectionInterval) {
-      ant.setRandomVelocity(this.antSpeed);
-      this.timeSinceLastChange.set(ant.id, 0);
+    // Decide if we should change direction (wandering behavior)
+    if (shouldChangeDirection(ant.timeSinceDirectionChange, this.movementConfig)) {
+      applyRandomWander(ant, this.movementConfig);
+      ant.timeSinceDirectionChange = 0;
     } else {
-      this.timeSinceLastChange.set(ant.id, updatedTimeSinceChange);
-      // If idle and we didn't just change direction, start moving
-      if (ant.state === AntState.IDLE) {
-        ant.setRandomVelocity(this.antSpeed);
-      }
+      // If idle and not changing direction, start moving
+      initializeMovementIfIdle(ant, this.movementConfig);
     }
 
-    // Update position
-    ant.updatePosition(deltaTime);
+    // Apply movement
+    updatePosition(ant, deltaTime);
 
-    // Keep ant within world bounds (simple bounce)
-    this.bounceOffWalls(ant);
+    // Constrain to world bounds
+    constrainToWorld(ant, this.world);
+
+    // Extension point: Pheromone detection and response
+    // Extension point: Food/threat detection
+    // Extension point: Ant-to-ant interactions (communication, combat)
   }
 
   /**
-   * Bounce ant off world boundaries
-   * Simple collision response - reverses velocity component when hitting a wall
-   * Boundaries are exclusive (0 and width/height are valid positions)
+   * Convenience method for Phaser integration
+   * Converts milliseconds to seconds and calls tick()
    */
-  private bounceOffWalls(ant: Ant): void {
-    if (ant.x < 0 || ant.x > this.world.width) {
-      ant.vx *= -1;
-      ant.x = Math.max(0, Math.min(this.world.width, ant.x));
-    }
-
-    if (ant.y < 0 || ant.y > this.world.height) {
-      ant.vy *= -1;
-      ant.y = Math.max(0, Math.min(this.world.height, ant.y));
-    }
+  public update(deltaTime: number): void {
+    this.tick(deltaTime);
   }
 
   /**
@@ -90,7 +109,7 @@ export class SimulationSystem {
     for (let i = 0; i < initialAntCount; i++) {
       const ant = this.world.spawnAnt(colony);
       // Start with random velocity
-      ant.setRandomVelocity(this.antSpeed);
+      applyRandomWander(ant, this.movementConfig);
     }
   }
 }
