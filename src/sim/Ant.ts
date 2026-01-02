@@ -23,13 +23,16 @@ export class Ant {
   public timeSinceDirectionChange: number;
   public timeInCurrentState: number; // Time spent in current state (for transitions)
 
+  // Perception properties
+  public perceptionRange: number; // How far ant can "see" environment
+
   // Extension points for future systems (not yet implemented)
   // These will remain unused until Phase 2+
   // TODO: Add pheromone detection data structure
   // TODO: Add trait/role enum
   // TODO: Add task/goal reference
 
-  constructor(id: number, x: number, y: number, colonyId: number) {
+  constructor(id: number, x: number, y: number, colonyId: number, perceptionRange: number = 100) {
     this.id = id;
     this.x = x;
     this.y = y;
@@ -41,5 +44,6 @@ export class Ant {
     this.colonyId = colonyId;
     this.timeSinceDirectionChange = 0;
     this.timeInCurrentState = 0;
+    this.perceptionRange = perceptionRange;
   }
 }

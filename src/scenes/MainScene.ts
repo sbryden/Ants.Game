@@ -3,8 +3,10 @@ import { World } from '../sim/World';
 import { SimulationSystem } from '../systems/SimulationSystem';
 import { AntRenderer } from '../render/AntRenderer';
 import { ColonyRenderer } from '../render/ColonyRenderer';
+import { ObstacleRenderer } from '../render/ObstacleRenderer';
 import { AntState } from '../sim/AntState';
 import { Ant } from '../sim/Ant';
+import { Obstacle } from '../sim/Obstacle';
 import { SCENE_CONFIG, PHASER_CONFIG } from '../config';
 
 /**
@@ -16,6 +18,7 @@ export class MainScene extends Phaser.Scene {
   private simulationSystem!: SimulationSystem;
   private antRenderer!: AntRenderer;
   private colonyRenderer!: ColonyRenderer;
+  private obstacleRenderer!: ObstacleRenderer;
   private debugText!: Phaser.GameObjects.Text;
 
   constructor() {
@@ -33,9 +36,13 @@ export class MainScene extends Phaser.Scene {
     this.simulationSystem = new SimulationSystem(this.world);
     this.simulationSystem.initializeWorld();
 
+    // Add test obstacles (hardcoded for MVP)
+    this.addTestObstacles();
+
     // Initialize rendering
     this.antRenderer = new AntRenderer(this);
     this.colonyRenderer = new ColonyRenderer(this);
+    this.obstacleRenderer = new ObstacleRenderer(this);
 
     // Display title
     this.add
@@ -80,10 +87,13 @@ export class MainScene extends Phaser.Scene {
     // Update simulation
     this.simulationSystem.update(deltaTime);
 
-    // Render colonies (nests) first so ants appear on top
+    // Render obstacles first (background layer)
+    this.obstacleRenderer.render(this.world.getObstacles());
+
+    // Render colonies (nests) second
     this.colonyRenderer.render(this.world.getColonies());
 
-    // Render ants
+    // Render ants on top
     const ants = this.world.getAllAnts();
     this.antRenderer.render(ants);
 
@@ -119,9 +129,34 @@ export class MainScene extends Phaser.Scene {
     this.debugText.setText(debugInfo);
   }
 
+  /**
+   * Add test obstacles to the world for MVP testing.
+   * Hardcoded positions for now - can be made configurable later.
+   */
+  private addTestObstacles(): void {
+    const centerX = this.scale.width / 2;
+    const centerY = this.scale.height / 2;
+
+    // Top-left obstacle
+    this.world.addObstacle(new Obstacle(centerX / 2, centerY / 2, 35));
+
+    // Top-right obstacle
+    this.world.addObstacle(new Obstacle(centerX * 1.5, centerY / 2, 30));
+
+    // Bottom-left obstacle
+    this.world.addObstacle(new Obstacle(centerX / 2, centerY * 1.5, 40));
+
+    // Bottom-right obstacle
+    this.world.addObstacle(new Obstacle(centerX * 1.5, centerY * 1.5, 45));
+
+    // Left-side obstacle
+    this.world.addObstacle(new Obstacle(150, centerY, 25));
+  }
+
   shutdown(): void {
     // Clean up renderer resources
     this.antRenderer.destroy();
     this.colonyRenderer.destroy();
+    this.obstacleRenderer.destroy();
   }
 }

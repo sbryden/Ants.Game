@@ -1,4 +1,5 @@
 import { Ant } from './Ant';
+import { PERCEPTION_CONFIG } from '../config';
 
 /**
  * Colony data structure
@@ -23,7 +24,7 @@ export class Colony {
    * Spawn a new ant at the colony location
    */
   public spawnAnt(antId: number): Ant {
-    const ant = new Ant(antId, this.x, this.y, this.id);
+    const ant = new Ant(antId, this.x, this.y, this.id, PERCEPTION_CONFIG.PERCEPTION_RANGE);
     this.ants.push(ant);
     return ant;
   }
