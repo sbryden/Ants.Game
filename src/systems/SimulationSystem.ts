@@ -16,6 +16,7 @@ import {
   StateTransitionConfig,
   DEFAULT_TRANSITION_CONFIG,
 } from '../sim/behaviors/BehaviorStateMachine';
+import { WORLD_CONFIG } from '../config';
 
 /**
  * SimulationSystem orchestrates the deterministic simulation update loop
@@ -154,8 +155,7 @@ export class SimulationSystem {
     );
 
     // Spawn initial ants for MVP
-    const initialAntCount = 20;
-    for (let i = 0; i < initialAntCount; i++) {
+    for (let i = 0; i < WORLD_CONFIG.INITIAL_ANT_COUNT; i++) {
       const ant = this.world.spawnAnt(colony);
       // Start with random velocity
       applyRandomWander(ant, this.movementConfig);
