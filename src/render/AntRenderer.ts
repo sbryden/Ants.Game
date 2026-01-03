@@ -3,6 +3,7 @@ import { Ant } from '../sim/Ant';
 import { AntState } from '../sim/AntState';
 import { ANT_RENDER_CONFIG, ANT_CARRY_CONFIG, THEME_CONFIG } from '../config';
 import { Theme } from '../types/Theme';
+import { deriveRole, getRoleColor } from '../sim/traits/roleDerivation';
 
 /**
  * AntRenderer handles procedural rendering of ants using Phaser.Graphics
@@ -12,6 +13,7 @@ import { Theme } from '../types/Theme';
 export class AntRenderer {
   private graphics: Phaser.GameObjects.Graphics;
   private theme: Theme;
+  private traitVisualizationEnabled: boolean = false;
 
   constructor(scene: Phaser.Scene, theme?: Theme) {
     this.graphics = scene.add.graphics();
@@ -26,10 +28,22 @@ export class AntRenderer {
   }
 
   /**
+   * Enable or disable trait visualization
+   */
+  public setTraitVisualization(enabled: boolean): void {
+    this.traitVisualizationEnabled = enabled;
+  }
+
+  /**
    * Render all ants to the screen
    * Called each frame from the update loop
    */
-  public render(ants: Ant[]): void {
+  public render(ants: Ant[], traitVisualizationEnabled?: boolean): void {
+    // Update trait visualization mode if provided
+    if (traitVisualizationEnabled !== undefined) {
+      this.traitVisualizationEnabled = traitVisualizationEnabled;
+    }
+
     // Clear previous frame
     this.graphics.clear();
 
@@ -40,7 +54,7 @@ export class AntRenderer {
 
   /**
    * Draw a single ant as simple circles
-   * Body color indicates current state (debug visualization)
+   * Body color indicates current state (debug visualization) or derived role (trait mode)
    * Body + head for MVP, expandable for future detail (legs, mandibles, etc.)
    */
   private drawAnt(ant: Ant): void {
@@ -56,15 +70,25 @@ export class AntRenderer {
       headOffsetY = normalizedVy * (ANT_RENDER_CONFIG.BODY_RADIUS + ANT_RENDER_CONFIG.HEAD_RADIUS);
     }
 
-    // Draw body with state-based color from theme
-    const stateColorMap: Record<AntState, keyof Theme['antColors']> = {
-      [AntState.IDLE]: 'idle',
-      [AntState.WANDERING]: 'wandering',
-      [AntState.FORAGING]: 'foraging',
-      [AntState.RETURNING]: 'returning',
-    };
-    const colorKey = stateColorMap[ant.state] || 'wandering';
-    const bodyColor = this.theme.antColors[colorKey];
+    // Determine body color based on visualization mode
+    let bodyColor: number;
+    if (this.traitVisualizationEnabled) {
+      // Trait visualization mode: color by derived role
+      const role = deriveRole(ant.traits);
+      bodyColor = getRoleColor(role);
+    } else {
+      // Normal mode: color by state
+      const stateColorMap: Record<AntState, keyof Theme['antColors']> = {
+        [AntState.IDLE]: 'idle',
+        [AntState.WANDERING]: 'wandering',
+        [AntState.FORAGING]: 'foraging',
+        [AntState.RETURNING]: 'returning',
+      };
+      const colorKey = stateColorMap[ant.state] || 'wandering';
+      bodyColor = this.theme.antColors[colorKey];
+    }
+
+    // Draw body with chosen color
     this.graphics.fillStyle(bodyColor, 1);
     this.graphics.fillCircle(ant.x, ant.y, ANT_RENDER_CONFIG.BODY_RADIUS);
 
@@ -78,7 +102,8 @@ export class AntRenderer {
 
     // Draw carrying indicator if ant has food
     if (ant.carriedFood > 0) {
-      const carryScale = ant.carriedFood / ANT_CARRY_CONFIG.MAX_CAPACITY;
+      const maxCapacity = ANT_CARRY_CONFIG.MAX_CAPACITY * ant.traits.carryCapacity;
+      const carryScale = ant.carriedFood / maxCapacity;
       const indicatorRadius = ANT_CARRY_CONFIG.CARRYING_INDICATOR_RADIUS * carryScale;
       
       this.graphics.fillStyle(ANT_CARRY_CONFIG.CARRYING_INDICATOR_COLOR, 0.8);

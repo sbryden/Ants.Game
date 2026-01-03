@@ -30,6 +30,7 @@ export class MainScene extends Phaser.Scene {
   private metricsText!: Phaser.GameObjects.Text;
   private pheromoneOverlayText!: Phaser.GameObjects.Text;
   private currentTheme!: Theme;
+  private traitOverlayEnabled: boolean = false;
 
   constructor() {
     super({ key: 'MainScene' });
@@ -89,7 +90,7 @@ export class MainScene extends Phaser.Scene {
 
     // Pheromone overlay indicator
     this.pheromoneOverlayText = this.add
-      .text(SCENE_CONFIG.LEGEND.X, SCENE_CONFIG.LEGEND.Y + 20, 'Press P to toggle pheromone overlay | Press T for test pattern', {
+      .text(SCENE_CONFIG.LEGEND.X, SCENE_CONFIG.LEGEND.Y + 20, 'Press P to toggle pheromone overlay (OFF) | Press Y to toggle trait visualization (OFF)', {
         fontSize: SCENE_CONFIG.LEGEND.FONT_SIZE,
         color: this.currentTheme.uiColors.textDim,
       })
@@ -118,6 +119,12 @@ export class MainScene extends Phaser.Scene {
     // Set up keyboard input for pheromone overlay toggle
     this.input.keyboard?.on('keydown-P', () => {
       this.pheromoneRenderer.toggle();
+      this.updatePheromoneOverlayText();
+    });
+
+    // Trait visualization toggle: Press 'Y' to toggle trait overlay
+    this.input.keyboard?.on('keydown-Y', () => {
+      this.traitOverlayEnabled = !this.traitOverlayEnabled;
       this.updatePheromoneOverlayText();
     });
 
@@ -158,7 +165,7 @@ export class MainScene extends Phaser.Scene {
 
     // Render ants on top
     const ants = this.world.getAllAnts();
-    this.antRenderer.render(ants);
+    this.antRenderer.render(ants, this.traitOverlayEnabled);
 
     // Update debug UI with state distribution
     this.updateDebugUI(ants);
@@ -171,11 +178,15 @@ export class MainScene extends Phaser.Scene {
   }
 
   /**
-   * Update pheromone overlay text
+   * Update overlay status text
+   * Shows both pheromone and trait visualization status
    */
   private updatePheromoneOverlayText(): void {
-    const status = this.pheromoneRenderer.isVisible() ? 'ON' : 'OFF';
-    this.pheromoneOverlayText.setText(`Press P to toggle pheromone overlay (${status}) | Press T for test pattern`);
+    const pheromoneStatus = this.pheromoneRenderer.isVisible() ? 'ON' : 'OFF';
+    const traitStatus = this.traitOverlayEnabled ? 'ON' : 'OFF';
+    this.pheromoneOverlayText.setText(
+      `Press P to toggle pheromone overlay (${pheromoneStatus}) | Press Y to toggle trait visualization (${traitStatus})`
+    );
   }
 
   /**
