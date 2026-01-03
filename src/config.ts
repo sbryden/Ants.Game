@@ -117,11 +117,6 @@ export const ENERGY_CONFIG = {
    * Food units consumed per second while eating
    */
   FOOD_CONSUMPTION_RATE: 0.2,
-
-  /**
-   * Energy gained per unit of food (derived from recovery/consumption rates)
-   */
-  ENERGY_PER_FOOD_UNIT: 100,
 } as const;
 
 /**

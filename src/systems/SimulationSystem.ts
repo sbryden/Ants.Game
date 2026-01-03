@@ -394,17 +394,27 @@ export class SimulationSystem {
 
   /**
    * Handle eating when ant is idle at colony
+   * Consumes only the food needed to reach max energy (prevents waste)
    */
   private handleEating(ant: Ant, colony: Colony, deltaTime: number): void {
     if (ant.energy >= ENERGY_CONFIG.MAX_ENERGY) {
       return;
     }
 
-    const foodToConsume = ENERGY_CONFIG.FOOD_CONSUMPTION_RATE * deltaTime;
+    // Calculate energy-to-food ratio from recovery and consumption rates
+    const energyPerFoodUnit = ENERGY_CONFIG.EATING_RECOVERY_RATE / ENERGY_CONFIG.FOOD_CONSUMPTION_RATE;
+    
+    // Determine how much energy is needed
+    const energyNeeded = ENERGY_CONFIG.MAX_ENERGY - ant.energy;
+    const foodNeeded = energyNeeded / energyPerFoodUnit;
+    
+    // Consume only what's needed, limited by eating rate
+    const maxFoodThisFrame = ENERGY_CONFIG.FOOD_CONSUMPTION_RATE * deltaTime;
+    const foodToConsume = Math.min(foodNeeded, maxFoodThisFrame);
     const consumed = colony.consumeFood(foodToConsume);
 
     if (consumed > 0) {
-      const energyGained = consumed * ENERGY_CONFIG.ENERGY_PER_FOOD_UNIT;
+      const energyGained = consumed * energyPerFoodUnit;
       ant.energy = Math.min(ENERGY_CONFIG.MAX_ENERGY, ant.energy + energyGained);
     }
   }
