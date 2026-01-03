@@ -34,9 +34,19 @@ Currently implementing the foundational simulation architecture and basic ant be
 - ✅ Pheromone visualization overlay (toggleable)
 
 ### In Development
-- None currently - preparing for Phase 5 (Menu System)
+- None currently - preparing for Phase 6 (Worker Specialization)
 
 ### Recently Completed
+- ✅ Menu & Title Screen (Phase 5)
+  - MenuScene as game entry point with living background (15 ants)
+  - Theme system with 3 themes (Default, High Contrast, Black & White)
+  - Configuration panel with ant count slider (10-100) and theme selector
+  - Scene lifecycle management (menu ↔ game transitions)
+  - Keyboard shortcuts (ENTER to start, R to return, ESC to close config)
+  - Theme colors applied across all renderers
+  - Smooth animations for UI interactions
+  - 60 FPS performance maintained
+
 - ✅ Health & Eating System (Phase 4)
   - Ant energy/metabolism
   - Activity-based energy consumption
@@ -343,9 +353,11 @@ Exit criteria:
 * ✅ Player observes resource flow dynamically
 * ✅ Survival mechanics add strategic depth
 
-### Phase 5 — Menu / Title Screen
+### Phase 5 — Menu / Title Screen ✅ **COMPLETE**
 
 **Goal:** Create a calm, minimal entry point that reflects the game's observational nature.
+
+**Status:** ✅ **Complete** (January 2026)
 
 The menu system acts as both the **first screen** players see and a **lightweight configuration step** before entering the simulation.
 
@@ -355,21 +367,33 @@ The menu system acts as both the **first screen** players see and a **lightweigh
 * **Living background** — Ants are visible and moving behind the menu overlay
 * **Defaults-first** — Players can start immediately without changing any settings
 
-#### Initial Configuration Options
+#### Implemented Features
 
-* **Starting ant amount** — Select how many ants the simulation begins with
-* **Theme selection** — Visual-only themes affecting colors and contrast
-  * Default (current look and feel)
-  * High Contrast (improved readability and accessibility)
-  * Black & White (minimal / experimental)
-  * Future themes (intentionally extensible)
+* **Living Background** — 15 ants wandering behind menu UI at 60 FPS
+* **Start Simulation Button** — Immediate play with default settings (ENTER key shortcut)
+* **Configuration Panel** — Toggle with ⚙ button
+  * Ant count slider (10-100, step 5)
+  * Theme selector (Default, High Contrast, Black & White)
+  * Apply/Cancel buttons with smooth animations
+* **Theme System** — Extensible color system affecting:
+  * Ant state colors
+  * Colony nest colors
+  * Pheromone visualization colors
+  * Food source colors
+  * Obstacle colors
+  * UI text colors
+* **Scene Lifecycle** — Smooth transitions between menu and game
+  * R key returns from game to menu
+  * Proper resource cleanup on scene transitions
+* **Keyboard Shortcuts** — ENTER to start, ESC to close config, R to restart
 
 Exit criteria:
 
-* Menu serves as an inviting, calm entry point
-* Players can configure basic simulation parameters
-* Sensible defaults allow immediate play
-* Theme system is extensible for future options
+* ✅ Menu serves as an inviting, calm entry point
+* ✅ Players can configure basic simulation parameters
+* ✅ Sensible defaults allow immediate play
+* ✅ Theme system is extensible for future options
+* ✅ 60 FPS performance maintained
 
 ### Phase 6 — Emergent Worker Specialization
 
