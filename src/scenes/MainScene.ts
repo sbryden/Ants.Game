@@ -10,7 +10,9 @@ import { AntState } from '../sim/AntState';
 import { Ant } from '../sim/Ant';
 import { Obstacle } from '../sim/Obstacle';
 import { PheromoneType } from '../sim/PheromoneType';
-import { SCENE_CONFIG, PHASER_CONFIG } from '../config';
+import { SCENE_CONFIG, PHASER_CONFIG, WORLD_CONFIG, THEME_CONFIG } from '../config';
+import { GameConfig } from '../types/GameConfig';
+import { Theme } from '../types/Theme';
 
 /**
  * Main game scene for Ants!
@@ -27,37 +29,44 @@ export class MainScene extends Phaser.Scene {
   private debugText!: Phaser.GameObjects.Text;
   private metricsText!: Phaser.GameObjects.Text;
   private pheromoneOverlayText!: Phaser.GameObjects.Text;
+  private currentTheme!: Theme;
 
   constructor() {
     super({ key: 'MainScene' });
   }
 
   create(): void {
-    // Set up camera and background
-    this.cameras.main.setBackgroundColor(PHASER_CONFIG.BACKGROUND_COLOR);
+    // Get configuration from scene data (passed from MenuScene)
+    const config = this.scene.settings.data as GameConfig;
+    const antCount = config?.antCount ?? WORLD_CONFIG.INITIAL_ANT_COUNT;
+    const themeId = config?.theme ?? 'default';
+    this.currentTheme = THEME_CONFIG[themeId];
 
-    // Initialize simulation
+    // Set up camera and background with theme color
+    this.cameras.main.setBackgroundColor(this.currentTheme.backgroundColor);
+
+    // Initialize simulation with configured ant count
     const worldWidth = this.scale.width;
     const worldHeight = this.scale.height;
     this.world = new World(worldWidth, worldHeight);
     this.simulationSystem = new SimulationSystem(this.world);
-    this.simulationSystem.initializeWorld();
+    this.simulationSystem.initializeWorld(antCount);
 
     // Add test obstacles (hardcoded for MVP)
     this.addTestObstacles();
 
-    // Initialize rendering
-    this.antRenderer = new AntRenderer(this);
-    this.colonyRenderer = new ColonyRenderer(this);
-    this.obstacleRenderer = new ObstacleRenderer(this);
-    this.pheromoneRenderer = new PheromoneRenderer(this);
-    this.foodSourceRenderer = new FoodSourceRenderer(this);
+    // Initialize rendering with theme
+    this.antRenderer = new AntRenderer(this, this.currentTheme);
+    this.colonyRenderer = new ColonyRenderer(this, this.currentTheme);
+    this.obstacleRenderer = new ObstacleRenderer(this, this.currentTheme);
+    this.pheromoneRenderer = new PheromoneRenderer(this, this.currentTheme);
+    this.foodSourceRenderer = new FoodSourceRenderer(this, this.currentTheme);
 
-    // Display title
+    // Display title with theme colors
     this.add
       .text(SCENE_CONFIG.TITLE.X, SCENE_CONFIG.TITLE.Y, SCENE_CONFIG.TITLE.TEXT, {
         fontSize: SCENE_CONFIG.TITLE.FONT_SIZE,
-        color: SCENE_CONFIG.TITLE.COLOR,
+        color: this.currentTheme.uiColors.title,
         fontStyle: 'bold',
       })
       .setDepth(SCENE_CONFIG.UI_DEPTH);
@@ -66,7 +75,7 @@ export class MainScene extends Phaser.Scene {
     this.add
       .text(SCENE_CONFIG.INSTRUCTIONS.X, SCENE_CONFIG.INSTRUCTIONS.Y, SCENE_CONFIG.INSTRUCTIONS.TEXT, {
         fontSize: SCENE_CONFIG.INSTRUCTIONS.FONT_SIZE,
-        color: SCENE_CONFIG.INSTRUCTIONS.COLOR,
+        color: this.currentTheme.uiColors.text,
       })
       .setDepth(SCENE_CONFIG.UI_DEPTH);
 
@@ -74,7 +83,7 @@ export class MainScene extends Phaser.Scene {
     this.add
       .text(SCENE_CONFIG.LEGEND.X, SCENE_CONFIG.LEGEND.Y, SCENE_CONFIG.LEGEND.TEXT, {
         fontSize: SCENE_CONFIG.LEGEND.FONT_SIZE,
-        color: SCENE_CONFIG.LEGEND.COLOR,
+        color: this.currentTheme.uiColors.textDim,
       })
       .setDepth(SCENE_CONFIG.UI_DEPTH);
 
@@ -82,7 +91,7 @@ export class MainScene extends Phaser.Scene {
     this.pheromoneOverlayText = this.add
       .text(SCENE_CONFIG.LEGEND.X, SCENE_CONFIG.LEGEND.Y + 20, 'Press P to toggle pheromone overlay | Press T for test pattern', {
         fontSize: SCENE_CONFIG.LEGEND.FONT_SIZE,
-        color: SCENE_CONFIG.LEGEND.COLOR,
+        color: this.currentTheme.uiColors.textDim,
       })
       .setDepth(SCENE_CONFIG.UI_DEPTH);
 
@@ -90,7 +99,7 @@ export class MainScene extends Phaser.Scene {
     this.debugText = this.add
       .text(SCENE_CONFIG.DEBUG.X, this.scale.height - SCENE_CONFIG.DEBUG.Y_OFFSET_FROM_BOTTOM, '', {
         fontSize: SCENE_CONFIG.DEBUG.FONT_SIZE,
-        color: SCENE_CONFIG.DEBUG.COLOR,
+        color: this.currentTheme.uiColors.text,
         backgroundColor: SCENE_CONFIG.DEBUG.BACKGROUND_COLOR,
         padding: SCENE_CONFIG.DEBUG.PADDING,
       })
@@ -100,7 +109,7 @@ export class MainScene extends Phaser.Scene {
     this.metricsText = this.add
       .text(SCENE_CONFIG.DEBUG.X, this.scale.height - SCENE_CONFIG.DEBUG.Y_OFFSET_FROM_BOTTOM - 30, '', {
         fontSize: SCENE_CONFIG.DEBUG.FONT_SIZE,
-        color: SCENE_CONFIG.DEBUG.COLOR,
+        color: this.currentTheme.uiColors.text,
         backgroundColor: SCENE_CONFIG.DEBUG.BACKGROUND_COLOR,
         padding: SCENE_CONFIG.DEBUG.PADDING,
       })
@@ -115,6 +124,11 @@ export class MainScene extends Phaser.Scene {
     // Test key: Press 'T' to deposit test pheromones
     this.input.keyboard?.on('keydown-T', () => {
       this.depositTestPheromones();
+    });
+
+    // Restart key: Press 'R' to return to menu
+    this.input.keyboard?.on('keydown-R', () => {
+      this.returnToMenu();
     });
 
     // Prevent default context menu for right-click test functionality
@@ -286,6 +300,14 @@ export class MainScene extends Phaser.Scene {
 
     // Left-side obstacle
     this.world.addObstacle(new Obstacle(150, centerY, 25));
+  }
+
+  /**
+   * Return to menu scene
+   */
+  private returnToMenu(): void {
+    this.shutdown();
+    this.scene.start('MenuScene');
   }
 
   shutdown(): void {
