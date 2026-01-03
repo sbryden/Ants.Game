@@ -34,6 +34,7 @@ import {
   isCarryingFull,
 } from '../sim/behaviors/foodBehaviors';
 import { WORLD_CONFIG, MOVEMENT_CONFIG, COLONY_CONFIG, PERCEPTION_CONFIG, PHEROMONE_CONFIG, PHEROMONE_BEHAVIOR_CONFIG, FOOD_CONFIG, ENERGY_CONFIG } from '../config';
+import { TraitEvolutionSystem } from './TraitEvolutionSystem';
 
 /**
  * SimulationSystem orchestrates the deterministic simulation update loop
@@ -51,6 +52,7 @@ export class SimulationSystem {
   private transitionConfig: StateTransitionConfig;
   private pheromoneBehaviorConfig: PheromoneBehaviorConfig;
   private frameCounter: number = 0;
+  private traitEvolutionSystem: TraitEvolutionSystem;
 
   constructor(world: World) {
     this.world = world;
@@ -66,6 +68,7 @@ export class SimulationSystem {
       followStrength: PHEROMONE_BEHAVIOR_CONFIG.FOLLOW_STRENGTH,
       explorationRandomness: PHEROMONE_BEHAVIOR_CONFIG.EXPLORATION_RANDOMNESS,
     };
+    this.traitEvolutionSystem = new TraitEvolutionSystem(world);
   }
 
   /**
@@ -122,6 +125,9 @@ export class SimulationSystem {
     for (const colony of colonies) {
       colony.finalizeFrame(deltaTime);
     }
+
+    // Trait evolution system update
+    this.traitEvolutionSystem.update(deltaTime);
 
     // Extension point: Colony resource updates
     // Extension point: Task assignment system
@@ -185,12 +191,13 @@ export class SimulationSystem {
 
           if (gradientDirection !== null) {
             // Follow food pheromone with exploration randomness
-            // This naturally transitions to foraging when food is found
+            // Apply ant's pheromone sensitivity trait
+            const antPheromoneConfig = this.getPheromoneBehaviorConfigForAnt(ant);
             followPheromone(
               ant,
               gradientDirection,
               movementConfig.speed,
-              this.pheromoneBehaviorConfig
+              antPheromoneConfig
             );
           } else {
             // No clear gradient direction, continue random wandering
@@ -352,11 +359,12 @@ export class SimulationSystem {
 
   /**
    * Apply energy consumption for current frame
-   * Deducts energy from ant based on its activity state
+   * Deducts energy from ant based on its activity state and efficiency trait
    */
   private applyEnergyConsumption(ant: Ant, deltaTime: number): void {
-    const rate = this.getConsumptionRate(ant.state);
-    const consumption = rate * deltaTime;
+    const baseRate = this.getConsumptionRate(ant.state);
+    // Apply energy efficiency trait (lower is better)
+    const consumption = baseRate * ant.traits.energyEfficiency * deltaTime;
     ant.energy = Math.max(0, ant.energy - consumption);
     ant.lastEnergyConsumption = consumption;
   }
@@ -369,27 +377,40 @@ export class SimulationSystem {
   }
 
   /**
-   * Get movement config adjusted for current energy level
+   * Get movement config adjusted for current energy level and traits
    */
   private getMovementConfigForAnt(ant: Ant): MovementConfig {
     const energyPercent = ant.energy / ENERGY_CONFIG.MAX_ENERGY;
-    let multiplier = 1.0;
+    let energyMultiplier = 1.0;
 
     if (energyPercent >= 0.8) {
-      multiplier = ENERGY_CONFIG.SPEED_MULTIPLIERS.WELL_FED;
+      energyMultiplier = ENERGY_CONFIG.SPEED_MULTIPLIERS.WELL_FED;
     } else if (energyPercent >= 0.5) {
-      multiplier = ENERGY_CONFIG.SPEED_MULTIPLIERS.NORMAL;
+      energyMultiplier = ENERGY_CONFIG.SPEED_MULTIPLIERS.NORMAL;
     } else if (energyPercent >= 0.25) {
-      multiplier = ENERGY_CONFIG.SPEED_MULTIPLIERS.HUNGRY;
+      energyMultiplier = ENERGY_CONFIG.SPEED_MULTIPLIERS.HUNGRY;
     } else {
-      multiplier = ENERGY_CONFIG.SPEED_MULTIPLIERS.STARVING;
+      energyMultiplier = ENERGY_CONFIG.SPEED_MULTIPLIERS.STARVING;
     }
 
-    this.energyAdjustedMovementConfig.speed = this.movementConfig.speed * multiplier;
+    // Apply both energy and trait multipliers
+    const traitMultiplier = ant.traits.movementSpeed;
+    this.energyAdjustedMovementConfig.speed = this.movementConfig.speed * energyMultiplier * traitMultiplier;
     this.energyAdjustedMovementConfig.changeDirectionInterval = this.movementConfig.changeDirectionInterval;
     this.energyAdjustedMovementConfig.turnSpeed = this.movementConfig.turnSpeed;
 
     return this.energyAdjustedMovementConfig;
+  }
+
+  /**
+   * Get pheromone behavior config adjusted for ant's pheromone sensitivity trait
+   */
+  private getPheromoneBehaviorConfigForAnt(ant: Ant): PheromoneBehaviorConfig {
+    return {
+      sampleDistance: this.pheromoneBehaviorConfig.sampleDistance,
+      followStrength: this.pheromoneBehaviorConfig.followStrength * ant.traits.pheromoneSensitivity,
+      explorationRandomness: this.pheromoneBehaviorConfig.explorationRandomness,
+    };
   }
 
   /**
