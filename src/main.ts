@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { MenuScene } from './scenes/MenuScene';
 import { MainScene } from './scenes/MainScene';
 import { PHASER_CONFIG } from './config';
 
@@ -13,7 +14,7 @@ const config: Phaser.Types.Core.GameConfig = {
   height: PHASER_CONFIG.CANVAS_HEIGHT,
   parent: 'game-container',
   backgroundColor: PHASER_CONFIG.BACKGROUND_COLOR,
-  scene: [MainScene],
+  scene: [MenuScene, MainScene],
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,

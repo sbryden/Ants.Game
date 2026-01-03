@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { Ant } from '../sim/Ant';
 import { AntState } from '../sim/AntState';
-import { ANT_RENDER_CONFIG, ANT_CARRY_CONFIG } from '../config';
+import { ANT_RENDER_CONFIG, ANT_CARRY_CONFIG, THEME_CONFIG } from '../config';
+import { Theme } from '../types/Theme';
 
 /**
  * AntRenderer handles procedural rendering of ants using Phaser.Graphics
@@ -10,9 +11,18 @@ import { ANT_RENDER_CONFIG, ANT_CARRY_CONFIG } from '../config';
  */
 export class AntRenderer {
   private graphics: Phaser.GameObjects.Graphics;
+  private theme: Theme;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, theme?: Theme) {
     this.graphics = scene.add.graphics();
+    this.theme = theme || THEME_CONFIG.default;
+  }
+
+  /**
+   * Set the rendering depth
+   */
+  public setDepth(depth: number): void {
+    this.graphics.setDepth(depth);
   }
 
   /**
@@ -46,8 +56,15 @@ export class AntRenderer {
       headOffsetY = normalizedVy * (ANT_RENDER_CONFIG.BODY_RADIUS + ANT_RENDER_CONFIG.HEAD_RADIUS);
     }
 
-    // Draw body with state-based color
-    const bodyColor = ANT_RENDER_CONFIG.STATE_COLORS[ant.state] || ANT_RENDER_CONFIG.DEFAULT_BODY_COLOR;
+    // Draw body with state-based color from theme
+    const stateColorMap: Record<AntState, keyof Theme['antColors']> = {
+      [AntState.IDLE]: 'idle',
+      [AntState.WANDERING]: 'wandering',
+      [AntState.FORAGING]: 'foraging',
+      [AntState.RETURNING]: 'returning',
+    };
+    const colorKey = stateColorMap[ant.state] || 'wandering';
+    const bodyColor = this.theme.antColors[colorKey];
     this.graphics.fillStyle(bodyColor, 1);
     this.graphics.fillCircle(ant.x, ant.y, ANT_RENDER_CONFIG.BODY_RADIUS);
 

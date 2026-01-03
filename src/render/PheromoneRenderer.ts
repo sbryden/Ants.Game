@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { PheromoneGrid } from '../sim/PheromoneGrid';
 import { PheromoneType } from '../sim/PheromoneType';
-import { PHEROMONE_CONFIG, RENDER_CONFIG } from '../config';
+import { PHEROMONE_CONFIG, RENDER_CONFIG, THEME_CONFIG } from '../config';
+import { Theme } from '../types/Theme';
 
 /**
  * PheromoneRenderer visualizes pheromone grids as heatmap overlays
@@ -12,13 +13,15 @@ export class PheromoneRenderer {
   private scene: Phaser.Scene;
   private graphics: Phaser.GameObjects.Graphics;
   private visible: boolean;
+  private theme: Theme;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, theme?: Theme) {
     this.scene = scene;
     this.graphics = scene.add.graphics();
     this.graphics.setDepth(RENDER_CONFIG.PHEROMONE_DEPTH);
     this.visible = false;
     this.graphics.setVisible(false);
+    this.theme = theme || THEME_CONFIG.default;
   }
 
   /**
@@ -36,10 +39,10 @@ export class PheromoneRenderer {
     const gridHeight = grid.getGridHeight();
     const cellSize = grid.getCellSize();
 
-    // Render each pheromone type with configured colors
-    this.renderPheromoneType(grid, PheromoneType.NEST, gridWidth, gridHeight, cellSize, PHEROMONE_CONFIG.COLORS.NEST);
-    this.renderPheromoneType(grid, PheromoneType.FOOD, gridWidth, gridHeight, cellSize, PHEROMONE_CONFIG.COLORS.FOOD);
-    this.renderPheromoneType(grid, PheromoneType.DANGER, gridWidth, gridHeight, cellSize, PHEROMONE_CONFIG.COLORS.DANGER);
+    // Render each pheromone type with theme colors
+    this.renderPheromoneType(grid, PheromoneType.NEST, gridWidth, gridHeight, cellSize, this.theme.pheromoneColors.nest);
+    this.renderPheromoneType(grid, PheromoneType.FOOD, gridWidth, gridHeight, cellSize, this.theme.pheromoneColors.food);
+    this.renderPheromoneType(grid, PheromoneType.DANGER, gridWidth, gridHeight, cellSize, this.theme.pheromoneColors.danger);
   }
 
   /**

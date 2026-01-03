@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { FoodSource } from '../sim/FoodSource';
-import { FOOD_RENDER_CONFIG, FOOD_CONFIG } from '../config';
+import { FOOD_CONFIG, THEME_CONFIG } from '../config';
+import { Theme } from '../types/Theme';
 
 /**
  * Renders a food source as a procedural circle with opacity based on remaining food amount.
@@ -8,9 +9,11 @@ import { FOOD_RENDER_CONFIG, FOOD_CONFIG } from '../config';
  */
 export class FoodSourceRenderer {
   private graphics: Phaser.GameObjects.Graphics;
+  private theme: Theme;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, theme?: Theme) {
     this.graphics = scene.add.graphics({ x: 0, y: 0 });
+    this.theme = theme || THEME_CONFIG.default;
   }
 
   /**
@@ -28,14 +31,14 @@ export class FoodSourceRenderer {
     const foodPercentage = Math.min(foodSource.foodAmount / FOOD_CONFIG.INITIAL_FOOD_AMOUNT, 1.0);
     const alpha = Math.max(0.3, foodPercentage); // Never fully transparent
 
-    // Draw border circle (slightly larger)
-    this.graphics.lineStyle(2, FOOD_RENDER_CONFIG.FOOD_BORDER_COLOR, alpha);
+    // Draw border circle (slightly larger) - use theme colors
+    this.graphics.lineStyle(2, this.theme.foodColors.border, alpha);
     this.graphics.strokeCircleShape(
       new Phaser.Geom.Circle(foodSource.x, foodSource.y, foodSource.radius + 1)
     );
 
     // Draw filled circle
-    this.graphics.fillStyle(FOOD_RENDER_CONFIG.FOOD_COLOR, alpha);
+    this.graphics.fillStyle(this.theme.foodColors.food, alpha);
     this.graphics.fillCircleShape(
       new Phaser.Geom.Circle(foodSource.x, foodSource.y, foodSource.radius)
     );

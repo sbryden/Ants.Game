@@ -6,6 +6,9 @@
  * Benefits: Easy to find, modify, and understand configurable values
  */
 
+import { Theme } from './types/Theme';
+import { ThemeId } from './types/GameConfig';
+
 /**
  * Phaser game engine configuration
  * Canvas dimensions and display settings
@@ -604,4 +607,193 @@ export const FOOD_RENDER_CONFIG = {
    * Border width in pixels
    */
   FOOD_BORDER_WIDTH: 2,
+} as const;
+
+/**
+ * Theme configuration
+ * Visual themes for the game (does not affect gameplay)
+ */
+export const THEME_CONFIG: Record<ThemeId, Theme> = {
+  default: {
+    id: 'default',
+    name: 'Default',
+    backgroundColor: 0x2d4a2e,
+    antColors: {
+      idle: 0x808080,      // Gray
+      wandering: 0x8b4513, // Brown
+      foraging: 0x4a7c4e,  // Green
+      returning: 0x4169a1, // Blue
+    },
+    pheromoneColors: {
+      food: 0xff0000,    // Red
+      nest: 0x0000ff,    // Blue
+      danger: 0xffff00,  // Yellow
+    },
+    colonyColors: {
+      nest: 0x704214,
+      border: 0x8b4513,
+      entrance: 0x000000,
+    },
+    foodColors: {
+      food: 0xd4a574,
+      border: 0x8b6f47,
+    },
+    obstacleColor: 0x4a4a4a,
+    uiColors: {
+      title: '#ffffff',
+      text: '#cccccc',
+      textDim: '#aaaaaa',
+    },
+  },
+  highContrast: {
+    id: 'highContrast',
+    name: 'High Contrast',
+    backgroundColor: 0x1a1a1a,
+    antColors: {
+      idle: 0xaaaaaa,      // Light Gray
+      wandering: 0xffaa44, // Bright Orange
+      foraging: 0x44ff44,  // Bright Green
+      returning: 0x4488ff, // Bright Blue
+    },
+    pheromoneColors: {
+      food: 0xff0055,    // Hot Pink
+      nest: 0x00ffff,    // Cyan
+      danger: 0xffff00,  // Yellow
+    },
+    colonyColors: {
+      nest: 0xaa6633,
+      border: 0xffaa66,
+      entrance: 0x000000,
+    },
+    foodColors: {
+      food: 0xffcc66,
+      border: 0xff9933,
+    },
+    obstacleColor: 0x666666,
+    uiColors: {
+      title: '#ffffff',
+      text: '#ffffff',
+      textDim: '#cccccc',
+    },
+  },
+  blackWhite: {
+    id: 'blackWhite',
+    name: 'Black & White',
+    backgroundColor: 0x000000,
+    antColors: {
+      idle: 0x555555,      // Dark Gray
+      wandering: 0x999999, // Medium Gray
+      foraging: 0xcccccc,  // Light Gray
+      returning: 0xffffff, // White
+    },
+    pheromoneColors: {
+      food: 0xbbbbbb,    // Light Gray
+      nest: 0x777777,    // Medium Gray
+      danger: 0xffffff,  // White
+    },
+    colonyColors: {
+      nest: 0x666666,
+      border: 0xaaaaaa,
+      entrance: 0x000000,
+    },
+    foodColors: {
+      food: 0xdddddd,
+      border: 0xffffff,
+    },
+    obstacleColor: 0x333333,
+    uiColors: {
+      title: '#ffffff',
+      text: '#dddddd',
+      textDim: '#999999',
+    },
+  },
+} as const;
+
+/**
+ * Menu scene configuration
+ * Styling and layout constants for the menu UI
+ */
+export const MENU_CONFIG = {
+  /**
+   * Title text configuration
+   */
+  TITLE: {
+    TEXT: 'Ants.Game',
+    FONT_SIZE: '56px',
+    Y_POSITION: 150,
+  },
+
+  /**
+   * Tagline text configuration
+   */
+  TAGLINE: {
+    TEXT: 'Observe. Adapt. Survive.',
+    FONT_SIZE: '24px',
+    Y_POSITION: 220,
+  },
+
+  /**
+   * Start button configuration
+   */
+  START_BUTTON: {
+    TEXT: 'Start Simulation',
+    FONT_SIZE: '28px',
+    Y_POSITION: 320,
+    PADDING: { x: 40, y: 18 },
+    BACKGROUND_COLOR: '#4a7c4e',
+    HOVER_COLOR: '#5a9c6e',
+    BORDER_COLOR: '#ffffff',
+    BORDER_WIDTH: 2,
+  },
+
+  /**
+   * Configuration button
+   */
+  CONFIG_BUTTON: {
+    TEXT: '⚙ Configuration',
+    FONT_SIZE: '20px',
+    Y_POSITION: 420,
+  },
+
+  /**
+   * Configuration panel
+   */
+  CONFIG_PANEL: {
+    WIDTH: 500,
+    HEIGHT: 450,
+    BACKGROUND_COLOR: 0x1a1a1a,
+    BACKGROUND_ALPHA: 0.95,
+    BORDER_COLOR: 0x4a7c4e,
+    BORDER_WIDTH: 3,
+    PADDING: 30,
+  },
+
+  /**
+   * Slider configuration
+   */
+  SLIDER: {
+    WIDTH: 400,
+    HEIGHT: 8,
+    HANDLE_RADIUS: 12,
+    TRACK_COLOR: 0x333333,
+    HANDLE_COLOR: 0x4a7c4e,
+    HANDLE_HOVER_COLOR: 0x5a9c6e,
+  },
+
+  /**
+   * Background simulation configuration (lightweight)
+   */
+  BACKGROUND_SIM: {
+    ANT_COUNT: 15,
+  },
+
+  /**
+   * Z-depths for layering
+   */
+  DEPTHS: {
+    BACKGROUND: 0,
+    UI_BASE: 100,
+    CONFIG_OVERLAY: 200,
+    CONFIG_PANEL: 201,
+  },
 } as const;

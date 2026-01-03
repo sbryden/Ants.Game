@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Colony } from '../sim/Colony';
-import { COLONY_RENDER_CONFIG } from '../config';
+import { COLONY_RENDER_CONFIG, THEME_CONFIG } from '../config';
+import { Theme } from '../types/Theme';
 
 /**
  * ColonyRenderer handles procedural rendering of colony nests
@@ -9,9 +10,18 @@ import { COLONY_RENDER_CONFIG } from '../config';
  */
 export class ColonyRenderer {
   private graphics: Phaser.GameObjects.Graphics;
+  private theme: Theme;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, theme?: Theme) {
     this.graphics = scene.add.graphics();
+    this.theme = theme || THEME_CONFIG.default;
+  }
+
+  /**
+   * Set the rendering depth
+   */
+  public setDepth(depth: number): void {
+    this.graphics.setDepth(depth);
   }
 
   /**
@@ -32,16 +42,16 @@ export class ColonyRenderer {
    * Simple circle marker for MVP
    */
   private drawColony(colony: Colony): void {
-    // Draw nest base (filled circle)
-    this.graphics.fillStyle(COLONY_RENDER_CONFIG.NEST_COLOR, COLONY_RENDER_CONFIG.NEST_OPACITY);
+    // Draw nest base (filled circle) - use theme colors
+    this.graphics.fillStyle(this.theme.colonyColors.nest, COLONY_RENDER_CONFIG.NEST_OPACITY);
     this.graphics.fillCircle(colony.x, colony.y, COLONY_RENDER_CONFIG.NEST_RADIUS);
 
     // Draw nest border
-    this.graphics.lineStyle(COLONY_RENDER_CONFIG.NEST_BORDER_WIDTH, COLONY_RENDER_CONFIG.NEST_BORDER_COLOR, 1);
+    this.graphics.lineStyle(COLONY_RENDER_CONFIG.NEST_BORDER_WIDTH, this.theme.colonyColors.border, 1);
     this.graphics.strokeCircle(colony.x, colony.y, COLONY_RENDER_CONFIG.NEST_RADIUS);
 
     // Optional: Draw entrance (small inner circle for detail)
-    this.graphics.fillStyle(COLONY_RENDER_CONFIG.ENTRANCE_COLOR, COLONY_RENDER_CONFIG.ENTRANCE_OPACITY);
+    this.graphics.fillStyle(this.theme.colonyColors.entrance, COLONY_RENDER_CONFIG.ENTRANCE_OPACITY);
     this.graphics.fillCircle(colony.x, colony.y, COLONY_RENDER_CONFIG.NEST_RADIUS * COLONY_RENDER_CONFIG.ENTRANCE_RADIUS_MULTIPLIER);
 
     // TODO: Future phases could add nest structure visualization

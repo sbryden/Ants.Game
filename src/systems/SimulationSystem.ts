@@ -430,15 +430,19 @@ export class SimulationSystem {
   /**
    * Initialize world with a colony and some ants
    * Called once at startup
+   * 
+   * @param antCount - Optional number of ants to spawn (defaults to WORLD_CONFIG.INITIAL_ANT_COUNT)
    */
-  public initializeWorld(): void {
+  public initializeWorld(antCount?: number): void {
+    const count = antCount ?? WORLD_CONFIG.INITIAL_ANT_COUNT;
+    
     const colony = this.world.createColony(
       this.world.width / 2,
       this.world.height / 2
     );
 
-    // Spawn initial ants for MVP
-    for (let i = 0; i < WORLD_CONFIG.INITIAL_ANT_COUNT; i++) {
+    // Spawn initial ants
+    for (let i = 0; i < count; i++) {
       const ant = this.world.spawnAnt(colony);
       // Start with random velocity
       applyRandomWander(ant, this.movementConfig);
