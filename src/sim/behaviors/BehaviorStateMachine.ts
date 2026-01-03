@@ -1,6 +1,6 @@
 import { Ant } from '../Ant';
 import { AntState } from '../AntState';
-import { BEHAVIOR_CONFIG } from '../../config';
+import { BEHAVIOR_CONFIG, ENERGY_CONFIG } from '../../config';
 
 /**
  * Behavior State Machine for ants
@@ -68,6 +68,14 @@ export function evaluateStateTransition(
       break;
 
     case AntState.WANDERING:
+      // Hungry wanderers bias toward returning home
+      if (ant.energy < ENERGY_CONFIG.THRESHOLDS.HUNGER) {
+        const hungerChance = ENERGY_CONFIG.HUNGER_RETURN_CHANCE * deltaTime;
+        if (Math.random() < hungerChance) {
+          return AntState.RETURNING;
+        }
+      }
+
       // Only consider transitions after minimum duration
       if (timeInState >= config.wanderingMinDuration) {
         // Check foraging transition (evaluate first, return early if triggered)
@@ -82,6 +90,14 @@ export function evaluateStateTransition(
       break;
 
     case AntState.FORAGING:
+      // Starving foragers give up earlier
+      if (ant.energy < ENERGY_CONFIG.THRESHOLDS.HUNGER) {
+        const hungerChance = ENERGY_CONFIG.HUNGER_RETURN_CHANCE * 2 * deltaTime;
+        if (Math.random() < hungerChance) {
+          return AntState.RETURNING;
+        }
+      }
+
       // Only consider transitions after minimum duration
       if (timeInState >= config.foragingMinDuration) {
         // Give up and return home

@@ -1,4 +1,5 @@
 import { World } from '../sim/World';
+import { Colony } from '../sim/Colony';
 import { Ant } from '../sim/Ant';
 import { AntState } from '../sim/AntState';
 import { PheromoneType } from '../sim/PheromoneType';
@@ -32,7 +33,7 @@ import {
   harvestFood,
   isCarryingFull,
 } from '../sim/behaviors/foodBehaviors';
-import { WORLD_CONFIG, MOVEMENT_CONFIG, COLONY_CONFIG, PERCEPTION_CONFIG, PHEROMONE_CONFIG, PHEROMONE_BEHAVIOR_CONFIG, FOOD_CONFIG } from '../config';
+import { WORLD_CONFIG, MOVEMENT_CONFIG, COLONY_CONFIG, PERCEPTION_CONFIG, PHEROMONE_CONFIG, PHEROMONE_BEHAVIOR_CONFIG, FOOD_CONFIG, ENERGY_CONFIG } from '../config';
 
 /**
  * SimulationSystem orchestrates the deterministic simulation update loop
@@ -46,6 +47,7 @@ import { WORLD_CONFIG, MOVEMENT_CONFIG, COLONY_CONFIG, PERCEPTION_CONFIG, PHEROM
 export class SimulationSystem {
   private world: World;
   private movementConfig: MovementConfig;
+  private energyAdjustedMovementConfig: MovementConfig;
   private transitionConfig: StateTransitionConfig;
   private pheromoneBehaviorConfig: PheromoneBehaviorConfig;
   private frameCounter: number = 0;
@@ -57,6 +59,7 @@ export class SimulationSystem {
       changeDirectionInterval: MOVEMENT_CONFIG.CHANGE_DIRECTION_INTERVAL,
       turnSpeed: MOVEMENT_CONFIG.TURN_SPEED,
     };
+    this.energyAdjustedMovementConfig = { ...this.movementConfig };
     this.transitionConfig = DEFAULT_TRANSITION_CONFIG;
     this.pheromoneBehaviorConfig = {
       sampleDistance: PHEROMONE_BEHAVIOR_CONFIG.SAMPLE_DISTANCE,
@@ -77,11 +80,24 @@ export class SimulationSystem {
    * - Global events (food spawning, threats) would happen here
    */
   public tick(deltaTime: number): void {
+    const colonies = this.world.getColonies();
+    for (const colony of colonies) {
+      colony.beginFrame();
+    }
+
     const ants = this.world.getAllAnts();
+    const deadAnts: Ant[] = [];
 
     // Update ant behaviors
     for (const ant of ants) {
-      this.updateAntBehavior(ant, deltaTime);
+      const isDead = this.updateAntBehavior(ant, deltaTime);
+      if (isDead) {
+        deadAnts.push(ant);
+      }
+    }
+
+    for (const ant of deadAnts) {
+      this.world.removeAnt(ant);
     }
 
     // Pheromone system update: Decay all pheromone types
@@ -103,6 +119,10 @@ export class SimulationSystem {
       this.world.spawnFoodSource();
     }
 
+    for (const colony of colonies) {
+      colony.finalizeFrame(deltaTime);
+    }
+
     // Extension point: Colony resource updates
     // Extension point: Task assignment system
   }
@@ -110,16 +130,22 @@ export class SimulationSystem {
   /**
    * Update a single ant's behavior and state
    * Uses pure functions from behaviors/ to maintain separation of concerns
-   * Now includes FSM-based state transitions and inertia-based movement
+   * Returns true if the ant dies this frame
    */
-  private updateAntBehavior(ant: Ant, deltaTime: number): void {
+  private updateAntBehavior(ant: Ant, deltaTime: number): boolean {
     // Update timing
     ant.timeSinceDirectionChange += deltaTime;
     ant.timeInCurrentState += deltaTime;
 
     // Get ant's colony for home position
     const colony = this.world.getColony(ant.colonyId);
-    if (!colony) return; // Safety check
+    if (!colony) return false; // Safety check
+
+    // Energy decay for current activity
+    this.applyEnergyConsumption(ant, deltaTime);
+    if (ant.energy <= 0) {
+      return true;
+    }
 
     // Evaluate state transitions (FSM)
     const newState = evaluateStateTransition(ant, deltaTime, this.transitionConfig);
@@ -127,12 +153,15 @@ export class SimulationSystem {
       changeState(ant, newState);
     }
 
+    const movementConfig = this.getMovementConfigForAnt(ant);
+
     // State-specific movement behaviors
     switch (ant.state) {
       case AntState.IDLE:
         // Stop moving when idle
         ant.targetVx = 0;
         ant.targetVy = 0;
+        this.handleEating(ant, colony, deltaTime);
         break;
 
       case AntState.WANDERING:
@@ -160,20 +189,20 @@ export class SimulationSystem {
             followPheromone(
               ant,
               gradientDirection,
-              this.movementConfig.speed,
+              movementConfig.speed,
               this.pheromoneBehaviorConfig
             );
           } else {
             // No clear gradient direction, continue random wandering
-            if (ant.timeSinceDirectionChange >= this.movementConfig.changeDirectionInterval) {
-              applyRandomWander(ant, this.movementConfig);
+            if (ant.timeSinceDirectionChange >= movementConfig.changeDirectionInterval) {
+              applyRandomWander(ant, movementConfig);
               ant.timeSinceDirectionChange = 0;
             }
           }
         } else {
           // No food pheromone detected, random wander and explore
-          if (ant.timeSinceDirectionChange >= this.movementConfig.changeDirectionInterval) {
-            applyRandomWander(ant, this.movementConfig);
+          if (ant.timeSinceDirectionChange >= movementConfig.changeDirectionInterval) {
+            applyRandomWander(ant, movementConfig);
             ant.timeSinceDirectionChange = 0;
           }
         }
@@ -196,12 +225,12 @@ export class SimulationSystem {
             }
           } else {
             // Move towards food source
-            moveTowardsPoint(ant, food.x, food.y, this.movementConfig);
+            moveTowardsPoint(ant, food.x, food.y, movementConfig);
           }
         } else {
           // No nearby food, random wander
-          if (ant.timeSinceDirectionChange >= this.movementConfig.changeDirectionInterval) {
-            applyRandomWander(ant, this.movementConfig);
+          if (ant.timeSinceDirectionChange >= movementConfig.changeDirectionInterval) {
+            applyRandomWander(ant, movementConfig);
             ant.timeSinceDirectionChange = 0;
           }
         }
@@ -212,25 +241,26 @@ export class SimulationSystem {
         if (isNearPoint(ant, colony.x, colony.y, COLONY_CONFIG.HOME_ARRIVAL_DISTANCE)) {
           // Deposit food to colony if carrying any
           if (ant.carriedFood > 0) {
-            colony.resourceCount += ant.carriedFood;
+            colony.addFood(ant.carriedFood);
             ant.carriedFood = 0;
           }
-          // Transition to idle
+          // Transition to idle and allow immediate refuel
           changeState(ant, AntState.IDLE);
+          this.handleEating(ant, colony, deltaTime);
         } else {
           // Move towards home
-          moveTowardsPoint(ant, colony.x, colony.y, this.movementConfig);
+          moveTowardsPoint(ant, colony.x, colony.y, movementConfig);
         }
         break;
     }
 
     // Apply inertia (smooth turning toward target velocity)
-    applyInertia(ant, this.movementConfig, deltaTime);
+    applyInertia(ant, movementConfig, deltaTime);
 
     // Check for obstacles and avoid if necessary (after state behaviors but before movement)
     const nearestObstacle = detectObstacles(ant, this.world, PERCEPTION_CONFIG.OBSTACLE_DETECTION_RANGE);
     if (nearestObstacle) {
-      avoidObstacle(ant, nearestObstacle, this.movementConfig);
+      avoidObstacle(ant, nearestObstacle, movementConfig);
     }
 
     // Apply movement based on current velocity
@@ -248,6 +278,7 @@ export class SimulationSystem {
     // Extension point: Pheromone detection and response
     // Extension point: Food/threat detection
     // Extension point: Ant-to-ant interactions (communication, combat)
+    return ant.energy <= 0;
   }
 
   /**
@@ -316,6 +347,65 @@ export class SimulationSystem {
           PHEROMONE_CONFIG.DEPOSITION_WANDERING
         );
         break;
+    }
+  }
+
+  /**
+   * Apply energy consumption for current frame
+   * Deducts energy from ant based on its activity state
+   */
+  private applyEnergyConsumption(ant: Ant, deltaTime: number): void {
+    const rate = this.getConsumptionRate(ant.state);
+    const consumption = rate * deltaTime;
+    ant.energy = Math.max(0, ant.energy - consumption);
+    ant.lastEnergyConsumption = consumption;
+  }
+
+  /**
+   * Get energy consumption rate for an activity state
+   */
+  private getConsumptionRate(state: AntState): number {
+    return ENERGY_CONFIG.CONSUMPTION_RATES[state] ?? 0;
+  }
+
+  /**
+   * Get movement config adjusted for current energy level
+   */
+  private getMovementConfigForAnt(ant: Ant): MovementConfig {
+    const energyPercent = ant.energy / ENERGY_CONFIG.MAX_ENERGY;
+    let multiplier = 1.0;
+
+    if (energyPercent >= 0.8) {
+      multiplier = ENERGY_CONFIG.SPEED_MULTIPLIERS.WELL_FED;
+    } else if (energyPercent >= 0.5) {
+      multiplier = ENERGY_CONFIG.SPEED_MULTIPLIERS.NORMAL;
+    } else if (energyPercent >= 0.25) {
+      multiplier = ENERGY_CONFIG.SPEED_MULTIPLIERS.HUNGRY;
+    } else {
+      multiplier = ENERGY_CONFIG.SPEED_MULTIPLIERS.STARVING;
+    }
+
+    this.energyAdjustedMovementConfig.speed = this.movementConfig.speed * multiplier;
+    this.energyAdjustedMovementConfig.changeDirectionInterval = this.movementConfig.changeDirectionInterval;
+    this.energyAdjustedMovementConfig.turnSpeed = this.movementConfig.turnSpeed;
+
+    return this.energyAdjustedMovementConfig;
+  }
+
+  /**
+   * Handle eating when ant is idle at colony
+   */
+  private handleEating(ant: Ant, colony: Colony, deltaTime: number): void {
+    if (ant.energy >= ENERGY_CONFIG.MAX_ENERGY) {
+      return;
+    }
+
+    const foodToConsume = ENERGY_CONFIG.FOOD_CONSUMPTION_RATE * deltaTime;
+    const consumed = colony.consumeFood(foodToConsume);
+
+    if (consumed > 0) {
+      const energyGained = consumed * ENERGY_CONFIG.ENERGY_PER_FOOD_UNIT;
+      ant.energy = Math.min(ENERGY_CONFIG.MAX_ENERGY, ant.energy + energyGained);
     }
   }
 

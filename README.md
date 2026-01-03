@@ -34,11 +34,18 @@ Currently implementing the foundational simulation architecture and basic ant be
 - ✅ Pheromone visualization overlay (toggleable)
 
 ### In Development
-- 🚧 Pheromone-based ant communication (Phase 2)
-  - ✅ Core grid system with decay
-  - ✅ Ant deposition by state
-  - ✅ Grid diffusion
-  - 🚧 Gradient following behavior
+- None currently - preparing for Phase 5 (Menu System)
+
+### Recently Completed
+- ✅ Health & Eating System (Phase 4)
+  - Ant energy/metabolism
+  - Activity-based energy consumption
+  - Eating and food-to-energy conversion
+  - Hunger-driven behavior (ants return home when hungry)
+  - Starvation effects (movement slowdown, death)
+  - Colony resource tracking (storage, consumption, gathering rates)
+  - Colony health metrics UI
+  - Survival mechanics (colony fails if food depleted)
 
 ### Future
 - Food sources and resource gathering
@@ -300,7 +307,7 @@ Exit criteria:
 - ✅ Visual carrying indicators (red dot scaled by inventory)
 - ✅ Foraging behavior with food detection
 - ✅ Food harvesting at sources
-- ✅ Food deposit to colony storage (colony.resourceCount)
+- ✅ Food deposit to colony storage
 - ✅ Pheromone trail formation (strong trails when carrying food)
 - ✅ Automatic food respawn when depleted
 - ✅ Procedural food rendering with opacity feedback
@@ -315,18 +322,26 @@ Exit criteria:
 
 **Goal:** Colonies survive by maintaining positive food flow.
 
-* Ant consumption rates (ants eat stored food to survive)
-* Colony health tracking (colony survives if food ≥ consumption)
-* Starvation mechanics (ants slow down / inactive when hungry)
-* Starvation as failure condition (colony dies if food depleted)
-* Metrics display (food stored, consumption rate, surplus/deficit)
+**Status:** ✅ **Complete**
+
+**Completed:**
+- ✅ Ant energy/metabolism system (0-100 energy scale)
+- ✅ Activity-based energy consumption (idle/wandering/foraging/returning)
+- ✅ Food-to-energy conversion (ants eat stored food at colony)
+- ✅ Hunger-driven behavior (hungry ants return home more frequently)
+- ✅ Starvation effects (movement slowdown based on energy level)
+- ✅ Death from starvation (ants die when energy reaches 0)
+- ✅ Colony resource tracking (food stored, consumption rate, gathering rate)
+- ✅ Colony health status (healthy/struggling/critical/dead)
+- ✅ Live metrics UI (displays food balance and colony status)
+- ✅ Survival mechanics (colony must maintain positive food production)
 
 Exit criteria:
 
-* Ants require food to stay active
-* Colony must maintain positive food production (foraging > consumption)
-* Player observes resource flow dynamically
-* Survival mechanics add strategic depth
+* ✅ Ants require food to stay active
+* ✅ Colony must maintain positive food production (foraging > consumption)
+* ✅ Player observes resource flow dynamically
+* ✅ Survival mechanics add strategic depth
 
 ### Phase 5 — Menu / Title Screen
 

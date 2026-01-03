@@ -55,10 +55,24 @@ export class World {
   }
 
   /**
+   * Remove an ant from the world and invalidate cache
+   */
+  public removeAnt(target: Ant): void {
+    const colony = this.getColony(target.colonyId);
+    if (!colony) return;
+
+    const index = colony.ants.indexOf(target);
+    if (index !== -1) {
+      colony.ants.splice(index, 1);
+      this.antsCacheDirty = true;
+    }
+  }
+
+  /**
    * Get all ants across all colonies
    * Useful for global operations like rendering or collision detection
    * Returns cached array to avoid per-frame allocations
-   * Note: Cache is invalidated only on ant spawn (MVP does not support removal)
+   * Cache is invalidated when ants are spawned or removed
    */
   public getAllAnts(): Ant[] {
     if (this.antsCacheDirty) {

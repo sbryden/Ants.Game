@@ -25,6 +25,7 @@ export class MainScene extends Phaser.Scene {
   private pheromoneRenderer!: PheromoneRenderer;
   private foodSourceRenderer!: FoodSourceRenderer;
   private debugText!: Phaser.GameObjects.Text;
+  private metricsText!: Phaser.GameObjects.Text;
   private pheromoneOverlayText!: Phaser.GameObjects.Text;
 
   constructor() {
@@ -95,6 +96,16 @@ export class MainScene extends Phaser.Scene {
       })
       .setDepth(SCENE_CONFIG.UI_DEPTH);
 
+    // Colony metrics display
+    this.metricsText = this.add
+      .text(SCENE_CONFIG.DEBUG.X, this.scale.height - SCENE_CONFIG.DEBUG.Y_OFFSET_FROM_BOTTOM - 30, '', {
+        fontSize: SCENE_CONFIG.DEBUG.FONT_SIZE,
+        color: SCENE_CONFIG.DEBUG.COLOR,
+        backgroundColor: SCENE_CONFIG.DEBUG.BACKGROUND_COLOR,
+        padding: SCENE_CONFIG.DEBUG.PADDING,
+      })
+      .setDepth(SCENE_CONFIG.UI_DEPTH);
+
     // Set up keyboard input for pheromone overlay toggle
     this.input.keyboard?.on('keydown-P', () => {
       this.pheromoneRenderer.toggle();
@@ -137,6 +148,9 @@ export class MainScene extends Phaser.Scene {
 
     // Update debug UI with state distribution
     this.updateDebugUI(ants);
+
+    // Update colony metrics UI
+    this.updateMetricsUI();
 
     // Test: Deposit pheromones where mouse is held (temporary test code)
     this.handleTestPheromoneDeposition();
@@ -226,6 +240,28 @@ export class MainScene extends Phaser.Scene {
     ].join(' | ');
 
     this.debugText.setText(debugInfo);
+  }
+
+  /**
+   * Update colony metrics display
+   */
+  private updateMetricsUI(): void {
+    const colony = this.world.getColonies()[0];
+    if (!colony) return;
+
+    const healthStatus = colony.getHealthStatus();
+    const surplus = colony.surplusRate;
+    const surplusStr = surplus >= 0 ? `+${surplus.toFixed(2)}` : `${surplus.toFixed(2)}`;
+
+    const metricsInfo = [
+      `Food: ${colony.foodStored.toFixed(1)}`,
+      `Eaten: ${colony.foodConsumedRate.toFixed(2)}/s`,
+      `Gathered: ${colony.foodGatheredRate.toFixed(2)}/s`,
+      `Surplus: ${surplusStr}/s`,
+      `Status: ${healthStatus}`,
+    ].join(' | ');
+
+    this.metricsText.setText(metricsInfo);
   }
 
   /**

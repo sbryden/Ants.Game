@@ -64,6 +64,67 @@ export const MOVEMENT_CONFIG = {
 } as const;
 
 /**
+ * Energy and hunger configuration
+ * Drives metabolic decay, eating, and starvation effects
+ */
+export const ENERGY_CONFIG = {
+  /**
+   * Maximum energy an ant can have (percent-style scale)
+   */
+  MAX_ENERGY: 100,
+
+  /**
+   * Energy consumption rates (energy per second) by activity state
+   */
+  CONSUMPTION_RATES: {
+    IDLE: 0.5,
+    WANDERING: 1.0,
+    FORAGING: 1.5,
+    RETURNING: 1.0,
+  },
+
+  /**
+   * Thresholds that affect behavior and movement speed
+   */
+  THRESHOLDS: {
+    HUNGER: 50,
+    STARVATION: 25,
+    WELL_FED: 80,
+  },
+
+  /**
+   * Speed multipliers by energy band
+   */
+  SPEED_MULTIPLIERS: {
+    WELL_FED: 1.0,      // 80-100
+    NORMAL: 0.95,       // 50-80
+    HUNGRY: 0.7,        // 25-50
+    STARVING: 0.3,      // 0-25
+  },
+
+  /**
+   * Chance per second for hungry ants to bail out and return home
+   * Applied when energy is below the hunger threshold
+   */
+  HUNGER_RETURN_CHANCE: 0.5,
+
+  /**
+   * Energy recovered per second while eating at the colony
+   */
+  EATING_RECOVERY_RATE: 20,
+
+  /**
+   * Food units consumed per second while eating
+   */
+  FOOD_CONSUMPTION_RATE: 0.2,
+
+  /**
+   * Energy gained per unit of food (derived from recovery/consumption rates)
+   */
+  ENERGY_PER_FOOD_UNIT: 100,
+} as const;
+
+/**
  * Behavior state machine configuration
  * Probabilities and durations for ant state transitions
  */
@@ -123,6 +184,17 @@ export const COLONY_CONFIG = {
    * Used for spawning validation to keep food sources away from colony entrances
    */
   ENTRANCE_RADIUS: 30,
+
+  /**
+   * Smoothing factor for rolling-average colony metrics (0-1)
+   * Higher values react faster but are noisier
+   */
+  METRICS_SMOOTHING_FACTOR: 0.2,
+
+  /**
+   * Safety buffer of food (per ant) before considering colony struggling
+   */
+  SAFETY_FOOD_PER_ANT: 0.2,
 } as const;
 
 /**

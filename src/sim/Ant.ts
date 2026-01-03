@@ -29,6 +29,10 @@ export class Ant {
   // Resource carrying state
   public carriedFood: number = 0; // Food units currently being carried
 
+  // Survival and metabolism
+  public energy: number = 100; // 0-100 energy scale
+  public lastEnergyConsumption: number = 0; // Energy spent in last frame
+
   // Extension points for future systems (not yet implemented)
   // These will remain unused until Phase 2+
   // TODO: Add pheromone detection data structure
@@ -48,5 +52,7 @@ export class Ant {
     this.timeSinceDirectionChange = 0;
     this.timeInCurrentState = 0;
     this.perceptionRange = perceptionRange;
+    this.energy = 100;
+    this.lastEnergyConsumption = 0;
   }
 }

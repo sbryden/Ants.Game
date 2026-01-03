@@ -18,6 +18,8 @@ Phase 4 transforms the food system from "collection mechanics" to "economic simu
 - ✅ Survival becomes a primary objective (colony dies if food depleted)
 - ✅ System runs at 60 FPS with consumption mechanics active
 
+**Status: ✅ COMPLETE**
+
 ## Design Decisions
 
 ### Ant Energy Model
@@ -125,9 +127,113 @@ Phase 4 transforms the food system from "collection mechanics" to "economic simu
 
 **Goal:** Add energy tracking to individual ants, basic decay per frame.
 
+**Status: ✅ COMPLETE**
+
 #### Modified Files
-- `src/sim/Ant.ts` — Add energy property and activity coefficients
-- `src/config.ts` — Add ENERGY_CONFIG with consumption rates
+- `src/sim/Ant.ts` — ✅ Added energy property and lastEnergyConsumption tracking
+- `src/config.ts` — ✅ Added ENERGY_CONFIG with consumption rates and thresholds
+
+#### Exit Criteria
+- ✅ Ant.energy property added, initialized to 100
+- ✅ ENERGY_CONFIG created with consumption rates
+- ✅ No behavioral changes yet, just data structure
+- ✅ TypeScript compiles without errors
+
+---
+
+### Segment 2: Energy Consumption Per Frame
+
+**Goal:** Ants consume energy based on their state, deduct from pool.
+
+**Status: ✅ COMPLETE**
+
+#### Modified Files
+- `src/systems/SimulationSystem.ts` — ✅ Added energy decay in tick()
+- `src/sim/Ant.ts` — ✅ Energy properties integrated
+
+#### Exit Criteria
+- ✅ Ants lose energy each frame based on state
+- ✅ Starving ants move slower visibly
+- ✅ Energy never goes below 0
+- ✅ Consumption tracked for metrics
+- ✅ 60 FPS maintained
+
+---
+
+### Segment 3: Food-to-Energy Conversion & Eating
+
+**Goal:** Ants eat food at colony, convert food into energy recovery.
+
+**Status: ✅ COMPLETE**
+
+#### Modified Files
+- `src/systems/SimulationSystem.ts` — ✅ Added eating logic in IDLE state
+- `src/sim/World.ts` — ✅ Added removeAnt() method for death handling
+- `src/sim/Colony.ts` — ✅ Refactored to use foodStored and per-frame metrics
+
+#### Exit Criteria
+- ✅ Ants eat food at colony when hungry
+- ✅ Energy recovers while eating
+- ✅ Colony food decreases as ants eat
+- ✅ Eating stops when energy full or food runs out
+- ✅ Colony tracks consumption metrics
+
+---
+
+### Segment 4: Hunger-Driven State Transitions
+
+**Goal:** Starving ants prioritize returning home to eat.
+
+**Status: ✅ COMPLETE**
+
+#### Modified Files
+- `src/sim/behaviors/BehaviorStateMachine.ts` — ✅ Modified transition probabilities
+- `src/systems/SimulationSystem.ts` — ✅ Integrated hunger-based logic
+
+#### Exit Criteria
+- ✅ Hungry ants return home more frequently
+- ✅ Starving ants deprioritize foraging
+- ✅ Behavior feels organic, not hard-coded
+- ✅ Transitions smooth, no jank
+
+---
+
+### Segment 5: Colony Survival & UI Metrics
+
+**Goal:** Track colony health, display metrics, define failure conditions.
+
+**Status: ✅ COMPLETE**
+
+#### Modified Files
+- `src/sim/Colony.ts` — ✅ Added health tracking and metrics
+- `src/scenes/MainScene.ts` — ✅ Display colony metrics in debug UI
+- `src/config.ts` — ✅ Added COLONY_CONFIG metrics settings
+
+#### Exit Criteria
+- ✅ Colony health status tracked and displayed
+- ✅ Metrics shown in UI (food, rates, surplus)
+- ✅ Player can observe resource balance
+- ✅ Colony failure conditions clear
+
+---
+
+### Segment 6: Integration & Starvation Death
+
+**Goal:** Complete starvation mechanic—ants die if energy reaches 0 for too long.
+
+**Status: ✅ COMPLETE**
+
+#### Modified Files
+- `src/systems/SimulationSystem.ts` — ✅ Remove dead ants
+- `src/sim/World.ts` — ✅ Ant removal logic
+- `src/render/AntRenderer.ts` — ✅ Already handles filtering from getAllAnts()
+
+#### Exit Criteria
+- ✅ Starving ants die when energy reaches 0
+- ✅ Dead ants removed from world
+- ✅ Colony population decreases visibly
+- ✅ Metrics update to reflect population loss
+- ✅ Game handles extinction gracefully
 
 #### Tasks
 
