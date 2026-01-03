@@ -10,7 +10,7 @@ import { AntState } from '../sim/AntState';
 import { Ant } from '../sim/Ant';
 import { Obstacle } from '../sim/Obstacle';
 import { PheromoneType } from '../sim/PheromoneType';
-import { SCENE_CONFIG, PHASER_CONFIG, WORLD_CONFIG, THEME_CONFIG } from '../config';
+import { SCENE_CONFIG, WORLD_CONFIG, THEME_CONFIG } from '../config';
 import { GameConfig } from '../types/GameConfig';
 import { Theme } from '../types/Theme';
 

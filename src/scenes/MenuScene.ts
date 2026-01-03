@@ -37,6 +37,10 @@ export class MenuScene extends Phaser.Scene {
   private selectedAntCount: number = 40;
   private selectedTheme: ThemeId = 'default';
 
+  // Previous configuration state (for Cancel button)
+  private previousAntCount: number = 40;
+  private previousTheme: ThemeId = 'default';
+
   // Slider state
   private sliderHandle!: Phaser.GameObjects.Arc;
   private isDraggingSlider: boolean = false;
@@ -264,10 +268,11 @@ export class MenuScene extends Phaser.Scene {
     // Cancel button
     const cancelBtn = this.createPanelButton('Cancel', 80, 150);
     cancelBtn.on('pointerdown', () => {
-      // Reset to defaults
-      this.selectedAntCount = 40;
-      this.selectedTheme = 'default';
+      // Revert to previous values
+      this.selectedAntCount = this.previousAntCount;
+      this.selectedTheme = this.previousTheme;
       this.updateSliderPosition();
+      this.updateThemeSelector();
       this.toggleConfigPanel();
     });
 
@@ -362,9 +367,8 @@ export class MenuScene extends Phaser.Scene {
    */
   private updateSliderPosition(): void {
     const config = MENU_CONFIG.SLIDER;
-    const panelX = this.configPanel.x;
-    const panelY = this.configPanel.y;
-    const sliderX = panelX - MENU_CONFIG.CONFIG_PANEL.WIDTH / 2 + MENU_CONFIG.CONFIG_PANEL.PADDING;
+    // Panel-relative X position for the start of the slider track
+    const sliderX = -MENU_CONFIG.CONFIG_PANEL.WIDTH / 2 + MENU_CONFIG.CONFIG_PANEL.PADDING;
     
     const normalizedValue = (this.selectedAntCount - 10) / 90;
     const handleX = sliderX + normalizedValue * config.WIDTH;
@@ -483,6 +487,10 @@ export class MenuScene extends Phaser.Scene {
     this.isConfigOpen = !this.isConfigOpen;
 
     if (this.isConfigOpen) {
+      // Store current values as previous values when opening
+      this.previousAntCount = this.selectedAntCount;
+      this.previousTheme = this.selectedTheme;
+
       // Show panel with fade in
       this.configOverlay.setVisible(true);
       this.configPanel.setVisible(true);
@@ -516,9 +524,14 @@ export class MenuScene extends Phaser.Scene {
    * Set up keyboard shortcuts
    */
   private setupKeyboardShortcuts(): void {
-    // ESC to close config panel
+    // ESC to close config panel and revert changes
     this.input.keyboard?.on('keydown-ESC', () => {
       if (this.isConfigOpen) {
+        // Revert to previous values like Cancel button
+        this.selectedAntCount = this.previousAntCount;
+        this.selectedTheme = this.previousTheme;
+        this.updateSliderPosition();
+        this.updateThemeSelector();
         this.toggleConfigPanel();
       }
     });
@@ -561,6 +574,12 @@ export class MenuScene extends Phaser.Scene {
     }
     if (this.colonyRenderer) {
       this.colonyRenderer.destroy();
+    }
+
+    // Clean up keyboard event listeners
+    if (this.input.keyboard) {
+      this.input.keyboard.off('keydown-ESC');
+      this.input.keyboard.off('keydown-ENTER');
     }
   }
 }

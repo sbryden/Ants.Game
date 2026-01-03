@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import type { FoodSource } from '../sim/FoodSource';
-import { FOOD_RENDER_CONFIG, FOOD_CONFIG, THEME_CONFIG } from '../config';
+import { FOOD_CONFIG, THEME_CONFIG } from '../config';
 import { Theme } from '../types/Theme';
 
 /**
