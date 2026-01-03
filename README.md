@@ -2,6 +2,8 @@
 
 A SimAnt-inspired ant colony simulation focused on emergent behavior, pheromone systems, and large numbers of autonomous agents.
 
+**[🎮 Try the game](https://sbryden.github.io/Ants.Game/)**
+
 ## Overview
 
 Ants.Game is a simulation-first game that prioritizes behavioral complexity and emergent gameplay over visual polish. Watch hundreds of ants interact through pheromone trails, build colonies, gather resources, and engage in territorial warfare—all driven by simple rules that create complex outcomes.
@@ -465,7 +467,29 @@ Exit criteria:
 * Colony population grows if food surplus sufficient
 * Population stabilizes or declines if food deficit
 
-### Phase 8 — Player Interaction (Indirect Control)
+### Phase 8 — Minimap & Spatial Awareness
+
+**Goal:** Provide players with a spatial overview of the world and colony activity.
+
+* Minimap display in corner of screen
+* Shows colony location and home base
+* Displays food source locations
+* Visualizes ant activity hotspots
+* Indicates exploration boundaries
+* Real-time updates of ant distribution
+* Interactive click-to-pan navigation
+* Toggleable layers (ants, food, pheromones)
+* Configurable zoom level and detail
+
+Exit criteria:
+
+* Minimap accurately represents world state
+* Click-to-pan navigation works smoothly
+* Layer toggles function correctly
+* Minimap provides useful spatial awareness
+* Performance remains stable with minimap active
+
+### Phase 9 — Player Interaction (Indirect Control)
 
 **Goal:** Player influences the system without direct unit control.
 
@@ -474,13 +498,16 @@ Exit criteria:
 * View colony statistics
 * Time controls (pause, speed up, slow down)
 * Debug UI becomes intentional UI
+* Pheromone placement tools
+* Observation/inspection mode for individual ants
 
 Exit criteria:
 
 * Player feels like an observer / influencer, not a micromanager
 * Interactions reinforce simulation learning
+* Tools feel responsive and intuitive
 
-### Phase 9 — World Depth
+### Phase 10 — World Depth
 
 **Goal:** Add environmental complexity.
 
