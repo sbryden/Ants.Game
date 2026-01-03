@@ -90,7 +90,7 @@ export class MainScene extends Phaser.Scene {
 
     // Pheromone overlay indicator
     this.pheromoneOverlayText = this.add
-      .text(SCENE_CONFIG.LEGEND.X, SCENE_CONFIG.LEGEND.Y + 20, 'Press P to toggle pheromone overlay | Press Y to toggle trait visualization', {
+      .text(SCENE_CONFIG.LEGEND.X, SCENE_CONFIG.LEGEND.Y + 20, 'Press P to toggle pheromone overlay (OFF) | Press Y to toggle trait visualization (OFF)', {
         fontSize: SCENE_CONFIG.LEGEND.FONT_SIZE,
         color: this.currentTheme.uiColors.textDim,
       })
@@ -178,11 +178,15 @@ export class MainScene extends Phaser.Scene {
   }
 
   /**
-   * Update pheromone overlay text
+   * Update overlay status text
+   * Shows both pheromone and trait visualization status
    */
   private updatePheromoneOverlayText(): void {
-    const status = this.pheromoneRenderer.isVisible() ? 'ON' : 'OFF';
-    this.pheromoneOverlayText.setText(`Press P to toggle pheromone overlay (${status}) | Press T for test pattern`);
+    const pheromoneStatus = this.pheromoneRenderer.isVisible() ? 'ON' : 'OFF';
+    const traitStatus = this.traitOverlayEnabled ? 'ON' : 'OFF';
+    this.pheromoneOverlayText.setText(
+      `Press P to toggle pheromone overlay (${pheromoneStatus}) | Press Y to toggle trait visualization (${traitStatus})`
+    );
   }
 
   /**
