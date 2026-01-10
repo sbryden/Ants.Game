@@ -8,6 +8,31 @@ A SimAnt-inspired ant colony simulation focused on emergent behavior, pheromone 
 
 Ants.Game is a simulation-first game that prioritizes behavioral complexity and emergent gameplay over visual polish. Watch hundreds of ants interact through pheromone trails, build colonies, gather resources, and engage in territorial warfare—all driven by simple rules that create complex outcomes.
 
+## Current Features
+
+✅ **Core Simulation**
+- Grid-based world with multiple food sources
+- State machine-driven ant behavior (Idle, Wandering, Foraging, Returning)
+- Smooth movement with inertia and obstacle avoidance
+- Energy/metabolism system with hunger-driven behavior
+
+✅ **Pheromone System**
+- Three pheromone types (Food, Nest, Danger)
+- Emergent trail formation and optimization
+- Diffusion and decay mechanics
+- Toggleable visualization overlay
+
+✅ **Colony Management**
+- Food gathering and storage
+- Consumption and starvation mechanics
+- Live metrics and health status
+- Survival-based gameplay
+
+✅ **Menu & Themes**
+- Configuration panel with ant count slider
+- Three visual themes (Default, High Contrast, Black & White)
+- Living background simulation
+
 ## Technology Stack
 
 - **Phaser 3** (v3.80+) — Game engine
@@ -17,75 +42,9 @@ Ants.Game is a simulation-first game that prioritizes behavioral complexity and 
 
 ## Project Status
 
-🚧 **Early Development / MVP Phase**
+🚧 **Phase 5 Complete — Next: Worker Specialization**
 
-Currently implementing the foundational simulation architecture and basic ant behaviors.
-
-## Features (Planned)
-
-### MVP
-- ✅ Grid-based world representation
-- ✅ Basic worker ant entities with simple movement
-- ✅ Deterministic update loop
-- ✅ Procedural ant rendering (simple shapes)
-- ✅ Colony structure with nest visualization
-- ✅ Basic ant behaviors (wandering, foraging, returning to colony)
-- ✅ Finite state machine with smooth transitions
-- ✅ Obstacle avoidance and perception system
-- ✅ Pheromone grid infrastructure (deposit, sample, decay)
-- ✅ Pheromone visualization overlay (toggleable)
-
-### In Development
-- None currently - preparing for Phase 6 (Worker Specialization)
-
-### Recently Completed
-- ✅ Menu & Title Screen (Phase 5)
-  - MenuScene as game entry point with living background (15 ants)
-  - Theme system with 3 themes (Default, High Contrast, Black & White)
-  - Configuration panel with ant count slider (10-100) and theme selector
-  - Scene lifecycle management (menu ↔ game transitions)
-  - Keyboard shortcuts (ENTER to start, R to return, ESC to close config)
-  - Theme colors applied across all renderers
-  - Smooth animations for UI interactions
-  - 60 FPS performance maintained
-
-- ✅ Health & Eating System (Phase 4)
-  - Ant energy/metabolism
-  - Activity-based energy consumption
-  - Eating and food-to-energy conversion
-  - Hunger-driven behavior (ants return home when hungry)
-  - Starvation effects (movement slowdown, death)
-  - Colony resource tracking (storage, consumption, gathering rates)
-  - Colony health metrics UI
-  - Survival mechanics (colony fails if food depleted)
-
-### Future
-- Food sources and resource gathering
-- Ant roles (workers, soldiers, queens)
-- Multiple colonies with territorial behavior
-- Combat mechanics
-- Nest building and expansion
-- Complex emergent behaviors
-
-## Architecture
-
-This project follows a **simulation-first architecture** with strict separation of concerns:
-
-```
-/src
-  /sim       - Pure simulation logic (engine-agnostic, NO Phaser imports)
-  /systems   - Update loops and game systems
-  /render    - Phaser rendering layer (visualization only)
-  /scenes    - Phaser scene definitions
-  /types     - Shared TypeScript types
-```
-
-### Key Principles
-
-1. **Ants are data, not Phaser objects** — Entity state is separate from rendering
-2. **Engine-agnostic simulation** — Core logic can run without Phaser
-3. **Performance-first** — Designed to support hundreds/thousands of agents
-4. **Clarity over cleverness** — Readable, maintainable code
+See [ROADMAP.md](ROADMAP.md) for the full development plan.
 
 ## Getting Started
 
@@ -117,105 +76,11 @@ npm run preview     # Preview production build
 npm run type-check  # Run TypeScript compiler check
 ```
 
-## Project Structure
+## Documentation
 
-```
-Ants.Game/
-├── .github/
-│   ├── copilot-instructions.md   # AI coding assistant guidelines
-│   └── prompts/                   # Development planning documents
-├── src/
-│   ├── sim/                       # Core simulation (engine-agnostic)
-│   ├── systems/                   # Game systems and update loops
-│   ├── render/                    # Phaser rendering layer
-│   ├── scenes/                    # Phaser scenes
-│   ├── types/                     # TypeScript type definitions
-│   └── main.ts                    # Application entry point
-├── index.html                     # Vite entry point
-├── vite.config.ts                 # Vite configuration
-├── tsconfig.json                  # TypeScript configuration
-└── package.json                   # Dependencies and scripts
-```
-
-## Design Philosophy
-
-### Simulation First
-
-The core simulation runs independent of the rendering engine. This enables:
-- Unit testing without graphics
-- Performance profiling of pure logic
-- Potential for headless simulation mode
-- Easy iteration on behavior without rendering concerns
-
-### Emergent Complexity
-
-Simple individual rules create complex group behaviors:
-- Ants follow pheromone gradients
-- Pheromones decay over time
-- Food sources create natural trails
-- Multiple colonies compete for resources
-
-### Performance Awareness
-
-- Object pooling for entities
-- Batch rendering operations
-- Spatial partitioning for collision detection
-- Efficient grid-based pathfinding
-- No per-frame allocations in hot loops
-
-## Ant States & Behavior
-
-Ants are state machines that transition between four distinct behavioral modes, each with a clear objective:
-
-### IDLE
-
-**Goal:** Rest and wait at the colony.
-
-An ant enters IDLE when it returns home and has no food to deposit. Idle ants remain at the nest, depositing weak pheromones to mark the colony location. They occasionally transition to WANDERING to explore or forage.
-
-**Visual cue:** Ants rendered in gray
-
-### WANDERING
-
-**Goal:** Explore the environment and search for food.
-
-Wandering ants move randomly throughout the world, avoiding obstacles. They deposit weak NEST pheromones to create breadcrumb trails back home. If they detect a food source or follow a strong food pheromone trail, they transition to FORAGING.
-
-**Visual cue:** Ants rendered in brown
-
-### FORAGING
-
-**Goal:** Find food, harvest it, and fill carrying capacity.
-
-Foraging ants actively search for food sources within their perception range. Once food is detected, they move toward it and harvest automatically while nearby. As they harvest and fill their inventory, they deposit **strong food pheromones** (if carrying food) to mark successful routes back home. When full or when the food source is depleted, they transition to RETURNING.
-
-**Visual cue:** Ants rendered in green; red indicator dot appears when carrying food
-
-### RETURNING
-
-**Goal:** Bring food back to the colony and deposit it.
-
-Returning ants navigate home using nest pheromone trails and their internal sense of colony location. While carrying food, they deposit strong food pheromones to reinforce the successful foraging route. Upon arrival at the colony, they automatically deposit their food into shared storage and transition back to IDLE. If they lose their food (or never had any), they transition directly to IDLE.
-
-**Visual cue:** Ants rendered in blue; red indicator shows carried food amount
-
-### State Transitions
-
-```
-IDLE → WANDERING (probability-based or when colony needs resources)
-WANDERING → FORAGING (food detected within perception range)
-FORAGING → RETURNING (inventory full OR food source depleted)
-RETURNING → IDLE (arrived at colony AND deposited food)
-RETURNING → IDLE (arrived at colony with no food)
-```
-
-### Emergent Trail Formation
-
-Individual state transitions create emergent colony behavior:
-- Ants leaving food trails (FORAGING ants with cargo) + ants following those trails (WANDERING ants) = **self-reinforcing food highways**
-- Repeated foraging routes strengthen pheromone signals
-- New routes emerge as ants explore different paths
-- The colony collectively "learns" the most efficient routes without centralized planning
+- **[Architecture Guide](docs/ARCHITECTURE.md)** — Design principles, project structure, and technical decisions
+- **[Ant Behavior Guide](docs/BEHAVIOR.md)** — State machines, pheromone systems, and emergent mechanics
+- **[Roadmap](ROADMAP.md)** — Development phases and planned features
 
 ## Contributing
 
@@ -223,400 +88,13 @@ See [.github/copilot-instructions.md](.github/copilot-instructions.md) for archi
 
 ## License
 
-[MIT License](LICENSE) (or your preferred license)
+[MIT License](LICENSE)
 
 ## Inspiration
 
 - **SimAnt** (Maxis, 1991) — The original ant colony simulation
 - **Boids** (Craig Reynolds) — Emergent flocking behavior
 - **Ant Colony Optimization** — Computational swarm intelligence
-
-## Roadmap
-
-This roadmap outlines the evolution of Ants.Game from its current foundation into a deep, emergent ant colony simulation. It is intentionally **system-focused**, not feature-bloated, and prioritizes clarity, iteration, and learning.
-
-The roadmap is organized by **phases**, not strict timelines. Each phase should result in a playable, observable simulation with clear new behaviors.
-
-### Phase 0 — Foundation
-
-**Goal:** A stable simulation loop with visible agents.
-
-Status: ✅ **Complete**
-
-* ✅ Phaser + TypeScript scaffold
-* ✅ Deterministic update loop
-* ✅ Basic world bounds
-* ✅ Ant data model
-* ✅ Simple ant movement / wandering
-* ✅ Procedural rendering (no assets)
-* ✅ Project structure aligned with simulation-first architecture
-* ✅ Colony nest visualization
-* ✅ Returning to colony behavior
-* ✅ Centralized configuration system (config.ts)
-
-Exit criteria:
-
-* ✅ Ants move consistently and deterministically
-* ✅ Simulation logic is decoupled from rendering
-* ✅ Codebase feels easy to reason about
-
-### Phase 1 — Core Ant Behavior
-
-**Goal:** Ants exhibit purposeful individual behavior.
-
-Status: ✅ **Complete**
-
-* ✅ Ant finite state machine (FSM)
-  * Idle
-  * Wandering
-  * Foraging
-  * Returning
-* ✅ Directional movement with inertia (smooth turning)
-* ✅ Obstacle avoidance using tangent-based steering
-* ✅ Perception system foundation (PerceptionData interface)
-* ✅ Randomized probabilistic decision-making
-* ✅ Debug visualization of ant state (color-coded by state)
-* ✅ Live debug UI showing state distribution
-
-Exit criteria:
-
-* ✅ Individual ants feel "alive"
-* ✅ States are easy to inspect and reason about
-* ✅ No pheromones yet — behavior is still local
-
-### Phase 2 — Pheromone System (The Heart of the Game) 🚧 **COMPLETE**
-
-**Goal:** Emergent colony behavior via indirect communication.
-
-**Status:** ✅ **Complete**
-
-**Completed:**
-- ✅ Pheromone grid data structure (Float32Array-based)
-- ✅ Pheromone types: Food, Nest, Danger
-- ✅ Core operations: deposit, sample, decay
-- ✅ Toggleable pheromone heatmap overlay (press 'P' key)
-- ✅ Configuration-driven parameters (PHEROMONE_CONFIG)
-- ✅ State-based ant deposition (idle/wandering/foraging/returning)
-- ✅ Grid diffusion with 4-neighbor averaging (runs every 3 frames)
-- ✅ Pheromone-following behavior (8-directional gradient sampling)
-- ✅ Parameter tuning for trail saturation and accumulation
-
-Exit criteria:
-
-* ✅ Ants form visible trails
-* ✅ Trails strengthen and decay naturally
-* ✅ Emergent path optimization occurs without hardcoding
-
-### Phase 3 — Colony & Resources
-
-**Goal:** The colony becomes a persistent system.
-
-**Status:** ✅ **Complete**
-
-**Completed:**
-- ✅ Food source entities with spawn/respawn mechanics
-- ✅ Ant carrying capacity (5 units per ant)
-- ✅ Visual carrying indicators (red dot scaled by inventory)
-- ✅ Foraging behavior with food detection
-- ✅ Food harvesting at sources
-- ✅ Food deposit to colony storage
-- ✅ Pheromone trail formation (strong trails when carrying food)
-- ✅ Automatic food respawn when depleted
-- ✅ Procedural food rendering with opacity feedback
-
-Exit criteria:
-
-* ✅ Ants successfully gather and return food
-* ✅ Colony state meaningfully changes over time
-* ✅ Player can visually understand resource flow
-
-### Phase 4 — Health & Eating
-
-**Goal:** Colonies survive by maintaining positive food flow.
-
-**Status:** ✅ **Complete**
-
-**Completed:**
-- ✅ Ant energy/metabolism system (0-100 energy scale)
-- ✅ Activity-based energy consumption (idle/wandering/foraging/returning)
-- ✅ Food-to-energy conversion (ants eat stored food at colony)
-- ✅ Hunger-driven behavior (hungry ants return home more frequently)
-- ✅ Starvation effects (movement slowdown based on energy level)
-- ✅ Death from starvation (ants die when energy reaches 0)
-- ✅ Colony resource tracking (food stored, consumption rate, gathering rate)
-- ✅ Colony health status (healthy/struggling/critical/dead)
-- ✅ Live metrics UI (displays food balance and colony status)
-- ✅ Survival mechanics (colony must maintain positive food production)
-
-Exit criteria:
-
-* ✅ Ants require food to stay active
-* ✅ Colony must maintain positive food production (foraging > consumption)
-* ✅ Player observes resource flow dynamically
-* ✅ Survival mechanics add strategic depth
-
-### Phase 5 — Menu / Title Screen ✅ **COMPLETE**
-
-**Goal:** Create a calm, minimal entry point that reflects the game's observational nature.
-
-**Status:** ✅ **Complete** (January 2026)
-
-The menu system acts as both the **first screen** players see and a **lightweight configuration step** before entering the simulation.
-
-#### Design Principles
-
-* **Minimal and observational** — Text and UI elements are kept simple
-* **Living background** — Ants are visible and moving behind the menu overlay
-* **Defaults-first** — Players can start immediately without changing any settings
-
-#### Implemented Features
-
-* **Living Background** — 15 ants wandering behind menu UI at 60 FPS
-* **Start Simulation Button** — Immediate play with default settings (ENTER key shortcut)
-* **Configuration Panel** — Toggle with ⚙ button
-  * Ant count slider (10-100, step 5)
-  * Theme selector (Default, High Contrast, Black & White)
-  * Apply/Cancel buttons with smooth animations
-* **Theme System** — Extensible color system affecting:
-  * Ant state colors
-  * Colony nest colors
-  * Pheromone visualization colors
-  * Food source colors
-  * Obstacle colors
-  * UI text colors
-* **Scene Lifecycle** — Smooth transitions between menu and game
-  * R key returns from game to menu
-  * Proper resource cleanup on scene transitions
-* **Keyboard Shortcuts** — ENTER to start, ESC to close config, R to restart
-
-Exit criteria:
-
-* ✅ Menu serves as an inviting, calm entry point
-* ✅ Players can configure basic simulation parameters
-* ✅ Sensible defaults allow immediate play
-* ✅ Theme system is extensible for future options
-* ✅ 60 FPS performance maintained
-
-### Phase 6 — Emergent Worker Specialization
-
-**Goal:** Ants develop distinct behavioral patterns through experience.
-
-**Core Principle:** All ants are workers, but they diverge over time through **traits**, not hard-coded classes. Specialization is **expressed**, not assigned.
-
-> Ants become better at what they do most.
-
-#### Trait-Based Model
-
-Each ant has a small numeric trait profile:
-
-* `taskAffinity` — Bias toward gathering, nursing, digging, building
-* `movementSpeed`
-* `carryCapacity`
-* `energyEfficiency`
-* `pheromoneSensitivity`
-* `wanderingRadius`
-
-Traits are **multipliers**, not gates.
-
-#### Emergent "Roles" (Labels Only)
-
-Roles are **derived**, never stored.
-
-* **Food Gatherer**
-  * High movement speed
-  * High food-pheromone sensitivity
-  * Increased carry capacity
-
-* **Nursery Worker**
-  * Strong brood-task affinity
-  * Small wandering radius
-  * High energy efficiency when idle
-
-* **Builder / Digger**
-  * Faster terrain modification
-  * Lower movement speed
-  * Reduced attraction to food trails
-
-> An ant may partially fit multiple roles.
-
-#### How Specialization Emerges
-
-* Ants start as near-generalists
-* Performing a task slightly increases related traits
-* Colony needs bias task-selection probabilities
-* New ants may spawn with mild trait bias based on colony state
-* No instant role-switching — behavior **drifts** over time
-
-#### Technical Implementation
-
-* Traits live in `sim/traits`
-* Tasks query traits, **never roles**
-* Ants do not know what "type" they are
-* Rendering may tint ants **only for debug**
-
-Exit criteria:
-
-* Ants visibly specialize over time
-* Behavior feels organic, not scripted
-* Colony efficiency improves naturally through specialization
-* System is observable and debuggable
-
-#### Caste Notes (concise)
-
-* While the Phase name focuses on worker specialization, the game will include multiple ant castes over time: **workers**, **soldiers**, **scouts**, **queens**, **princesses**, and potentially others.
-* For roadmap simplicity, Phase 3 emphasizes worker specialization first. Other castes exist conceptually but their deep specialization systems belong to later phases.
-* All castes can perform core tasks (gathering food, caring for young, fighting), but castes differ by efficiency via trait multipliers. Example: a worker might fight at ~10% effectiveness of a soldier, while a soldier might perform worker tasks at ~10% of a worker's efficiency.
-* Specialization is expressed as trait multipliers rather than hard roles; this lets any ant perform any task with varying effectiveness.
-
-#### Future Flexibility
-
-* The system should allow ants to shift their effective specialization over time if colony needs change (e.g., temporary role drift or deliberate retraining). This is a "future feature" to keep Phase 3 focused and lightweight.
-* Deeper caste mechanics, lifecycle rules (e.g., queens/princesses spawning new castes), and caste-specific behaviors will be introduced in later phases when the simulation and pheromone systems are stable.
-
-### Phase 7 — Nursery / Reproduction
-
-**Goal:** Colonies grow by breeding new ants.
-
-* Egg/larva/pupa lifecycle stages
-* Queen ant produces eggs
-* Worker ants feed larvae (brood care behavior)
-* Pupae mature into adult ants (workers, soldiers, etc.)
-* Population growth dynamics
-* Energy cost of reproduction (colony needs surplus food)
-
-Exit criteria:
-
-* Ants are born and age through stages
-* Brood care creates specialized behavior (some ants prioritize nursery)
-* Colony population grows if food surplus sufficient
-* Population stabilizes or declines if food deficit
-
-### Phase 8 — Minimap & Spatial Awareness
-
-**Goal:** Provide players with a spatial overview of the world and colony activity.
-
-* Minimap display in corner of screen
-* Shows colony location and home base
-* Displays food source locations
-* Visualizes ant activity hotspots
-* Indicates exploration boundaries
-* Real-time updates of ant distribution
-* Interactive click-to-pan navigation
-* Toggleable layers (ants, food, pheromones)
-* Configurable zoom level and detail
-
-Exit criteria:
-
-* Minimap accurately represents world state
-* Click-to-pan navigation works smoothly
-* Layer toggles function correctly
-* Minimap provides useful spatial awareness
-* Performance remains stable with minimap active
-
-### Phase 9 — Player Interaction (Indirect Control)
-
-**Goal:** Player influences the system without direct unit control.
-
-* Place / remove food sources
-* Disturb terrain (block paths, create obstacles)
-* View colony statistics
-* Time controls (pause, speed up, slow down)
-* Debug UI becomes intentional UI
-* Pheromone placement tools
-* Observation/inspection mode for individual ants
-
-Exit criteria:
-
-* Player feels like an observer / influencer, not a micromanager
-* Interactions reinforce simulation learning
-* Tools feel responsive and intuitive
-
-### Phase 10 — World Depth
-
-**Goal:** Add environmental complexity.
-
-* Above-ground vs underground layers
-* Fog of war / unexplored areas
-* Terrain types (soft soil, rock, impassable)
-* Environmental hazards
-
-Exit criteria:
-
-* Exploration becomes meaningful
-* The map feels like a system, not a backdrop
-
-### Phase 10 — Other Colonies & Threats
-
-**Goal:** Introduce conflict and competition.
-
-* Rival ant colonies
-* Territory pheromones
-* Simple combat interactions
-* Predators or environmental threats
-
-Exit criteria:
-
-* Emergent conflict arises naturally
-* No hard-scripted battles
-
-### Phase 11 — Systems & Scale
-
-**Goal:** Stress-test the simulation.
-
-* Hundreds to thousands of ants
-* Performance profiling and optimization
-* System batching and update throttling
-* Optional headless / fast-forward simulation
-
-Exit criteria:
-
-* Simulation remains stable under load
-* Performance issues are understood and controlled
-
-### Phase 12 — Persistence & Replayability
-
-**Goal:** Make simulations meaningful over time.
-
-* Save / load colony state
-* Replay or time-lapse viewing
-* Scenario presets
-* Parameterized world generation
-
-Exit criteria:
-
-* Simulations can be revisited and compared
-* Player can experiment intentionally
-
-### Phase 13 — Polish (Only If It Serves Clarity)
-
-**Goal:** Improve readability, not flash.
-
-* Subtle animations
-* Improved color language
-* Sound cues tied to system events
-* Optional visual themes
-
-Exit criteria:
-
-* Visuals enhance understanding
-* No system complexity added purely for aesthetics
-
-### Guiding Principles (Do Not Break)
-
-* Simulation logic is always engine-agnostic
-* Emergence > scripting
-* Debug views are first-class features
-* Clarity beats realism
-* Systems should explain themselves visually
-
-### Non-Goals (Intentionally Out of Scope)
-
-* Direct unit control
-* Heavy narrative
-* High-fidelity art
-* Twitch-reflex gameplay
-
-**Ants.Game is not about winning fast — it is about *watching intelligence emerge*.**
 
 ---
 

@@ -159,9 +159,12 @@ export class SimulationSystem {
       this.frameCounter = 0;
     }
 
-    // Food respawn: If no food source or current one is depleted, spawn a new one
-    if (!this.world.foodSource || this.world.foodSource.isDepleted()) {
-      this.world.spawnFoodSource();
+    // Food respawn: Remove depleted food sources and spawn replacements
+    for (let i = this.world.foodSources.length - 1; i >= 0; i--) {
+      if (this.world.foodSources[i].isDepleted()) {
+        this.world.foodSources.splice(i, 1);
+        this.world.spawnFoodSource();
+      }
     }
 
     for (const colony of colonies) {
@@ -482,5 +485,9 @@ export class SimulationSystem {
       // Start with random velocity
       applyRandomWander(ant, this.movementConfig);
     }
+
+    // Spawn initial food sources
+    this.world.spawnFoodSource();
+    this.world.spawnFoodSource();
   }
 }

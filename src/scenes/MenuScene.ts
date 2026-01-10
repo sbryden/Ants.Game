@@ -32,6 +32,7 @@ export class MenuScene extends Phaser.Scene {
   private configPanel!: Phaser.GameObjects.Container;
   private configOverlay!: Phaser.GameObjects.Rectangle;
   private isConfigOpen: boolean = false;
+  private themeDots: Map<string, Phaser.GameObjects.Arc> = new Map();
 
   // Configuration state
   private selectedAntCount: number = 40;
@@ -246,27 +247,35 @@ export class MenuScene extends Phaser.Scene {
       color: theme.uiColors.text,
     }).setOrigin(0);
 
-    // Create slider
-    this.createSlider(-config.WIDTH / 2 + config.PADDING, -80);
-
     // Theme selection section
     const themeLabel = this.add.text(-config.WIDTH / 2 + config.PADDING, 20, 'Theme:', {
       fontSize: '20px',
       color: theme.uiColors.text,
     }).setOrigin(0);
 
-    // Create theme selector
+    // Add background and labels to panel FIRST (so they render behind interactive elements)
+    this.configPanel.add([
+      panelBg,
+      panelTitle,
+      antCountLabel,
+      themeLabel,
+    ]);
+
+    // Create slider (adds itself to panel)
+    this.createSlider(-config.WIDTH / 2 + config.PADDING, -80);
+
+    // Create theme selector (adds itself to panel)
     this.createThemeSelector(-config.WIDTH / 2 + config.PADDING, 60);
 
-    // Apply button
-    const applyBtn = this.createPanelButton('Apply', -80, 150);
+    // Apply button (adds itself to panel)
+    const applyBtn = this.createPanelButton('Apply', -80, 180);
     applyBtn.on('pointerdown', () => {
       this.toggleConfigPanel();
       // Config is already updated, no need to do anything else
     });
 
-    // Cancel button
-    const cancelBtn = this.createPanelButton('Cancel', 80, 150);
+    // Cancel button (adds itself to panel)
+    const cancelBtn = this.createPanelButton('Cancel', 80, 180);
     cancelBtn.on('pointerdown', () => {
       // Revert to previous values
       this.selectedAntCount = this.previousAntCount;
@@ -275,14 +284,6 @@ export class MenuScene extends Phaser.Scene {
       this.updateThemeSelector();
       this.toggleConfigPanel();
     });
-
-    // Add all elements to panel
-    this.configPanel.add([
-      panelBg,
-      panelTitle,
-      antCountLabel,
-      themeLabel,
-    ]);
   }
 
   /**
@@ -389,9 +390,10 @@ export class MenuScene extends Phaser.Scene {
       const themeData = THEME_CONFIG[themeId];
       const yPos = y + index * spacing;
 
-      // Radio button circle
-      const radio = this.add.circle(x, yPos, 8, 0xffffff)
-        .setStrokeStyle(2, Phaser.Display.Color.HexStringToColor(theme.uiColors.text).color);
+      // Radio button circle (outer ring only, no fill)
+      const radio = this.add.circle(x, yPos, 8)
+        .setStrokeStyle(2, Phaser.Display.Color.HexStringToColor(theme.uiColors.text).color)
+        .setFillStyle(0x000000, 0);
 
       // Inner dot (if selected)
       const dot = this.add.circle(x, yPos, 5, Phaser.Display.Color.HexStringToColor(theme.uiColors.title).color)
@@ -422,11 +424,11 @@ export class MenuScene extends Phaser.Scene {
         label.setStyle({ color: theme.uiColors.text });
       });
 
+      // Add in correct order: radio (back), dot (front), then non-visual elements
       this.configPanel.add([radio, dot, label, hitArea]);
 
       // Store references for updating
-      radio.setData('themeId', themeId);
-      dot.setData('themeId', themeId);
+      this.themeDots.set(themeId, dot);
     });
   }
 
@@ -434,14 +436,9 @@ export class MenuScene extends Phaser.Scene {
    * Update theme selector to show current selection
    */
   private updateThemeSelector(): void {
-    this.configPanel.iterate((child: Phaser.GameObjects.GameObject) => {
-      if (child instanceof Phaser.GameObjects.Arc && child.getData('themeId')) {
-        const themeId = child.getData('themeId');
-        // Check if this is a dot (inner circle, radius 5)
-        if (child.radius === 5) {
-          child.setVisible(themeId === this.selectedTheme);
-        }
-      }
+    // Update each radio button dot based on selected theme
+    this.themeDots.forEach((dot, themeId) => {
+      dot.setVisible(themeId === this.selectedTheme);
     });
   }
 
