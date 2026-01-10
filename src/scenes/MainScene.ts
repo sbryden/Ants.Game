@@ -130,6 +130,15 @@ export class MainScene extends Phaser.Scene {
       this.updatePheromoneOverlayText();
     });
 
+    // Underground view toggle: Press 'U' to toggle underground view
+    this.input.keyboard?.on('keydown-U', () => {
+      const undergroundWorld = this.simulationSystem.getUndergroundWorld();
+      if (undergroundWorld) {
+        this.scene.pause('MainScene');
+        this.scene.launch('UndergroundScene', { undergroundWorld });
+      }
+    });
+
     // Test key: Press 'T' to deposit test pheromones
     this.input.keyboard?.on('keydown-T', () => {
       this.depositTestPheromones();

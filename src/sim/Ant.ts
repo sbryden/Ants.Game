@@ -37,6 +37,9 @@ export class Ant {
   // Trait system - ant specialization profile
   public traits: AntTraits;
 
+  // Layer system - which simulation layer the ant is currently in
+  public currentLayer: 'surface' | 'underground' = 'surface';
+
   // Extension points for future systems (not yet implemented)
   // These will remain unused until Phase 2+
   // TODO: Add pheromone detection data structure

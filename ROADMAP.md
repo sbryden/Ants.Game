@@ -301,12 +301,12 @@ Player toggles between views with **'U' key**. Both simulations run continuously
 
 This phase is broken into sub-phases for clarity:
 
-**Phase 7A — Underground World Foundation**
-- Create `UndergroundWorld` class (parallel to `World`)
-- Implement tile grid (2D array of TileType)
-- Add `UndergroundScene` (side-view camera)
-- Create entrance entity (shared between layers)
-- Add `currentLayer` property to ants ('surface' | 'underground')
+**Phase 7A — Underground World Foundation** ✅ **COMPLETE**
+- ✅ Create `UndergroundWorld` class (parallel to `World`)
+- ✅ Implement tile grid (2D array of TileType)
+- ✅ Add `UndergroundScene` (side-view camera)
+- ✅ Create entrance entity (shared between layers)
+- ✅ Add `currentLayer` property to ants ('surface' | 'underground')
 
 **Phase 7B — Layer Transitions**
 - Implement entrance transition logic

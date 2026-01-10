@@ -1,8 +1,10 @@
 import { World } from '../sim/World';
+import { UndergroundWorld } from '../sim/UndergroundWorld';
 import { Colony } from '../sim/Colony';
 import { Ant } from '../sim/Ant';
 import { AntState } from '../sim/AntState';
 import { PheromoneType } from '../sim/PheromoneType';
+import { createEntrance } from '../sim/Entrance';
 import {
   applyRandomWander,
   updatePosition,
@@ -43,10 +45,12 @@ import { TraitEvolutionSystem } from './TraitEvolutionSystem';
  * Responsibilities:
  * - Tick the simulation forward in time
  * - Coordinate behavior updates across all ants
+ * - Manage both surface and underground world simulations
  * - Provide extension points for future systems (pheromones, tasks, etc.)
  */
 export class SimulationSystem {
   private world: World;
+  private undergroundWorld: UndergroundWorld | null = null;
   private movementConfig: MovementConfig;
   private energyAdjustedMovementConfig: MovementConfig;
   private transitionConfig: StateTransitionConfig;
@@ -543,5 +547,25 @@ export class SimulationSystem {
     // Spawn initial food sources
     this.world.spawnFoodSource();
     this.world.spawnFoodSource();
+
+    // Initialize underground world with entrance near colony
+    const entrance = createEntrance(
+      colony.x,
+      colony.y - 30,
+      400, // Underground x position
+      50,  // Underground y position (near top)
+      10
+    );
+    this.world.entrance = entrance;
+    this.undergroundWorld = new UndergroundWorld(
+      80,  // Width in tiles (80 * 10 = 800px)
+      60,  // Height in tiles (60 * 10 = 600px)
+      10,  // Tile size in pixels
+      entrance
+    );
+  }
+
+  public getUndergroundWorld(): UndergroundWorld | null {
+    return this.undergroundWorld;
   }
 }

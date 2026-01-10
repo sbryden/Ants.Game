@@ -3,6 +3,7 @@ import { Ant } from './Ant';
 import { Obstacle } from './Obstacle';
 import { FoodSource } from './FoodSource';
 import { PheromoneGrid } from './PheromoneGrid';
+import { Entrance } from './Entrance';
 import { PHEROMONE_CONFIG, FOOD_CONFIG, COLONY_CONFIG } from '../config';
 
 /**
@@ -17,6 +18,7 @@ export class World {
   public obstacles: Obstacle[];
   public pheromoneGrid: PheromoneGrid;
   public foodSources: FoodSource[] = [];
+  public entrance: Entrance | null = null; // Connection to underground layer
   private nextAntId: number;
   private nextFoodSourceId: number;
   private cachedAnts: Ant[];
