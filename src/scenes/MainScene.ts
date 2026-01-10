@@ -6,6 +6,7 @@ import { ColonyRenderer } from '../render/ColonyRenderer';
 import { ObstacleRenderer } from '../render/ObstacleRenderer';
 import { PheromoneRenderer } from '../render/PheromoneRenderer';
 import { FoodSourceRenderer } from '../render/FoodSourceRenderer';
+import { EntranceRenderer } from '../render/EntranceRenderer';
 import { AntState } from '../sim/AntState';
 import { Ant } from '../sim/Ant';
 import { Obstacle } from '../sim/Obstacle';
@@ -26,6 +27,7 @@ export class MainScene extends Phaser.Scene {
   private obstacleRenderer!: ObstacleRenderer;
   private pheromoneRenderer!: PheromoneRenderer;
   private foodSourceRenderer!: FoodSourceRenderer;
+  private entranceRenderer!: EntranceRenderer;
   private debugText!: Phaser.GameObjects.Text;
   private metricsText!: Phaser.GameObjects.Text;
   private pheromoneOverlayText!: Phaser.GameObjects.Text;
@@ -63,6 +65,7 @@ export class MainScene extends Phaser.Scene {
     this.obstacleRenderer = new ObstacleRenderer(this, this.currentTheme);
     this.pheromoneRenderer = new PheromoneRenderer(this, this.currentTheme);
     this.foodSourceRenderer = new FoodSourceRenderer(this, this.currentTheme);
+    this.entranceRenderer = new EntranceRenderer(this, this.currentTheme);
 
     // Display title with theme colors
     this.add
@@ -135,7 +138,7 @@ export class MainScene extends Phaser.Scene {
       const undergroundWorld = this.simulationSystem.getUndergroundWorld();
       if (undergroundWorld) {
         this.scene.pause('MainScene');
-        this.scene.launch('UndergroundScene', { undergroundWorld });
+        this.scene.launch('UndergroundScene', { undergroundWorld, world: this.world });
       }
     });
 
@@ -171,10 +174,13 @@ export class MainScene extends Phaser.Scene {
     // Render colonies (nests)
     this.colonyRenderer.render(this.world.getColonies());
 
+    // Render entrance (connection to underground)
+    this.entranceRenderer.render(this.world.entrance);
+
     // Render food sources
     this.foodSourceRenderer.render(this.world.foodSources);
 
-    // Render ants on top
+    // Render ants on top (surface layer only)
     const ants = this.world.getAllAnts();
     this.antRenderer.render(ants, this.traitOverlayEnabled);
 

@@ -1,6 +1,9 @@
 import Phaser from 'phaser';
 import { UndergroundWorld } from '../sim/UndergroundWorld';
+import { World } from '../sim/World';
 import { TileType } from '../sim/TileType';
+import { AntRenderer } from '../render/AntRenderer';
+import { THEME_CONFIG } from '../config';
 
 /**
  * UndergroundScene - Side-view rendering of underground colony.
@@ -14,19 +17,25 @@ import { TileType } from '../sim/TileType';
 
 export class UndergroundScene extends Phaser.Scene {
   private undergroundWorld!: UndergroundWorld;
+  private world!: World;
   private graphics!: Phaser.GameObjects.Graphics;
+  private antRenderer!: AntRenderer;
 
   constructor() {
     super({ key: 'UndergroundScene' });
   }
 
-  init(data: { undergroundWorld: UndergroundWorld }) {
+  init(data: { undergroundWorld: UndergroundWorld; world: World }) {
     this.undergroundWorld = data.undergroundWorld;
+    this.world = data.world;
   }
 
   create() {
     // Create graphics object for rendering tiles
     this.graphics = this.add.graphics();
+
+    // Initialize ant renderer for underground layer
+    this.antRenderer = new AntRenderer(this, THEME_CONFIG.default);
 
     // Background (sky/surface line)
     this.add.rectangle(
@@ -58,6 +67,10 @@ export class UndergroundScene extends Phaser.Scene {
 
     // Render tile grid
     this.renderTiles();
+
+    // Render underground ants
+    const allAnts = this.world.getAllAnts();
+    this.antRenderer.render(allAnts, false, 'underground');
   }
 
   private renderTiles(): void {

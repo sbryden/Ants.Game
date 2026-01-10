@@ -37,8 +37,9 @@ export class AntRenderer {
   /**
    * Render all ants to the screen
    * Called each frame from the update loop
+   * Only renders ants on the specified layer (defaults to 'surface')
    */
-  public render(ants: Ant[], traitVisualizationEnabled?: boolean): void {
+  public render(ants: Ant[], traitVisualizationEnabled?: boolean, layer: 'surface' | 'underground' = 'surface'): void {
     // Update trait visualization mode if provided
     if (traitVisualizationEnabled !== undefined) {
       this.traitVisualizationEnabled = traitVisualizationEnabled;
@@ -48,7 +49,10 @@ export class AntRenderer {
     this.graphics.clear();
 
     for (const ant of ants) {
-      this.drawAnt(ant);
+      // Only render ants on the current layer
+      if (ant.currentLayer === layer) {
+        this.drawAnt(ant);
+      }
     }
   }
 

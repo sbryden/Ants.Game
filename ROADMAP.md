@@ -308,12 +308,12 @@ This phase is broken into sub-phases for clarity:
 - ✅ Create entrance entity (shared between layers)
 - ✅ Add `currentLayer` property to ants ('surface' | 'underground')
 
-**Phase 7B — Layer Transitions**
-- Implement entrance transition logic
-- Add behavior rules for when ants enter/exit
-- Update ant rendering to handle both layers
-- Ensure both simulations run continuously
-- Add 'U' key toggle between scenes
+**Phase 7B — Layer Transitions** ✅ **COMPLETE**
+- ✅ Implement entrance transition logic
+- ✅ Add behavior rules for when ants enter/exit
+- ✅ Update ant rendering to handle both layers
+- ✅ Ensure both simulations run continuously
+- ✅ Add 'U' key toggle between scenes
 
 **Phase 7C — Basic Digging**
 - Add DIGGING state to ant state machine

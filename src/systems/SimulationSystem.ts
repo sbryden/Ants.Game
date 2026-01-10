@@ -5,6 +5,7 @@ import { Ant } from '../sim/Ant';
 import { AntState } from '../sim/AntState';
 import { PheromoneType } from '../sim/PheromoneType';
 import { createEntrance } from '../sim/Entrance';
+import { processLayerTransition } from '../sim/behaviors/layerTransitions';
 import {
   applyRandomWander,
   updatePosition,
@@ -176,6 +177,17 @@ export class SimulationSystem {
 
     for (const colony of colonies) {
       colony.finalizeFrame(deltaTime);
+    }
+
+    // Process layer transitions for all ants
+    if (this.world.entrance && this.undergroundWorld) {
+      for (const ant of ants) {
+        // Only process surface ants for entrance proximity
+        // Underground ants will be checked separately in underground update
+        if (ant.currentLayer === 'surface') {
+          processLayerTransition(ant, this.world.entrance);
+        }
+      }
     }
 
     // Trait evolution system update
