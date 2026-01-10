@@ -384,8 +384,14 @@ export class SimulationSystem {
     // Resolve collisions if ant moved into an obstacle
     resolveObstacleCollisions(ant, this.world);
 
-    // Constrain to world bounds
-    constrainToWorld(ant, this.world);
+    // Layer-specific position constraints
+    if (ant.currentLayer === 'underground') {
+      // Underground ants must stay in tunnel tiles
+      this.constrainToTunnels(ant);
+    } else {
+      // Surface ants constrained to world bounds
+      constrainToWorld(ant, this.world);
+    }
 
     // Pheromone deposition based on ant state
     this.depositPheromones(ant);
@@ -394,6 +400,70 @@ export class SimulationSystem {
     // Extension point: Food/threat detection
     // Extension point: Ant-to-ant interactions (communication, combat)
     return ant.energy <= 0;
+  }
+
+  /**
+   * Constrain underground ant to tunnel tiles only.
+   * If ant moves into dirt/non-tunnel tile, snap back to nearest tunnel tile.
+   */
+  private constrainToTunnels(ant: Ant): void {
+    if (!this.undergroundWorld) return;
+
+    const tileSize = this.undergroundWorld.tileSize;
+    const gridX = Math.floor(ant.x / tileSize);
+    const gridY = Math.floor(ant.y / tileSize);
+
+    // Check if current position is in a valid tunnel/chamber/entrance tile
+    const tile = this.undergroundWorld.getTile(gridX, gridY);
+    if (tile !== 'TUNNEL' && tile !== 'CHAMBER' && tile !== 'ENTRANCE') {
+      // Ant is in dirt - find nearest tunnel tile and snap to it
+      const nearestTunnel = this.findNearestTunnelTile(ant.x, ant.y);
+      if (nearestTunnel) {
+        ant.x = nearestTunnel.x * tileSize + tileSize / 2;
+        ant.y = nearestTunnel.y * tileSize + tileSize / 2;
+        // Stop movement when snapped back
+        ant.vx = 0;
+        ant.vy = 0;
+        ant.targetVx = 0;
+        ant.targetVy = 0;
+      }
+    }
+  }
+
+  /**
+   * Find the nearest tunnel/chamber/entrance tile to given coordinates.
+   */
+  private findNearestTunnelTile(x: number, y: number): { x: number; y: number } | null {
+    if (!this.undergroundWorld) return null;
+
+    const tileSize = this.undergroundWorld.tileSize;
+    const centerX = Math.floor(x / tileSize);
+    const centerY = Math.floor(y / tileSize);
+    let minDist = Infinity;
+    let nearest: { x: number; y: number } | null = null;
+
+    // Search in expanding radius
+    for (let radius = 0; radius <= 5; radius++) {
+      for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          const gridX = centerX + dx;
+          const gridY = centerY + dy;
+          const tile = this.undergroundWorld.getTile(gridX, gridY);
+          
+          if (tile === 'TUNNEL' || tile === 'CHAMBER' || tile === 'ENTRANCE') {
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < minDist) {
+              minDist = dist;
+              nearest = { x: gridX, y: gridY };
+            }
+          }
+        }
+      }
+      // If we found a tunnel in this radius, return it
+      if (nearest) return nearest;
+    }
+
+    return nearest;
   }
 
   /**
