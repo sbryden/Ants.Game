@@ -53,10 +53,21 @@ export const MOVEMENT_CONFIG = {
   SPEED: 50,
 
   /**
+   * Slow movement speed while harvesting food at source
+   * Ants move randomly around food to simulate collecting behavior
+   */
+  HARVESTING_SPEED: 15,
+
+  /**
    * Time interval (in seconds) between random direction changes
    * Lower values = more erratic movement, higher = smoother paths
    */
   CHANGE_DIRECTION_INTERVAL: 2,
+
+  /**
+   * Harvesting behavior: change direction more frequently for random collecting
+   */
+  HARVESTING_CHANGE_INTERVAL: 0.5,
 
   /**
    * Turn speed coefficient (0-1)

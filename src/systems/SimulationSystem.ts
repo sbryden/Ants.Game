@@ -331,6 +331,17 @@ export class SimulationSystem {
             // Harvest food from source (automatic while nearby)
             harvestFood(ant, food, FOOD_CONFIG.HARVEST_RATE * deltaTime);
             
+            // Move randomly around food source while collecting (slow, erratic movement)
+            if (ant.timeSinceDirectionChange >= MOVEMENT_CONFIG.HARVESTING_CHANGE_INTERVAL) {
+              const harvestingConfig = {
+                ...movementConfig,
+                speed: MOVEMENT_CONFIG.HARVESTING_SPEED,
+                changeDirectionInterval: MOVEMENT_CONFIG.HARVESTING_CHANGE_INTERVAL,
+              };
+              applyRandomWander(ant, harvestingConfig);
+              ant.timeSinceDirectionChange = 0;
+            }
+            
             // Transition to returning if full or source depleted
             if (isCarryingFull(ant) || food.isDepleted()) {
               changeState(ant, AntState.RETURNING);
