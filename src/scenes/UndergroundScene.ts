@@ -3,6 +3,8 @@ import { UndergroundWorld } from '../sim/UndergroundWorld';
 import { World } from '../sim/World';
 import { TileType } from '../sim/TileType';
 import { AntRenderer } from '../render/AntRenderer';
+import { QueenRenderer } from '../render/QueenRenderer';
+import { EggRenderer } from '../render/EggRenderer';
 import { THEME_CONFIG } from '../config';
 
 /**
@@ -20,6 +22,8 @@ export class UndergroundScene extends Phaser.Scene {
   private world!: World;
   private graphics!: Phaser.GameObjects.Graphics;
   private antRenderer!: AntRenderer;
+  private queenRenderer!: QueenRenderer;
+  private eggRenderer!: EggRenderer;
 
   constructor() {
     super({ key: 'UndergroundScene' });
@@ -34,8 +38,10 @@ export class UndergroundScene extends Phaser.Scene {
     // Create graphics object for rendering tiles
     this.graphics = this.add.graphics();
 
-    // Initialize ant renderer for underground layer
+    // Initialize renderers
     this.antRenderer = new AntRenderer(this, THEME_CONFIG.default);
+    this.queenRenderer = new QueenRenderer(this);
+    this.eggRenderer = new EggRenderer(this);
 
     // Background (sky/surface line)
     this.add.rectangle(
@@ -67,6 +73,12 @@ export class UndergroundScene extends Phaser.Scene {
 
     // Render tile grid
     this.renderTiles();
+
+    // Render queen
+    this.queenRenderer.render(this.undergroundWorld.queen);
+
+    // Render eggs
+    this.eggRenderer.render(this.undergroundWorld.eggs);
 
     // Render underground ants
     const allAnts = this.world.getAllAnts();

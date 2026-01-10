@@ -196,6 +196,24 @@ export class SimulationSystem {
       }
     }
 
+    // Update queen and egg-laying
+    if (this.undergroundWorld && this.undergroundWorld.queen) {
+      const queen = this.undergroundWorld.queen;
+      queen.timeSinceLastEgg += deltaTime;
+
+      // Queen lays eggs every 10 seconds if she has enough food
+      if (queen.timeSinceLastEgg >= 10.0 && queen.canLayEgg()) {
+        if (queen.layEgg()) {
+          this.undergroundWorld.layEgg(queen.colonyId);
+        }
+      }
+
+      // Update all eggs
+      for (const egg of this.undergroundWorld.eggs) {
+        egg.update(deltaTime);
+      }
+    }
+
     // Trait evolution system update
     this.traitEvolutionSystem.update(deltaTime);
 
@@ -596,6 +614,9 @@ export class SimulationSystem {
       10,  // Tile size in pixels
       entrance
     );
+
+    // Spawn queen in initial chamber
+    this.undergroundWorld.spawnQueen(colony.id);
   }
 
   public getUndergroundWorld(): UndergroundWorld | null {

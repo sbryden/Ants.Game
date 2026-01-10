@@ -1,5 +1,7 @@
 import { TileType } from './TileType';
 import { Entrance } from './Entrance';
+import { Queen } from './Queen';
+import { Egg } from './Egg';
 
 /**
  * UndergroundWorld - Engine-agnostic underground simulation state.
@@ -29,6 +31,14 @@ export class UndergroundWorld {
   
   /** Entrance connecting to surface */
   entrance: Entrance;
+
+  /** Queen (colony reproduction center) */
+  queen: Queen | null = null;
+
+  /** Eggs laid by the queen */
+  eggs: Egg[] = [];
+
+  private nextEggId: number = 0;
 
   constructor(width: number, height: number, tileSize: number, entrance: Entrance) {
     this.width = width;
@@ -141,5 +151,55 @@ export class UndergroundWorld {
    */
   isDiggable(x: number, y: number): boolean {
     return this.getTile(x, y) === TileType.DIRT;
+  }
+
+  /**
+   * Spawn the queen in the initial chamber.
+   */
+  spawnQueen(colonyId: number): Queen {
+    // Place queen in center of initial queen chamber
+    const gridPos = this.worldToGrid(this.entrance.undergroundX, this.entrance.undergroundY);
+    const chamberX = gridPos.x + 5; // Offset to chamber location
+    const chamberY = gridPos.y + 4;
+    const worldPos = this.gridToWorld(chamberX, chamberY);
+    
+    this.queen = new Queen(0, worldPos.x, worldPos.y, colonyId);
+    return this.queen;
+  }
+
+  /**
+   * Lay an egg from the queen.
+   * Places egg near queen in a chamber tile.
+   */
+  layEgg(colonyId: number): Egg | null {
+    if (!this.queen) return null;
+
+    // Find a nearby chamber tile for the egg
+    const queenGridPos = this.worldToGrid(this.queen.x, this.queen.y);
+    
+    // Search for chamber tiles nearby
+    for (let dy = -2; dy <= 2; dy++) {
+      for (let dx = -2; dx <= 2; dx++) {
+        const checkX = queenGridPos.x + dx;
+        const checkY = queenGridPos.y + dy;
+        
+        if (this.getTile(checkX, checkY) === TileType.CHAMBER) {
+          // Check if there's already an egg at this position
+          const worldPos = this.gridToWorld(checkX, checkY);
+          const hasEgg = this.eggs.some(egg => 
+            Math.abs(egg.x - worldPos.x) < 5 && Math.abs(egg.y - worldPos.y) < 5
+          );
+          
+          if (!hasEgg) {
+            // Place egg here
+            const egg = new Egg(this.nextEggId++, worldPos.x, worldPos.y, colonyId);
+            this.eggs.push(egg);
+            return egg;
+          }
+        }
+      }
+    }
+    
+    return null; // No space for egg
   }
 }

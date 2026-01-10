@@ -322,12 +322,12 @@ This phase is broken into sub-phases for clarity:
 - ✅ Create organic randomness in tunnel shapes
 - ✅ Visual feedback for digging (ants stationary while digging)
 
-**Phase 7D — Queen & Eggs**
-- Create Queen entity (stationary, high-priority care)
-- Implement egg-laying mechanic (cooldown-based)
-- Place eggs in chamber tiles
-- Add egg visualization (small white circles)
-- Queen requires food from workers
+**Phase 7D — Queen & Eggs** ✅ **COMPLETE**
+- ✅ Create Queen entity (stationary, high-priority care)
+- ✅ Implement egg-laying mechanic (every 10s, costs 10 food)
+- ✅ Place eggs in chamber tiles near queen
+- ✅ Add egg visualization (small cream-colored circles)
+- ✅ Queen food reserve system (workers can feed queen in Phase 7F)
 
 **Phase 7E — Emergent Chambers**
 - Ants dig chambers when certain thresholds are met:
