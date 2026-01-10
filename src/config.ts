@@ -797,3 +797,58 @@ export const MENU_CONFIG = {
     CONFIG_PANEL: 201,
   },
 } as const;
+
+/**
+ * Trait system configuration
+ * Controls ant specialization and trait evolution
+ */
+export const TRAIT_CONFIG = {
+  /**
+   * Initial trait variance when ants spawn
+   * Range around baseline 1.0 (e.g., 0.1 means 0.9-1.1)
+   */
+  INITIAL_VARIANCE: 0.1,
+
+  /**
+   * Trait increase rate per task completion
+   * Applied when ant successfully performs a task
+   */
+  TRAIT_INCREASE_RATE: 0.01,
+
+  /**
+   * Trait decay rate per update when not using trait
+   * Pulls traits back toward baseline 1.0
+   */
+  TRAIT_DECAY_RATE: 0.001,
+
+  /**
+   * Minimum allowed trait value
+   * Prevents traits from becoming too weak
+   */
+  MIN_TRAIT_VALUE: 0.5,
+
+  /**
+   * Maximum allowed trait value
+   * Prevents runaway specialization
+   */
+  MAX_TRAIT_VALUE: 2.0,
+
+  /**
+   * High affinity threshold for role derivation (debug only)
+   * Traits above this are considered "high"
+   */
+  HIGH_AFFINITY_THRESHOLD: 1.3,
+
+  /**
+   * Low affinity threshold for role derivation (debug only)
+   * Traits below this are considered "low"
+   */
+  LOW_AFFINITY_THRESHOLD: 0.7,
+
+  /**
+   * Trait evolution update interval (in frames)
+   * Trait evolution is expensive, run every N frames
+   * 60 = once per second at 60 FPS
+   */
+  EVOLUTION_UPDATE_INTERVAL: 60,
+} as const;

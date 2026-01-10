@@ -1,4 +1,5 @@
 import { AntState } from './AntState';
+import { AntTraits, initializeTraits } from './traits/AntTraits';
 
 /**
  * Pure data structure representing a single ant
@@ -33,10 +34,12 @@ export class Ant {
   public energy: number = 100; // 0-100 energy scale
   public lastEnergyConsumption: number = 0; // Energy spent in last frame
 
+  // Trait system - ant specialization profile
+  public traits: AntTraits;
+
   // Extension points for future systems (not yet implemented)
   // These will remain unused until Phase 2+
   // TODO: Add pheromone detection data structure
-  // TODO: Add trait/role enum
   // TODO: Add task/goal reference
 
   constructor(id: number, x: number, y: number, colonyId: number, perceptionRange: number = 100) {
@@ -54,5 +57,6 @@ export class Ant {
     this.perceptionRange = perceptionRange;
     this.energy = 100;
     this.lastEnergyConsumption = 0;
+    this.traits = initializeTraits();
   }
 }

@@ -44,8 +44,11 @@ export function harvestFood(
   foodSource: FoodSource,
   harvestRate: number
 ): number {
+  // Calculate max capacity with trait multiplier
+  const maxCapacity = ANT_CARRY_CONFIG.MAX_CAPACITY * ant.traits.carryCapacity;
+  
   // Calculate how much the ant can still carry
-  const canHarvest = ANT_CARRY_CONFIG.MAX_CAPACITY - ant.carriedFood;
+  const canHarvest = maxCapacity - ant.carriedFood;
   
   if (canHarvest <= 0) {
     return 0; // Ant is full
@@ -71,7 +74,8 @@ export function shouldReturnHome(ant: Ant): boolean {
  * Check if ant inventory is full
  */
 export function isCarryingFull(ant: Ant): boolean {
-  return ant.carriedFood >= ANT_CARRY_CONFIG.MAX_CAPACITY;
+  const maxCapacity = ANT_CARRY_CONFIG.MAX_CAPACITY * ant.traits.carryCapacity;
+  return ant.carriedFood >= maxCapacity;
 }
 
 /**
