@@ -35,6 +35,9 @@ export class UndergroundScene extends Phaser.Scene {
   }
 
   create() {
+    // Set background color instead of using a rectangle
+    this.cameras.main.setBackgroundColor(0x4a3c2a);
+
     // Create graphics object for rendering tiles
     this.graphics = this.add.graphics();
 
@@ -43,26 +46,17 @@ export class UndergroundScene extends Phaser.Scene {
     this.queenRenderer = new QueenRenderer(this);
     this.eggRenderer = new EggRenderer(this);
 
-    // Background (sky/surface line)
-    this.add.rectangle(
-      0,
-      0,
-      this.cameras.main.width,
-      this.cameras.main.height,
-      0x4a3c2a // Brown dirt color
-    ).setOrigin(0, 0);
-
     // Instructions text
     this.add.text(10, 10, "Underground View - Press 'U' to return to surface", {
       fontSize: '16px',
       color: '#ffffff',
       backgroundColor: '#000000',
       padding: { x: 8, y: 4 },
-    });
+    }).setScrollFactor(0); // Fixed to camera
 
     // Set up 'U' key to toggle back to surface
     this.input.keyboard?.on('keydown-U', () => {
-      this.scene.pause('UndergroundScene');
+      this.scene.stop('UndergroundScene');
       this.scene.resume('MainScene');
     });
   }

@@ -601,17 +601,18 @@ export class SimulationSystem {
     this.world.spawnFoodSource();
 
     // Initialize underground world with entrance at colony location
+    // Underground uses its own coordinate system (0,0 at top-left of screen)
     const entrance = createEntrance(
       colony.x,
-      colony.y, // Entrance is AT the colony, not above it
-      400, // Underground x position
-      50,  // Underground y position (near top)
-      COLONY_CONFIG.ENTRANCE_RADIUS // Use colony entrance radius for visual consistency
+      colony.y, // Surface entrance at colony
+      this.world.width / 2, // Underground entrance centered horizontally
+      50,  // Underground entrance near top of screen
+      COLONY_CONFIG.ENTRANCE_RADIUS
     );
     this.world.entrance = entrance;
     this.undergroundWorld = new UndergroundWorld(
-      80,  // Width in tiles (80 * 10 = 800px)
-      60,  // Height in tiles (60 * 10 = 600px)
+      Math.floor(this.world.width / 10),  // Width in tiles to match screen width
+      Math.floor(this.world.height / 10), // Height in tiles to match screen height
       10,  // Tile size in pixels
       entrance
     );
