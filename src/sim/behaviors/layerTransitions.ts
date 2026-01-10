@@ -31,18 +31,21 @@ export function isNearEntrance(ant: Ant, entrance: Entrance): boolean {
  * 
  * Rules:
  * - RETURNING ants (carrying food) should enter to deposit food
- * - IDLE ants occasionally enter (20% chance when near)
- * - WANDERING ants occasionally enter (30% chance when near)
+ * - IDLE ants rarely enter (5% chance - most rest on surface)
+ * - WANDERING ants rarely enter (8% chance - most explore surface)
  * - FORAGING ants stay on surface (looking for food)
+ * 
+ * Design: Keep most ants on surface for foraging efficiency.
+ * Underground should be primarily for food storage and nursery.
  */
 export function shouldEnterUnderground(ant: Ant): boolean {
   switch (ant.state) {
     case 'RETURNING':
       return true; // Always enter when returning with food
     case 'IDLE':
-      return Math.random() < 0.2; // 20% chance
+      return Math.random() < 0.05; // 5% chance (was 20%)
     case 'WANDERING':
-      return Math.random() < 0.3; // 30% chance
+      return Math.random() < 0.08; // 8% chance (was 30%)
     case 'FORAGING':
       return false; // Stay on surface to forage
     default:
@@ -55,18 +58,20 @@ export function shouldEnterUnderground(ant: Ant): boolean {
  * 
  * Rules:
  * - FORAGING ants should exit (looking for food on surface)
- * - IDLE ants occasionally exit (20% chance)
- * - WANDERING ants occasionally exit (30% chance)
+ * - IDLE ants frequently exit (60% chance - prefer surface)
+ * - WANDERING ants frequently exit (70% chance - prefer exploration)
  * - RETURNING ants stay underground until food deposited
+ * 
+ * Design: Push ants toward surface to maintain foraging workforce.
  */
 export function shouldExitToSurface(ant: Ant): boolean {
   switch (ant.state) {
     case 'FORAGING':
       return true; // Always exit to forage
     case 'IDLE':
-      return Math.random() < 0.2; // 20% chance
+      return Math.random() < 0.6; // 60% chance (was 20%)
     case 'WANDERING':
-      return Math.random() < 0.3; // 30% chance
+      return Math.random() < 0.7; // 70% chance (was 30%)
     case 'RETURNING':
       return false; // Stay underground to deposit food
     default:
