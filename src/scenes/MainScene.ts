@@ -171,11 +171,11 @@ export class MainScene extends Phaser.Scene {
     // Render obstacles (background layer)
     this.obstacleRenderer.render(this.world.getObstacles());
 
-    // Render colonies (nests)
+    // Render colonies (nests) - the colony nest serves as the entrance visual
     this.colonyRenderer.render(this.world.getColonies());
 
-    // Render entrance (connection to underground)
-    this.entranceRenderer.render(this.world.entrance);
+    // Don't render entrance separately - it's shown as the colony nest
+    // this.entranceRenderer.render(this.world.entrance);
 
     // Render food sources
     this.foodSourceRenderer.render(this.world.foodSources);

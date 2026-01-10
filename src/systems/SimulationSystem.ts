@@ -599,13 +599,13 @@ export class SimulationSystem {
     this.world.spawnFoodSource();
     this.world.spawnFoodSource();
 
-    // Initialize underground world with entrance near colony
+    // Initialize underground world with entrance at colony location
     const entrance = createEntrance(
       colony.x,
-      colony.y - 30,
+      colony.y, // Entrance is AT the colony, not above it
       400, // Underground x position
       50,  // Underground y position (near top)
-      10
+      COLONY_CONFIG.ENTRANCE_RADIUS // Use colony entrance radius for visual consistency
     );
     this.world.entrance = entrance;
     this.undergroundWorld = new UndergroundWorld(
