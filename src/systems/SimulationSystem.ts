@@ -230,6 +230,7 @@ export class SimulationSystem {
     // Update timing
     ant.timeSinceDirectionChange += deltaTime;
     ant.timeInCurrentState += deltaTime;
+    ant.timeSinceLayerTransition += deltaTime;
 
     // Get ant's colony for home position
     const colony = this.world.getColony(ant.colonyId);

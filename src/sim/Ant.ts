@@ -39,6 +39,7 @@ export class Ant {
 
   // Layer system - which simulation layer the ant is currently in
   public currentLayer: 'surface' | 'underground' = 'surface';
+  public timeSinceLayerTransition: number = 0; // Cooldown to prevent rapid toggling
 
   // Extension points for future systems (not yet implemented)
   // These will remain unused until Phase 2+

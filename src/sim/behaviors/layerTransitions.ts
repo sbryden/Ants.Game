@@ -11,6 +11,7 @@ import { Entrance } from '../Entrance';
  */
 
 const ENTRANCE_PROXIMITY_THRESHOLD = 20; // Distance to trigger transition
+const TRANSITION_COOLDOWN = 3.0; // Seconds to wait before allowing another transition
 
 /**
  * Check if an ant is near the entrance and should transition.
@@ -84,6 +85,8 @@ export function transitionToUnderground(ant: Ant, entrance: Entrance): void {
   ant.vy = 0;
   ant.targetVx = 0;
   ant.targetVy = 0;
+  // Reset transition cooldown
+  ant.timeSinceLayerTransition = 0;
 }
 
 /**
@@ -99,6 +102,8 @@ export function transitionToSurface(ant: Ant, entrance: Entrance): void {
   ant.vy = 0;
   ant.targetVx = 0;
   ant.targetVy = 0;
+  // Reset transition cooldown
+  ant.timeSinceLayerTransition = 0;
 }
 
 /**
@@ -108,6 +113,11 @@ export function transitionToSurface(ant: Ant, entrance: Entrance): void {
  * @returns true if transition occurred, false otherwise
  */
 export function processLayerTransition(ant: Ant, entrance: Entrance): boolean {
+  // Check cooldown - prevent rapid toggling
+  if (ant.timeSinceLayerTransition < TRANSITION_COOLDOWN) {
+    return false;
+  }
+
   // Only process if near entrance
   if (!isNearEntrance(ant, entrance)) {
     return false;
