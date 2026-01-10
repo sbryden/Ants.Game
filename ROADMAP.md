@@ -143,13 +143,15 @@ Exit criteria:
 * ✅ Theme system is extensible for future options
 * ✅ 60 FPS performance maintained
 
-## Phase 6 — Emergent Worker Specialization
+## Phase 6 — Emergent Worker Specialization ✅ **COMPLETE**
 
 **Goal:** Ants develop distinct behavioral patterns through experience.
 
 **Core Principle:** All ants are workers, but they diverge over time through **traits**, not hard-coded classes. Specialization is **expressed**, not assigned.
 
 > Ants become better at what they do most.
+
+**Status:** ✅ **Complete** (January 2026)
 
 ### Trait-Based Model
 
@@ -200,11 +202,33 @@ Roles are **derived**, never stored.
 * Ants do not know what "type" they are
 * Rendering may tint ants **only for debug**
 
+### Completed Implementation
+
+- ✅ Trait system with 6 core traits:
+  - `taskAffinity` (gathering, nursing, digging, building)
+  - `movementSpeed`, `carryCapacity`, `energyEfficiency`
+  - `pheromoneSensitivity`, `wanderingRadius`
+- ✅ TraitEvolutionSystem for gradual trait changes
+- ✅ Traits integrated into all behaviors:
+  - Movement speed scaled by trait
+  - Pheromone sensitivity affects trail following
+  - Carry capacity affects food gathering
+  - Energy efficiency affects metabolism
+- ✅ Trait evolution based on ant actions:
+  - Foraging increases gathering affinity
+  - Carrying food increases carry capacity
+  - Following trails increases pheromone sensitivity
+  - Unused traits decay toward baseline
+- ✅ Role derivation system (labels derived from traits, not stored)
+- ✅ Debug visualization (press 'Y' for trait overlay)
+- ✅ Visual role tinting in debug mode
+- ✅ Trait bounds enforced (0.5-2.0 range)
+
 Exit criteria:
-* Ants visibly specialize over time
-* Behavior feels organic, not scripted
-* Colony efficiency improves naturally through specialization
-* System is observable and debuggable
+* ✅ Ants visibly specialize over time
+* ✅ Behavior feels organic, not scripted
+* ✅ Colony efficiency improves naturally through specialization
+* ✅ System is observable and debuggable
 
 ### Caste Notes (concise)
 
@@ -218,24 +242,171 @@ Exit criteria:
 * The system should allow ants to shift their effective specialization over time if colony needs change (e.g., temporary role drift or deliberate retraining). This is a "future feature" to keep Phase 6 focused and lightweight.
 * Deeper caste mechanics, lifecycle rules (e.g., queens/princesses spawning new castes), and caste-specific behaviors will be introduced in later phases when the simulation and pheromone systems are stable.
 
-## Phase 7 — Nursery / Reproduction
+## Phase 7 — Underground Colony System
 
-**Goal:** Colonies grow by breeding new ants.
+**Goal:** Implement SimAnt-style side-view underground layer with automatic expansion.
 
-* Egg/larva/pupa lifecycle stages
-* Queen ant produces eggs
-* Worker ants feed larvae (brood care behavior)
-* Pupae mature into adult ants (workers, soldiers, etc.)
+### Overview
+
+The simulation will now run on two layers:
+- **Surface (top-down view)** — existing foraging world
+- **Underground (side-view)** — ant farm-style cross-section showing tunnels, chambers, queen, eggs, larvae
+
+Player toggles between views with **'U' key**. Both simulations run continuously regardless of which view is active.
+
+### Core Mechanics
+
+**Dual-World System:**
+- Surface and underground share the same ants (ants have `currentLayer` property)
+- Single entrance connects the layers (ants transition through it)
+- Both layers update every frame, independent of which is being viewed
+- Camera switches between scenes, but simulation continues in both
+
+**Automatic Digging:**
+- Ants dig new tunnels based on colony needs (not player-controlled)
+- Digging decisions emerge from needs:
+  - Queen needs space → expand queen chamber
+  - Food storage full → dig storage chamber
+  - Egg count high → expand nursery
+  - Colony size growing → widen main tunnels
+- Digging behavior is a new ant state (DIGGING)
+- Tunnels have organic randomness (not perfect rectangles)
+- Dirt tiles become tunnel tiles when dug
+
+**Starting State:**
+- Single entrance from surface
+- Short main tunnel leading down and to the side
+- Small queen chamber at the end
+- Queen entity present, begins laying eggs immediately
+- 3-5 worker ants start in the chamber
+
+**Underground Features:**
+- Tile-based grid (TileType: DIRT, TUNNEL, CHAMBER, ENTRANCE)
+- Queen entity (stationary, lays eggs on cooldown)
+- Egg entities (placed in chamber, require care)
+- Larvae entities (eggs hatch after X time, need feeding)
+- Food storage visualization (carried food deposited underground)
+- Emergent chamber formation (ants naturally create distinct zones)
+
+**Layer Transitions:**
+- Ants can enter/exit through the entrance tile
+- Transition logic:
+  - Foraging ants exit to surface
+  - Returning ants enter underground
+  - Brood care ants stay underground
+  - Idle ants wander between layers
+- Entrance is a special tile on both layers (top-down: hole, side-view: tunnel opening)
+
+### Implementation Phases
+
+This phase is broken into sub-phases for clarity:
+
+**Phase 7A — Underground World Foundation**
+- Create `UndergroundWorld` class (parallel to `World`)
+- Implement tile grid (2D array of TileType)
+- Add `UndergroundScene` (side-view camera)
+- Create entrance entity (shared between layers)
+- Add `currentLayer` property to ants ('surface' | 'underground')
+
+**Phase 7B — Layer Transitions**
+- Implement entrance transition logic
+- Add behavior rules for when ants enter/exit
+- Update ant rendering to handle both layers
+- Ensure both simulations run continuously
+- Add 'U' key toggle between scenes
+
+**Phase 7C — Basic Digging**
+- Add DIGGING state to ant state machine
+- Implement digging behavior (select adjacent dirt tile, convert to tunnel)
+- Add tunnel expansion logic (widen existing paths)
+- Create organic randomness in tunnel shapes
+- Visual feedback for digging (animated dirt removal)
+
+**Phase 7D — Queen & Eggs**
+- Create Queen entity (stationary, high-priority care)
+- Implement egg-laying mechanic (cooldown-based)
+- Place eggs in chamber tiles
+- Add egg visualization (small white circles)
+- Queen requires food from workers
+
+**Phase 7E — Emergent Chambers**
+- Ants dig chambers when certain thresholds are met:
+  - Food storage needs → dig food chamber
+  - Egg count high → expand nursery
+  - Colony size → dig rest areas
+- Chamber identification (connected tunnel tiles exceeding size threshold)
+- Visual distinction (chambers slightly larger, different tint)
+
+**Phase 7F — Automatic Expansion Logic**
+- Colony need assessment system:
+  - Food surplus → trigger storage expansion
+  - Egg count / larvae count → trigger nursery expansion
+  - Traffic congestion → widen main tunnels
+  - Queen health low → prioritize queen chamber
+- Digging task assignment (idle ants become diggers when needed)
+- Prevent over-expansion (diminishing returns, energy costs)
+
+**Phase 7G — Polish & Integration**
+- Render underground elements (dirt, tunnels, chambers, eggs)
+- Add pheromone overlay for underground layer
+- Minimap shows both layers (toggle or split view)
+- Debug UI shows layer stats
+- Performance optimization for dual simulation
+
+### Technical Architecture
+
+Key new files:
+```
+/src/sim/UndergroundWorld.ts       — Tile grid and underground state
+/src/sim/Queen.ts                   — Queen entity
+/src/sim/Egg.ts                     — Egg entity
+/src/sim/TileType.ts                — Enum for tile types
+/src/scenes/UndergroundScene.ts     — Side-view scene
+/src/render/UndergroundRenderer.ts  — Tile and entity rendering
+/src/systems/DiggingSystem.ts       — Automatic digging logic
+/src/behaviors/diggingBehaviors.ts  — DIGGING state behavior
+```
+
+Updated files:
+```
+/src/sim/Ant.ts                     — Add currentLayer, DIGGING state
+/src/sim/World.ts                   — Add entrance reference
+/src/systems/SimulationSystem.ts    — Update both worlds
+/src/scenes/MainScene.ts            — Add 'U' key handler
+```
+
+### Exit Criteria
+* ✅ Underground side-view renders correctly
+* ✅ Ants transition between layers via entrance
+* ✅ Queen lays eggs in chamber
+* ✅ Ants dig tunnels automatically based on needs
+* ✅ Chambers emerge naturally (food storage, nursery)
+* ✅ Both layers simulate simultaneously
+* ✅ 'U' key toggles between views smoothly
+* ✅ Performance stable with dual simulation
+
+## Phase 8 — Full Brood Lifecycle
+
+**Goal:** Complete the ant reproduction cycle with larvae and pupae stages.
+
+* Larvae entities (hatched eggs, require feeding)
+* Worker feeding behavior (carry food to larvae)
+* Larvae growth stages (visual progression)
+* Pupae stage (mature larvae, dormant period)
+* Pupae → adult ant transition (workers, specialized castes)
 * Population growth dynamics
 * Energy cost of reproduction (colony needs surplus food)
+* Brood care specialization (some workers prioritize nursery tasks)
 
 Exit criteria:
-* Ants are born and age through stages
-* Brood care creates specialized behavior (some ants prioritize nursery)
+* Full egg → larva → pupa → ant lifecycle works
+* Brood care creates specialized worker behavior
 * Colony population grows if food surplus sufficient
 * Population stabilizes or declines if food deficit
+* Larvae visually grow over time
+* Pupae hatch into adults with appropriate castes
 
-## Phase 8 — Minimap & Spatial Awareness
+## Phase 9 — Minimap & Spatial Awareness
 
 **Goal:** Provide players with a spatial overview of the world and colony activity.
 
@@ -256,7 +427,7 @@ Exit criteria:
 * Minimap provides useful spatial awareness
 * Performance remains stable with minimap active
 
-## Phase 9 — Player Interaction (Indirect Control)
+## Phase 10 — Player Interaction (Indirect Control)
 
 **Goal:** Player influences the system without direct unit control.
 
@@ -273,20 +444,22 @@ Exit criteria:
 * Interactions reinforce simulation learning
 * Tools feel responsive and intuitive
 
-## Phase 10 — World Depth
+## Phase 11 — World Depth
 
 **Goal:** Add environmental complexity.
 
-* Above-ground vs underground layers
 * Fog of war / unexplored areas
 * Terrain types (soft soil, rock, impassable)
 * Environmental hazards
+* Multiple underground layers (deeper digging)
+* Resource veins (underground minerals, water)
 
 Exit criteria:
 * Exploration becomes meaningful
 * The map feels like a system, not a backdrop
+* Underground has depth and variety
 
-## Phase 11 — Other Colonies & Threats
+## Phase 12 — Other Colonies & Threats
 
 **Goal:** Introduce conflict and competition.
 
@@ -299,7 +472,7 @@ Exit criteria:
 * Emergent conflict arises naturally
 * No hard-scripted battles
 
-## Phase 12 — Systems & Scale
+## Phase 13 — Systems & Scale
 
 **Goal:** Stress-test the simulation.
 
@@ -312,7 +485,7 @@ Exit criteria:
 * Simulation remains stable under load
 * Performance issues are understood and controlled
 
-## Phase 13 — Persistence & Replayability
+## Phase 14 — Persistence & Replayability
 
 **Goal:** Make simulations meaningful over time.
 
@@ -325,7 +498,7 @@ Exit criteria:
 * Simulations can be revisited and compared
 * Player can experiment intentionally
 
-## Phase 14 — Polish (Only If It Serves Clarity)
+## Phase 15 — Polish (Only If It Serves Clarity)
 
 **Goal:** Improve readability, not flash.
 
