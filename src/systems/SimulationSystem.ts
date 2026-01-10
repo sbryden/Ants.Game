@@ -229,27 +229,27 @@ export class SimulationSystem {
           }
         } else {
           // No direct food detected - use pheromone guidance
-          const foragingPerception = perceiveEnvironment(
+          const perception = perceiveEnvironment(
             ant,
             this.world,
             this.pheromoneBehaviorConfig.sampleDistance
           );
 
           // Check for food pheromone gradient
-          const foragingFoodGradient = foragingPerception.pheromoneGradients.get(PheromoneType.FOOD);
+          const foodGradient = perception.pheromoneGradients.get(PheromoneType.FOOD);
           
-          if (foragingFoodGradient) {
+          if (foodGradient) {
             // Calculate direction to strongest food pheromone
-            const foragingGradientDirection = calculateGradientDirection(
-              foragingFoodGradient,
+            const gradientDirection = calculateGradientDirection(
+              foodGradient,
               PHEROMONE_BEHAVIOR_CONFIG.GRADIENT_THRESHOLD
             );
 
-            if (foragingGradientDirection !== null) {
+            if (gradientDirection !== null) {
               // Follow food pheromone trail
               followPheromone(
                 ant,
-                foragingGradientDirection,
+                gradientDirection,
                 movementConfig.speed,
                 this.pheromoneBehaviorConfig
               );
