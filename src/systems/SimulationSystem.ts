@@ -228,10 +228,44 @@ export class SimulationSystem {
             moveTowardsPoint(ant, food.x, food.y, movementConfig);
           }
         } else {
-          // No nearby food, random wander
-          if (ant.timeSinceDirectionChange >= movementConfig.changeDirectionInterval) {
-            applyRandomWander(ant, movementConfig);
-            ant.timeSinceDirectionChange = 0;
+          // No direct food detected - use pheromone guidance
+          const foragingPerception = perceiveEnvironment(
+            ant,
+            this.world,
+            this.pheromoneBehaviorConfig.sampleDistance
+          );
+
+          // Check for food pheromone gradient
+          const foragingFoodGradient = foragingPerception.pheromoneGradients.get(PheromoneType.FOOD);
+          
+          if (foragingFoodGradient) {
+            // Calculate direction to strongest food pheromone
+            const foragingGradientDirection = calculateGradientDirection(
+              foragingFoodGradient,
+              PHEROMONE_BEHAVIOR_CONFIG.GRADIENT_THRESHOLD
+            );
+
+            if (foragingGradientDirection !== null) {
+              // Follow food pheromone trail
+              followPheromone(
+                ant,
+                foragingGradientDirection,
+                movementConfig.speed,
+                this.pheromoneBehaviorConfig
+              );
+            } else {
+              // No clear gradient, random wander
+              if (ant.timeSinceDirectionChange >= movementConfig.changeDirectionInterval) {
+                applyRandomWander(ant, movementConfig);
+                ant.timeSinceDirectionChange = 0;
+              }
+            }
+          } else {
+            // No food pheromone detected, random wander
+            if (ant.timeSinceDirectionChange >= movementConfig.changeDirectionInterval) {
+              applyRandomWander(ant, movementConfig);
+              ant.timeSinceDirectionChange = 0;
+            }
           }
         }
         break;
