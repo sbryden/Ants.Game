@@ -57,7 +57,11 @@ export class UndergroundScene extends Phaser.Scene {
     // Set up 'U' key to toggle back to surface
     this.input.keyboard?.on('keydown-U', () => {
       this.scene.stop('UndergroundScene');
-      this.scene.resume('MainScene');
+      // Make MainScene visible again (don't use resume since we never paused it)
+      const mainScene = this.scene.get('MainScene') as Phaser.Scene;
+      if (mainScene && mainScene.cameras.main) {
+        mainScene.cameras.main.setVisible(true);
+      }
     });
   }
 

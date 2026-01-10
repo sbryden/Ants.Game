@@ -137,7 +137,9 @@ export class MainScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-U', () => {
       const undergroundWorld = this.simulationSystem.getUndergroundWorld();
       if (undergroundWorld) {
-        this.scene.pause('MainScene');
+        // Don't pause MainScene - we need simulation to keep running
+        // Just make it invisible by moving camera off-screen or setting alpha
+        this.cameras.main.setVisible(false);
         this.scene.launch('UndergroundScene', { undergroundWorld, world: this.world });
       }
     });
