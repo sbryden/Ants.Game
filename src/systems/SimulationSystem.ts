@@ -366,8 +366,17 @@ export class SimulationSystem {
         break;
 
       case AntState.RETURNING:
-        // Check if ant has reached home
-        if (isNearPoint(ant, colony.x, colony.y, COLONY_CONFIG.HOME_ARRIVAL_DISTANCE)) {
+        // Underground ants are already home - deposit and rest immediately
+        if (ant.currentLayer === 'underground') {
+          if (ant.carriedFood > 0) {
+            colony.addFood(ant.carriedFood);
+            ant.carriedFood = 0;
+          }
+          changeState(ant, AntState.IDLE);
+          this.handleEating(ant, colony, deltaTime);
+        } 
+        // Surface ants: check if reached home entrance
+        else if (isNearPoint(ant, colony.x, colony.y, COLONY_CONFIG.HOME_ARRIVAL_DISTANCE)) {
           // Deposit food to colony if carrying any
           if (ant.carriedFood > 0) {
             colony.addFood(ant.carriedFood);
