@@ -33,6 +33,12 @@ Ants.Game is a simulation-first game that prioritizes behavioral complexity and 
 - Three visual themes (Default, High Contrast, Black & White)
 - Living background simulation
 
+✅ **Worker Specialization**
+- Trait-based ant specialization (6 core traits)
+- Ants become better at tasks they perform frequently
+- Organic behavioral divergence without hard-coded roles
+- Debug visualization (press 'Y' to view traits)
+
 ## Technology Stack
 
 - **Phaser 3** (v3.80+) — Game engine
@@ -42,7 +48,13 @@ Ants.Game is a simulation-first game that prioritizes behavioral complexity and 
 
 ## Project Status
 
-🚧 **Phase 5 Complete — Next: Worker Specialization**
+🚧 **Phase 6 Complete — Worker Specialization Live!**
+
+Ants now develop specialized behavioral patterns through experience. Watch as individual ants become better at gathering, nursing, or other tasks based on what they do most.
+
+🔜 **Next Up: Phase 7 — Underground Colony System**
+
+Implementing SimAnt-style side-view underground layer with automatic digging, queen chamber, and emergent tunnel networks.
 
 See [ROADMAP.md](ROADMAP.md) for the full development plan.
 
