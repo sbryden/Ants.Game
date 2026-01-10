@@ -191,7 +191,10 @@ export class SimulationSystem {
         // Only process surface ants for entrance proximity
         // Underground ants will be checked separately in underground update
         if (ant.currentLayer === 'surface') {
-          processLayerTransition(ant, this.world.entrance);
+          const colony = this.world.getColony(ant.colonyId);
+          if (colony) {
+            processLayerTransition(ant, this.world.entrance, colony);
+          }
         }
       }
     }

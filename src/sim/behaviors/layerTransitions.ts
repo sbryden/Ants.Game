@@ -1,5 +1,7 @@
 import { Ant } from '../Ant';
 import { Entrance } from '../Entrance';
+import { AntState } from '../AntState';
+import { Colony } from '../Colony';
 
 /**
  * Layer transition logic for ants moving between surface and underground.
@@ -75,11 +77,21 @@ export function shouldExitToSurface(ant: Ant): boolean {
 /**
  * Transition an ant from surface to underground.
  * Updates layer property and positions ant at underground entrance.
+ * If ant is RETURNING with food, deposit it and transition to IDLE.
  */
-export function transitionToUnderground(ant: Ant, entrance: Entrance): void {
+export function transitionToUnderground(ant: Ant, entrance: Entrance, colony: Colony): void {
   ant.currentLayer = 'underground';
   ant.x = entrance.undergroundX;
   ant.y = entrance.undergroundY;
+  
+  // If ant is returning with food, they've reached home - deposit and rest
+  if (ant.state === AntState.RETURNING && ant.carriedFood > 0) {
+    colony.addFood(ant.carriedFood);
+    ant.carriedFood = 0;
+    ant.state = AntState.IDLE;
+    ant.timeInCurrentState = 0;
+  }
+  
   // Reset velocity (ant needs to reorient in new layer)
   ant.vx = 0;
   ant.vy = 0;
@@ -112,7 +124,7 @@ export function transitionToSurface(ant: Ant, entrance: Entrance): void {
  * 
  * @returns true if transition occurred, false otherwise
  */
-export function processLayerTransition(ant: Ant, entrance: Entrance): boolean {
+export function processLayerTransition(ant: Ant, entrance: Entrance, colony: Colony): boolean {
   // Check cooldown - prevent rapid toggling
   if (ant.timeSinceLayerTransition < TRANSITION_COOLDOWN) {
     return false;
@@ -125,7 +137,7 @@ export function processLayerTransition(ant: Ant, entrance: Entrance): boolean {
 
   // Check current layer and transition logic
   if (ant.currentLayer === 'surface' && shouldEnterUnderground(ant)) {
-    transitionToUnderground(ant, entrance);
+    transitionToUnderground(ant, entrance, colony);
     return true;
   } else if (ant.currentLayer === 'underground' && shouldExitToSurface(ant)) {
     transitionToSurface(ant, entrance);
