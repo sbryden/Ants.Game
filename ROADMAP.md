@@ -315,12 +315,12 @@ This phase is broken into sub-phases for clarity:
 - ✅ Ensure both simulations run continuously
 - ✅ Add 'U' key toggle between scenes
 
-**Phase 7C — Basic Digging**
-- Add DIGGING state to ant state machine
-- Implement digging behavior (select adjacent dirt tile, convert to tunnel)
-- Add tunnel expansion logic (widen existing paths)
-- Create organic randomness in tunnel shapes
-- Visual feedback for digging (animated dirt removal)
+**Phase 7C — Basic Digging** ✅ **COMPLETE**
+- ✅ Add DIGGING state to ant state machine
+- ✅ Implement digging behavior (select adjacent dirt tile, convert to tunnel)
+- ✅ Add tunnel expansion logic (widen existing paths)
+- ✅ Create organic randomness in tunnel shapes
+- ✅ Visual feedback for digging (ants stationary while digging)
 
 **Phase 7D — Queen & Eggs**
 - Create Queen entity (stationary, high-priority care)

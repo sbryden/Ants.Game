@@ -9,6 +9,7 @@ export enum AntState {
   WANDERING = 'WANDERING',  // Random exploration
   FORAGING = 'FORAGING',    // Searching for food (Phase 4 will use this fully)
   RETURNING = 'RETURNING',  // Returning to colony
+  DIGGING = 'DIGGING',      // Excavating tunnels underground
   
   // Extension points for future states (Phase 2+):
   // CARRYING = 'CARRYING',      // Carrying food or resources

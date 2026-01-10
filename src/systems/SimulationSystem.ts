@@ -7,6 +7,12 @@ import { PheromoneType } from '../sim/PheromoneType';
 import { createEntrance } from '../sim/Entrance';
 import { processLayerTransition } from '../sim/behaviors/layerTransitions';
 import {
+  shouldStartDigging,
+  findDiggableTile,
+  startDigging,
+  updateDigging,
+} from '../sim/behaviors/diggingBehaviors';
+import {
   applyRandomWander,
   updatePosition,
   constrainToWorld,
@@ -215,6 +221,21 @@ export class SimulationSystem {
     this.applyEnergyConsumption(ant, deltaTime);
     if (ant.energy <= 0) {
       return true;
+    }
+
+    // Handle digging state (underground only)
+    if (ant.state === AntState.DIGGING && this.undergroundWorld) {
+      updateDigging(ant, deltaTime, this.undergroundWorld);
+      return false; // Continue simulation
+    }
+
+    // Check if idle underground ant should start digging
+    if (shouldStartDigging(ant) && this.undergroundWorld) {
+      const targetTile = findDiggableTile(ant, this.undergroundWorld);
+      if (targetTile) {
+        startDigging(ant, targetTile, this.undergroundWorld);
+        return false; // Ant now digging
+      }
     }
 
     // Evaluate state transitions (FSM)

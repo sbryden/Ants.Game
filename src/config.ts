@@ -84,6 +84,7 @@ export const ENERGY_CONFIG = {
     WANDERING: 1.0,
     FORAGING: 1.5,
     RETURNING: 1.0,
+    DIGGING: 2.0, // Digging is energy-intensive
   },
 
   /**

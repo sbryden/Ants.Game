@@ -87,6 +87,7 @@ export class AntRenderer {
         [AntState.WANDERING]: 'wandering',
         [AntState.FORAGING]: 'foraging',
         [AntState.RETURNING]: 'returning',
+        [AntState.DIGGING]: 'idle', // Use idle color for digging (brown/earth tone)
       };
       const colorKey = stateColorMap[ant.state] || 'wandering';
       bodyColor = this.theme.antColors[colorKey];
