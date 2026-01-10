@@ -29,6 +29,7 @@ export class MainScene extends Phaser.Scene {
   private debugText!: Phaser.GameObjects.Text;
   private metricsText!: Phaser.GameObjects.Text;
   private pheromoneOverlayText!: Phaser.GameObjects.Text;
+  private legendText!: Phaser.GameObjects.Text;
   private currentTheme!: Theme;
   private traitOverlayEnabled: boolean = false;
 
@@ -80,9 +81,10 @@ export class MainScene extends Phaser.Scene {
       })
       .setDepth(SCENE_CONFIG.UI_DEPTH);
 
-    // State color legend
-    this.add
-      .text(SCENE_CONFIG.LEGEND.X, SCENE_CONFIG.LEGEND.Y, SCENE_CONFIG.LEGEND.TEXT, {
+    // State color legend (dynamic based on theme)
+    const legendText = this.generateLegendText();
+    this.legendText = this.add
+      .text(SCENE_CONFIG.LEGEND.X, SCENE_CONFIG.LEGEND.Y, legendText, {
         fontSize: SCENE_CONFIG.LEGEND.FONT_SIZE,
         color: this.currentTheme.uiColors.textDim,
       })
@@ -161,7 +163,7 @@ export class MainScene extends Phaser.Scene {
     this.colonyRenderer.render(this.world.getColonies());
 
     // Render food sources
-    this.foodSourceRenderer.render(this.world.foodSource);
+    this.foodSourceRenderer.render(this.world.foodSources);
 
     // Render ants on top
     const ants = this.world.getAllAnts();
@@ -209,6 +211,47 @@ export class MainScene extends Phaser.Scene {
     if (pointer.middleButtonDown()) {
       this.world.pheromoneGrid.deposit(pointer.x, pointer.y, PheromoneType.DANGER, 0.5);
     }
+  }
+
+  /**
+   * Generate color legend text based on current theme
+   */
+  private generateLegendText(): string {
+    const colors = this.currentTheme.antColors;
+    
+    // Helper to get color name from hex value
+    const getColorName = (hex: number): string => {
+      // Convert to RGB for color identification
+      const r = (hex >> 16) & 0xff;
+      const g = (hex >> 8) & 0xff;
+      const b = hex & 0xff;
+      
+      // Simple color naming based on dominant channel
+      if (r < 80 && g < 80 && b < 80) return 'Dark Gray';
+      if (r > 200 && g > 200 && b > 200) return 'White';
+      if (Math.abs(r - g) < 30 && Math.abs(g - b) < 30) {
+        if (r < 100) return 'Dark Gray';
+        if (r < 150) return 'Gray';
+        return 'Light Gray';
+      }
+      if (r > g && r > b) {
+        if (g > 100 && b < 100) return 'Orange';
+        if (b > 100) return 'Pink';
+        return 'Red';
+      }
+      if (g > r && g > b) return 'Green';
+      if (b > r && b > g) return 'Blue';
+      if (r > 150 && g > 100 && b < 100) return 'Brown';
+      if (g > 150 && b > 150) return 'Cyan';
+      return 'Gray';
+    };
+    
+    const idleColor = getColorName(colors.idle);
+    const wanderingColor = getColorName(colors.wandering);
+    const foragingColor = getColorName(colors.foraging);
+    const returningColor = getColorName(colors.returning);
+    
+    return `Colors: ${idleColor}=Idle, ${wanderingColor}=Wandering, ${foragingColor}=Foraging, ${returningColor}=Returning`;
   }
 
   /**

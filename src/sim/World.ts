@@ -16,7 +16,7 @@ export class World {
   public colonies: Colony[];
   public obstacles: Obstacle[];
   public pheromoneGrid: PheromoneGrid;
-  public foodSource: FoodSource | null = null;
+  public foodSources: FoodSource[] = [];
   private nextAntId: number;
   private nextFoodSourceId: number;
   private cachedAnts: Ant[];
@@ -156,7 +156,7 @@ export class World {
           FOOD_CONFIG.INITIAL_FOOD_AMOUNT,
           sourceRadius
         );
-        this.foodSource = foodSource;
+        this.foodSources.push(foodSource);
         return foodSource;
       }
     }
@@ -171,7 +171,7 @@ export class World {
       FOOD_CONFIG.INITIAL_FOOD_AMOUNT,
       sourceRadius
     );
-    this.foodSource = fallbackFood;
+    this.foodSources.push(fallbackFood);
     return fallbackFood;
   }
 
@@ -207,18 +207,20 @@ export class World {
 
   /**
    * Get food sources near a location
-   * Currently supports only single food source, but returns array for future extensibility
    */
   public getFoodSourcesNear(x: number, y: number, range: number): FoodSource[] {
-    if (!this.foodSource) return [];
+    const nearby: FoodSource[] = [];
 
-    const dx = this.foodSource.x - x;
-    const dy = this.foodSource.y - y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
+    for (const foodSource of this.foodSources) {
+      const dx = foodSource.x - x;
+      const dy = foodSource.y - y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
 
-    if (distance <= range) {
-      return [this.foodSource];
+      if (distance <= range) {
+        nearby.push(foodSource);
+      }
     }
-    return [];
+
+    return nearby;
   }
 }

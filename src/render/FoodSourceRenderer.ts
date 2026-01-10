@@ -20,28 +20,30 @@ export class FoodSourceRenderer {
    * Render all food sources in the world.
    * Clears and redraws each frame based on current food amounts.
    */
-  render(foodSource: FoodSource | null): void {
+  render(foodSources: FoodSource[]): void {
     this.graphics.clear();
 
-    if (!foodSource) {
+    if (!foodSources || foodSources.length === 0) {
       return;
     }
 
-    // Calculate opacity based on remaining food (0 to 1)
-    const foodPercentage = Math.min(foodSource.foodAmount / FOOD_CONFIG.INITIAL_FOOD_AMOUNT, 1.0);
-    const alpha = Math.max(0.3, foodPercentage); // Never fully transparent
+    for (const foodSource of foodSources) {
+      // Calculate opacity based on remaining food (0 to 1)
+      const foodPercentage = Math.min(foodSource.foodAmount / FOOD_CONFIG.INITIAL_FOOD_AMOUNT, 1.0);
+      const alpha = Math.max(0.5, foodPercentage); // Minimum 50% opacity for visibility
 
-    // Draw border circle (slightly larger) - use theme colors
-    this.graphics.lineStyle(2, this.theme.foodColors.border, alpha);
-    this.graphics.strokeCircleShape(
-      new Phaser.Geom.Circle(foodSource.x, foodSource.y, foodSource.radius + 1)
-    );
+      // Draw border circle (slightly larger) - use theme colors
+      this.graphics.lineStyle(3, this.theme.foodColors.border, alpha);
+      this.graphics.strokeCircleShape(
+        new Phaser.Geom.Circle(foodSource.x, foodSource.y, foodSource.radius + 1)
+      );
 
-    // Draw filled circle
-    this.graphics.fillStyle(this.theme.foodColors.food, alpha);
-    this.graphics.fillCircleShape(
-      new Phaser.Geom.Circle(foodSource.x, foodSource.y, foodSource.radius)
-    );
+      // Draw filled circle
+      this.graphics.fillStyle(this.theme.foodColors.food, alpha);
+      this.graphics.fillCircleShape(
+        new Phaser.Geom.Circle(foodSource.x, foodSource.y, foodSource.radius)
+      );
+    }
   }
 
   /**
