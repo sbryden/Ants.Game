@@ -10,7 +10,7 @@ import { AntState } from '../sim/AntState';
 import { Ant } from '../sim/Ant';
 import { Obstacle } from '../sim/Obstacle';
 import { PheromoneType } from '../sim/PheromoneType';
-import { SCENE_CONFIG, WORLD_CONFIG, THEME_CONFIG } from '../config';
+import { SCENE_CONFIG, WORLD_CONFIG, THEME_CONFIG, CAMERA_CONFIG } from '../config';
 import { GameConfig } from '../types/GameConfig';
 import { Theme } from '../types/Theme';
 
@@ -32,6 +32,12 @@ export class MainScene extends Phaser.Scene {
   private legendText!: Phaser.GameObjects.Text;
   private currentTheme!: Theme;
   private traitOverlayEnabled: boolean = false;
+  private panKeys!: {
+    up: Phaser.Input.Keyboard.Key;
+    down: Phaser.Input.Keyboard.Key;
+    left: Phaser.Input.Keyboard.Key;
+    right: Phaser.Input.Keyboard.Key;
+  };
 
   constructor() {
     super({ key: 'MainScene' });
@@ -47,9 +53,9 @@ export class MainScene extends Phaser.Scene {
     // Set up camera and background with theme color
     this.cameras.main.setBackgroundColor(this.currentTheme.backgroundColor);
 
-    // Initialize simulation with configured ant count
-    const worldWidth = this.scale.width;
-    const worldHeight = this.scale.height;
+    // Initialize simulation with configured ant count using the expanded world dimensions
+    const worldWidth = WORLD_CONFIG.WORLD_WIDTH;
+    const worldHeight = WORLD_CONFIG.WORLD_HEIGHT;
     this.world = new World(worldWidth, worldHeight);
     this.simulationSystem = new SimulationSystem(this.world);
     this.simulationSystem.initializeWorld(antCount);
@@ -64,41 +70,66 @@ export class MainScene extends Phaser.Scene {
     this.pheromoneRenderer = new PheromoneRenderer(this, this.currentTheme);
     this.foodSourceRenderer = new FoodSourceRenderer(this, this.currentTheme);
 
-    // Display title with theme colors
+    // Configure camera: bounds cover full world, start centered on colony (world center)
+    this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
+    this.cameras.main.centerOn(worldWidth / 2, worldHeight / 2);
+
+    // Set up WASD pan keys
+    const keyboard = this.input.keyboard!;
+    this.panKeys = {
+      up: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+      down: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+      left: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+      right: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
+    };
+
+    // Mouse wheel zoom: zoom toward the pointer position
+    this.input.on('wheel', (_pointer: Phaser.Input.Pointer, _objs: unknown, _dx: number, deltaY: number) => {
+      const cam = this.cameras.main;
+      const factor = deltaY > 0 ? (1 - CAMERA_CONFIG.ZOOM_STEP) : (1 + CAMERA_CONFIG.ZOOM_STEP);
+      const newZoom = Phaser.Math.Clamp(cam.zoom * factor, CAMERA_CONFIG.MIN_ZOOM, CAMERA_CONFIG.MAX_ZOOM);
+      cam.setZoom(newZoom);
+    });
+
+    // Display title with theme colors (fixed to screen)
     this.add
       .text(SCENE_CONFIG.TITLE.X, SCENE_CONFIG.TITLE.Y, SCENE_CONFIG.TITLE.TEXT, {
         fontSize: SCENE_CONFIG.TITLE.FONT_SIZE,
         color: this.currentTheme.uiColors.title,
         fontStyle: 'bold',
       })
-      .setDepth(SCENE_CONFIG.UI_DEPTH);
+      .setDepth(SCENE_CONFIG.UI_DEPTH)
+      .setScrollFactor(0);
 
-    // Display instructions
+    // Display instructions (fixed to screen)
     this.add
       .text(SCENE_CONFIG.INSTRUCTIONS.X, SCENE_CONFIG.INSTRUCTIONS.Y, SCENE_CONFIG.INSTRUCTIONS.TEXT, {
         fontSize: SCENE_CONFIG.INSTRUCTIONS.FONT_SIZE,
         color: this.currentTheme.uiColors.text,
       })
-      .setDepth(SCENE_CONFIG.UI_DEPTH);
+      .setDepth(SCENE_CONFIG.UI_DEPTH)
+      .setScrollFactor(0);
 
-    // State color legend (dynamic based on theme)
+    // State color legend (dynamic based on theme, fixed to screen)
     const legendText = this.generateLegendText();
     this.legendText = this.add
       .text(SCENE_CONFIG.LEGEND.X, SCENE_CONFIG.LEGEND.Y, legendText, {
         fontSize: SCENE_CONFIG.LEGEND.FONT_SIZE,
         color: this.currentTheme.uiColors.textDim,
       })
-      .setDepth(SCENE_CONFIG.UI_DEPTH);
+      .setDepth(SCENE_CONFIG.UI_DEPTH)
+      .setScrollFactor(0);
 
-    // Pheromone overlay indicator
+    // Pheromone overlay indicator (fixed to screen)
     this.pheromoneOverlayText = this.add
       .text(SCENE_CONFIG.LEGEND.X, SCENE_CONFIG.LEGEND.Y + 20, 'Press P to toggle pheromone overlay (OFF) | Press Y to toggle trait visualization (OFF)', {
         fontSize: SCENE_CONFIG.LEGEND.FONT_SIZE,
         color: this.currentTheme.uiColors.textDim,
       })
-      .setDepth(SCENE_CONFIG.UI_DEPTH);
+      .setDepth(SCENE_CONFIG.UI_DEPTH)
+      .setScrollFactor(0);
 
-    // Debug: State distribution counter
+    // Debug: State distribution counter (fixed to screen)
     this.debugText = this.add
       .text(SCENE_CONFIG.DEBUG.X, this.scale.height - SCENE_CONFIG.DEBUG.Y_OFFSET_FROM_BOTTOM, '', {
         fontSize: SCENE_CONFIG.DEBUG.FONT_SIZE,
@@ -106,9 +137,10 @@ export class MainScene extends Phaser.Scene {
         backgroundColor: SCENE_CONFIG.DEBUG.BACKGROUND_COLOR,
         padding: SCENE_CONFIG.DEBUG.PADDING,
       })
-      .setDepth(SCENE_CONFIG.UI_DEPTH);
+      .setDepth(SCENE_CONFIG.UI_DEPTH)
+      .setScrollFactor(0);
 
-    // Colony metrics display
+    // Colony metrics display (fixed to screen)
     this.metricsText = this.add
       .text(SCENE_CONFIG.DEBUG.X, this.scale.height - SCENE_CONFIG.DEBUG.Y_OFFSET_FROM_BOTTOM - 30, '', {
         fontSize: SCENE_CONFIG.DEBUG.FONT_SIZE,
@@ -116,7 +148,8 @@ export class MainScene extends Phaser.Scene {
         backgroundColor: SCENE_CONFIG.DEBUG.BACKGROUND_COLOR,
         padding: SCENE_CONFIG.DEBUG.PADDING,
       })
-      .setDepth(SCENE_CONFIG.UI_DEPTH);
+      .setDepth(SCENE_CONFIG.UI_DEPTH)
+      .setScrollFactor(0);
 
     // Set up keyboard input for pheromone overlay toggle
     this.input.keyboard?.on('keydown-P', () => {
@@ -147,6 +180,16 @@ export class MainScene extends Phaser.Scene {
   update(_time: number, delta: number): void {
     // Convert delta from milliseconds to seconds
     const deltaTime = delta / 1000;
+
+    // Camera panning with WASD
+    // Dividing by cam.zoom keeps perceived movement speed consistent:
+    // zoomed out (small zoom) → more world pixels per frame to feel the same speed.
+    const cam = this.cameras.main;
+    const panSpeed = (CAMERA_CONFIG.PAN_SPEED / cam.zoom) * deltaTime;
+    if (this.panKeys.up.isDown)    cam.scrollY -= panSpeed;
+    if (this.panKeys.down.isDown)  cam.scrollY += panSpeed;
+    if (this.panKeys.left.isDown)  cam.scrollX -= panSpeed;
+    if (this.panKeys.right.isDown) cam.scrollX += panSpeed;
 
     // Update simulation (includes pheromone decay)
     this.simulationSystem.update(deltaTime);
@@ -201,15 +244,15 @@ export class MainScene extends Phaser.Scene {
     const pointer = this.input.activePointer;
     
     if (pointer.leftButtonDown()) {
-      this.world.pheromoneGrid.deposit(pointer.x, pointer.y, PheromoneType.FOOD, 0.5);
+      this.world.pheromoneGrid.deposit(pointer.worldX, pointer.worldY, PheromoneType.FOOD, 0.5);
     }
     
     if (pointer.rightButtonDown()) {
-      this.world.pheromoneGrid.deposit(pointer.x, pointer.y, PheromoneType.NEST, 0.5);
+      this.world.pheromoneGrid.deposit(pointer.worldX, pointer.worldY, PheromoneType.NEST, 0.5);
     }
     
     if (pointer.middleButtonDown()) {
-      this.world.pheromoneGrid.deposit(pointer.x, pointer.y, PheromoneType.DANGER, 0.5);
+      this.world.pheromoneGrid.deposit(pointer.worldX, pointer.worldY, PheromoneType.DANGER, 0.5);
     }
   }
 
@@ -259,8 +302,8 @@ export class MainScene extends Phaser.Scene {
    * Creates visible patterns to test the pheromone system
    */
   private depositTestPheromones(): void {
-    const centerX = this.scale.width / 2;
-    const centerY = this.scale.height / 2;
+    const centerX = this.world.width / 2;
+    const centerY = this.world.height / 2;
 
     // Deposit a horizontal line of FOOD pheromones (red)
     for (let i = 0; i < 150; i++) {
@@ -334,26 +377,27 @@ export class MainScene extends Phaser.Scene {
 
   /**
    * Add test obstacles to the world for MVP testing.
-   * Hardcoded positions for now - can be made configurable later.
+   * Positions are relative to the colony (world center) so they remain
+   * nearby regardless of world size.
    */
   private addTestObstacles(): void {
-    const centerX = this.scale.width / 2;
-    const centerY = this.scale.height / 2;
+    const cx = this.world.width / 2;
+    const cy = this.world.height / 2;
 
     // Top-left obstacle
-    this.world.addObstacle(new Obstacle(centerX / 2, centerY / 2, 35));
+    this.world.addObstacle(new Obstacle(cx - 256, cy - 192, 35));
 
     // Top-right obstacle
-    this.world.addObstacle(new Obstacle(centerX * 1.5, centerY / 2, 30));
+    this.world.addObstacle(new Obstacle(cx + 256, cy - 192, 30));
 
     // Bottom-left obstacle
-    this.world.addObstacle(new Obstacle(centerX / 2, centerY * 1.5, 40));
+    this.world.addObstacle(new Obstacle(cx - 256, cy + 192, 40));
 
     // Bottom-right obstacle
-    this.world.addObstacle(new Obstacle(centerX * 1.5, centerY * 1.5, 45));
+    this.world.addObstacle(new Obstacle(cx + 256, cy + 192, 45));
 
     // Left-side obstacle
-    this.world.addObstacle(new Obstacle(150, centerY, 25));
+    this.world.addObstacle(new Obstacle(cx - 362, cy, 25));
   }
 
   /**

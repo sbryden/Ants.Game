@@ -39,6 +39,18 @@ export const WORLD_CONFIG = {
    * Affects initial colony population
    */
   INITIAL_ANT_COUNT: 40,
+
+  /**
+   * World width in pixels (100x canvas width for large exploration space)
+   * Zoom and pan allow navigation of the full world
+   */
+  WORLD_WIDTH: 102400,
+
+  /**
+   * World height in pixels (100x canvas height for large exploration space)
+   * Zoom and pan allow navigation of the full world
+   */
+  WORLD_HEIGHT: 76800,
 } as const;
 
 /**
@@ -339,7 +351,7 @@ export const SCENE_CONFIG = {
     Y: 56,
     FONT_SIZE: '16px',
     COLOR: '#cccccc',
-    TEXT: 'Watch the ants wander and return home...',
+    TEXT: 'Watch the ants wander and return home... | Scroll to zoom | WASD to pan',
   },
 
   /**
@@ -372,15 +384,45 @@ export const SCENE_CONFIG = {
 } as const;
 
 /**
+ * Camera configuration
+ * Controls zoom and pan behavior for navigating the large world
+ */
+export const CAMERA_CONFIG = {
+  /**
+   * Minimum zoom level (most zoomed out)
+   * Derived from: canvas_width / WORLD_WIDTH = 1024 / 102400 ≈ 0.01
+   * At this value the full 100x world fits within the viewport
+   */
+  MIN_ZOOM: 0.01,
+
+  /**
+   * Maximum zoom level (most zoomed in)
+   */
+  MAX_ZOOM: 5.0,
+
+  /**
+   * Zoom step multiplier applied per scroll tick
+   * 0.15 = 15% zoom change per wheel notch
+   */
+  ZOOM_STEP: 0.15,
+
+  /**
+   * Camera pan speed in world pixels per second
+   */
+  PAN_SPEED: 1000,
+} as const;
+
+/**
  * Pheromone system configuration
  * Controls pheromone behavior, decay, and grid properties
  */
 export const PHEROMONE_CONFIG = {
   /**
    * Grid cell size in pixels
-   * 1 = one pheromone unit per pixel (highest resolution)
+   * Scaled to 100 to match the 100x world expansion, keeping the grid
+   * resolution proportional (same number of cells as the original 1px grid).
    */
-  GRID_CELL_SIZE: 1,
+  GRID_CELL_SIZE: 100,
 
   /**
    * Decay rate per second for Food pheromone (0-1)
@@ -491,11 +533,11 @@ export const PHEROMONE_CONFIG = {
 export const PHEROMONE_BEHAVIOR_CONFIG = {
   /**
    * Distance in pixels to sample pheromones in each of 8 directions
+   * Scaled to 8000 (100x original) to match the 100x world expansion so
+   * ants can still detect pheromone gradients across the larger cell grid.
    * Larger = ants sense further but less precisely (requires more computation)
-   * Smaller = ants only sense nearby pheromones (more localized)
-   * Increased to 80 to help wandering ants detect trails from further away
    */
-  SAMPLE_DISTANCE: 80,
+  SAMPLE_DISTANCE: 8000,
 
   /**
    * Strength of pheromone influence on foraging ant movement (0-1)
