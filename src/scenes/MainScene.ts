@@ -32,12 +32,13 @@ export class MainScene extends Phaser.Scene {
   private legendText!: Phaser.GameObjects.Text;
   private currentTheme!: Theme;
   private traitOverlayEnabled: boolean = false;
-  private panKeys!: {
+  private panKeys?: {
     up: Phaser.Input.Keyboard.Key;
     down: Phaser.Input.Keyboard.Key;
     left: Phaser.Input.Keyboard.Key;
     right: Phaser.Input.Keyboard.Key;
   };
+  private wheelHandler?: (pointer: Phaser.Input.Pointer, _objs: unknown, _dx: number, deltaY: number) => void;
 
   constructor() {
     super({ key: 'MainScene' });
@@ -74,22 +75,31 @@ export class MainScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
     this.cameras.main.centerOn(worldWidth / 2, worldHeight / 2);
 
-    // Set up WASD pan keys
-    const keyboard = this.input.keyboard!;
-    this.panKeys = {
-      up: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
-      down: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
-      left: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
-      right: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
-    };
+    // Set up WASD pan keys (only when keyboard plugin is available)
+    if (this.input.keyboard) {
+      const keyboard = this.input.keyboard;
+      this.panKeys = {
+        up: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+        down: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+        left: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+        right: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
+      };
+    }
 
-    // Mouse wheel zoom: zoom toward the pointer position
-    this.input.on('wheel', (_pointer: Phaser.Input.Pointer, _objs: unknown, _dx: number, deltaY: number) => {
+    // Mouse wheel zoom: adjust zoom and keep the world point under the pointer fixed
+    this.wheelHandler = (pointer: Phaser.Input.Pointer, _objs: unknown, _dx: number, deltaY: number): void => {
       const cam = this.cameras.main;
+      // World position under the pointer before zoom
+      const worldPointBefore = cam.getWorldPoint(pointer.x, pointer.y);
       const factor = deltaY > 0 ? (1 - CAMERA_CONFIG.ZOOM_STEP) : (1 + CAMERA_CONFIG.ZOOM_STEP);
       const newZoom = Phaser.Math.Clamp(cam.zoom * factor, CAMERA_CONFIG.MIN_ZOOM, CAMERA_CONFIG.MAX_ZOOM);
       cam.setZoom(newZoom);
-    });
+      // Adjust scroll so the same world point remains under the pointer
+      const worldPointAfter = cam.getWorldPoint(pointer.x, pointer.y);
+      cam.scrollX += worldPointBefore.x - worldPointAfter.x;
+      cam.scrollY += worldPointBefore.y - worldPointAfter.y;
+    };
+    this.input.on('wheel', this.wheelHandler);
 
     // Display title with theme colors (fixed to screen)
     this.add
@@ -168,13 +178,13 @@ export class MainScene extends Phaser.Scene {
       this.depositTestPheromones();
     });
 
-    // Zoom keys: '-' zooms out, '=' zooms in
+    // Zoom keys: '-' zooms out, '=' (keyCode 187, named PLUS in Phaser) zooms in
     this.input.keyboard?.on('keydown-MINUS', () => {
       const cam = this.cameras.main;
       const newZoom = Phaser.Math.Clamp(cam.zoom * (1 - CAMERA_CONFIG.ZOOM_STEP), CAMERA_CONFIG.MIN_ZOOM, CAMERA_CONFIG.MAX_ZOOM);
       cam.setZoom(newZoom);
     });
-    this.input.keyboard?.on('keydown-EQUALS', () => {
+    this.input.keyboard?.on('keydown-PLUS', () => {
       const cam = this.cameras.main;
       const newZoom = Phaser.Math.Clamp(cam.zoom * (1 + CAMERA_CONFIG.ZOOM_STEP), CAMERA_CONFIG.MIN_ZOOM, CAMERA_CONFIG.MAX_ZOOM);
       cam.setZoom(newZoom);
@@ -197,11 +207,13 @@ export class MainScene extends Phaser.Scene {
     // Dividing by cam.zoom keeps perceived movement speed consistent:
     // zoomed out (small zoom) → more world pixels per frame to feel the same speed.
     const cam = this.cameras.main;
-    const panSpeed = (CAMERA_CONFIG.PAN_SPEED / cam.zoom) * deltaTime;
-    if (this.panKeys.up.isDown)    cam.scrollY -= panSpeed;
-    if (this.panKeys.down.isDown)  cam.scrollY += panSpeed;
-    if (this.panKeys.left.isDown)  cam.scrollX -= panSpeed;
-    if (this.panKeys.right.isDown) cam.scrollX += panSpeed;
+    if (this.panKeys) {
+      const panSpeed = (CAMERA_CONFIG.PAN_SPEED / cam.zoom) * deltaTime;
+      if (this.panKeys.up.isDown)    cam.scrollY -= panSpeed;
+      if (this.panKeys.down.isDown)  cam.scrollY += panSpeed;
+      if (this.panKeys.left.isDown)  cam.scrollX -= panSpeed;
+      if (this.panKeys.right.isDown) cam.scrollX += panSpeed;
+    }
 
     // Update simulation (includes pheromone decay)
     this.simulationSystem.update(deltaTime);
@@ -421,6 +433,10 @@ export class MainScene extends Phaser.Scene {
   }
 
   shutdown(): void {
+    // Remove wheel listener to prevent accumulation if scene restarts
+    if (this.wheelHandler) {
+      this.input.off('wheel', this.wheelHandler);
+    }
     // Clean up renderer resources
     this.antRenderer.destroy();
     this.colonyRenderer.destroy();

@@ -390,10 +390,14 @@ export const SCENE_CONFIG = {
 export const CAMERA_CONFIG = {
   /**
    * Minimum zoom level (most zoomed out)
-   * Derived from: canvas_width / WORLD_WIDTH = 1024 / 102400 ≈ 0.01
-   * At this value the full 100x world fits within the viewport
+   * Computed so the full world fits within the viewport:
+   *   min(canvas_width / WORLD_WIDTH, canvas_height / WORLD_HEIGHT)
+   * Stays in sync automatically if PHASER_CONFIG or WORLD_CONFIG changes.
    */
-  MIN_ZOOM: 0.01,
+  MIN_ZOOM: Math.min(
+    PHASER_CONFIG.CANVAS_WIDTH / WORLD_CONFIG.WORLD_WIDTH,
+    PHASER_CONFIG.CANVAS_HEIGHT / WORLD_CONFIG.WORLD_HEIGHT,
+  ),
 
   /**
    * Maximum zoom level (most zoomed in)
