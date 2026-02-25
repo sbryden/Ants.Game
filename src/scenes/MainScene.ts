@@ -26,10 +26,13 @@ export class MainScene extends Phaser.Scene {
   private obstacleRenderer!: ObstacleRenderer;
   private pheromoneRenderer!: PheromoneRenderer;
   private foodSourceRenderer!: FoodSourceRenderer;
+  private titleText!: Phaser.GameObjects.Text;
+  private instructionsText!: Phaser.GameObjects.Text;
   private debugText!: Phaser.GameObjects.Text;
   private metricsText!: Phaser.GameObjects.Text;
   private pheromoneOverlayText!: Phaser.GameObjects.Text;
   private legendText!: Phaser.GameObjects.Text;
+  private hudCamera!: Phaser.Cameras.Scene2D.Camera;
   private currentTheme!: Theme;
   private traitOverlayEnabled: boolean = false;
   private panKeys?: {
@@ -101,45 +104,41 @@ export class MainScene extends Phaser.Scene {
     };
     this.input.on('wheel', this.wheelHandler);
 
-    // Display title with theme colors (fixed to screen)
-    this.add
+    // Display title with theme colors
+    this.titleText = this.add
       .text(SCENE_CONFIG.TITLE.X, SCENE_CONFIG.TITLE.Y, SCENE_CONFIG.TITLE.TEXT, {
         fontSize: SCENE_CONFIG.TITLE.FONT_SIZE,
         color: this.currentTheme.uiColors.title,
         fontStyle: 'bold',
       })
-      .setDepth(SCENE_CONFIG.UI_DEPTH)
-      .setScrollFactor(0);
+      .setDepth(SCENE_CONFIG.UI_DEPTH);
 
-    // Display instructions (fixed to screen)
-    this.add
+    // Display instructions
+    this.instructionsText = this.add
       .text(SCENE_CONFIG.INSTRUCTIONS.X, SCENE_CONFIG.INSTRUCTIONS.Y, SCENE_CONFIG.INSTRUCTIONS.TEXT, {
         fontSize: SCENE_CONFIG.INSTRUCTIONS.FONT_SIZE,
         color: this.currentTheme.uiColors.text,
       })
-      .setDepth(SCENE_CONFIG.UI_DEPTH)
-      .setScrollFactor(0);
+      .setDepth(SCENE_CONFIG.UI_DEPTH);
 
-    // State color legend (dynamic based on theme, fixed to screen)
+    // State color legend (dynamic based on theme)
     const legendText = this.generateLegendText();
     this.legendText = this.add
       .text(SCENE_CONFIG.LEGEND.X, SCENE_CONFIG.LEGEND.Y, legendText, {
         fontSize: SCENE_CONFIG.LEGEND.FONT_SIZE,
         color: this.currentTheme.uiColors.textDim,
       })
-      .setDepth(SCENE_CONFIG.UI_DEPTH)
-      .setScrollFactor(0);
+      .setDepth(SCENE_CONFIG.UI_DEPTH);
 
-    // Pheromone overlay indicator (fixed to screen)
+    // Pheromone overlay indicator
     this.pheromoneOverlayText = this.add
       .text(SCENE_CONFIG.LEGEND.X, SCENE_CONFIG.LEGEND.Y + 20, 'Press P to toggle pheromone overlay (OFF) | Press Y to toggle trait visualization (OFF)', {
         fontSize: SCENE_CONFIG.LEGEND.FONT_SIZE,
         color: this.currentTheme.uiColors.textDim,
       })
-      .setDepth(SCENE_CONFIG.UI_DEPTH)
-      .setScrollFactor(0);
+      .setDepth(SCENE_CONFIG.UI_DEPTH);
 
-    // Debug: State distribution counter (fixed to screen)
+    // Debug: State distribution counter
     this.debugText = this.add
       .text(SCENE_CONFIG.DEBUG.X, this.scale.height - SCENE_CONFIG.DEBUG.Y_OFFSET_FROM_BOTTOM, '', {
         fontSize: SCENE_CONFIG.DEBUG.FONT_SIZE,
@@ -147,10 +146,9 @@ export class MainScene extends Phaser.Scene {
         backgroundColor: SCENE_CONFIG.DEBUG.BACKGROUND_COLOR,
         padding: SCENE_CONFIG.DEBUG.PADDING,
       })
-      .setDepth(SCENE_CONFIG.UI_DEPTH)
-      .setScrollFactor(0);
+      .setDepth(SCENE_CONFIG.UI_DEPTH);
 
-    // Colony metrics display (fixed to screen)
+    // Colony metrics display
     this.metricsText = this.add
       .text(SCENE_CONFIG.DEBUG.X, this.scale.height - SCENE_CONFIG.DEBUG.Y_OFFSET_FROM_BOTTOM - 30, '', {
         fontSize: SCENE_CONFIG.DEBUG.FONT_SIZE,
@@ -158,8 +156,21 @@ export class MainScene extends Phaser.Scene {
         backgroundColor: SCENE_CONFIG.DEBUG.BACKGROUND_COLOR,
         padding: SCENE_CONFIG.DEBUG.PADDING,
       })
-      .setDepth(SCENE_CONFIG.UI_DEPTH)
-      .setScrollFactor(0);
+      .setDepth(SCENE_CONFIG.UI_DEPTH);
+
+    // Create a dedicated HUD camera that never zooms or scrolls.
+    // The main camera ignores HUD elements; the HUD camera ignores world elements.
+    this.hudCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height);
+    const hudElements: Phaser.GameObjects.GameObject[] = [
+      this.titleText, this.instructionsText, this.legendText,
+      this.pheromoneOverlayText, this.debugText, this.metricsText,
+    ];
+    this.cameras.main.ignore(hudElements);
+    for (const child of this.children.list) {
+      if (!hudElements.includes(child)) {
+        this.hudCamera.ignore(child);
+      }
+    }
 
     // Set up keyboard input for pheromone overlay toggle
     this.input.keyboard?.on('keydown-P', () => {
@@ -436,6 +447,10 @@ export class MainScene extends Phaser.Scene {
     // Remove wheel listener to prevent accumulation if scene restarts
     if (this.wheelHandler) {
       this.input.off('wheel', this.wheelHandler);
+    }
+    // Remove the HUD camera
+    if (this.hudCamera) {
+      this.cameras.remove(this.hudCamera);
     }
     // Clean up renderer resources
     this.antRenderer.destroy();
