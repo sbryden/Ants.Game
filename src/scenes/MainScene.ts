@@ -411,28 +411,44 @@ export class MainScene extends Phaser.Scene {
   }
 
   /**
-   * Add test obstacles to the world for MVP testing.
-   * Positions are relative to the colony (world center) so they remain
-   * nearby regardless of world size.
+   * Scatter obstacles randomly across the full map.
+   * Avoids spawning on top of the colony (world center) or each other.
    */
   private addTestObstacles(): void {
+    const OBSTACLE_COUNT = 60;
+    const MIN_RADIUS = 20;
+    const MAX_RADIUS = 60;
     const cx = this.world.width / 2;
     const cy = this.world.height / 2;
+    // Keep obstacles away from the colony entrance
+    const COLONY_CLEAR_RADIUS = 200;
 
-    // Top-left obstacle
-    this.world.addObstacle(new Obstacle(cx - 256, cy - 192, 35));
+    const placed: Obstacle[] = [];
 
-    // Top-right obstacle
-    this.world.addObstacle(new Obstacle(cx + 256, cy - 192, 30));
+    for (let attempts = 0; placed.length < OBSTACLE_COUNT && attempts < OBSTACLE_COUNT * 10; attempts++) {
+      const r = MIN_RADIUS + Math.random() * (MAX_RADIUS - MIN_RADIUS);
+      const x = r + Math.random() * (this.world.width - r * 2);
+      const y = r + Math.random() * (this.world.height - r * 2);
 
-    // Bottom-left obstacle
-    this.world.addObstacle(new Obstacle(cx - 256, cy + 192, 40));
+      // Skip if too close to colony
+      const dColony = Math.hypot(x - cx, y - cy);
+      if (dColony < COLONY_CLEAR_RADIUS + r) continue;
 
-    // Bottom-right obstacle
-    this.world.addObstacle(new Obstacle(cx + 256, cy + 192, 45));
+      // Skip if overlapping an already-placed obstacle
+      let overlaps = false;
+      for (const existing of placed) {
+        const d = Math.hypot(x - existing.x, y - existing.y);
+        if (d < r + existing.radius + 10) {
+          overlaps = true;
+          break;
+        }
+      }
+      if (overlaps) continue;
 
-    // Left-side obstacle
-    this.world.addObstacle(new Obstacle(cx - 362, cy, 25));
+      const obstacle = new Obstacle(x, y, r);
+      placed.push(obstacle);
+      this.world.addObstacle(obstacle);
+    }
   }
 
   /**

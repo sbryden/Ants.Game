@@ -423,10 +423,10 @@ export const CAMERA_CONFIG = {
 export const PHEROMONE_CONFIG = {
   /**
    * Grid cell size in pixels
-   * Scaled to 100 to match the 100x world expansion, keeping the grid
-   * resolution proportional (same number of cells as the original 1px grid).
+   * 10px cells provide fine-grained trail resolution while keeping memory
+   * reasonable for the large world (102400/10 × 76800/10 = ~79M cells).
    */
-  GRID_CELL_SIZE: 100,
+  GRID_CELL_SIZE: 10,
 
   /**
    * Decay rate per second for Food pheromone (0-1)
@@ -537,11 +537,10 @@ export const PHEROMONE_CONFIG = {
 export const PHEROMONE_BEHAVIOR_CONFIG = {
   /**
    * Distance in pixels to sample pheromones in each of 8 directions
-   * Scaled to 8000 (100x original) to match the 100x world expansion so
-   * ants can still detect pheromone gradients across the larger cell grid.
-   * Larger = ants sense further but less precisely (requires more computation)
+   * 300px keeps sensing local and realistic for trail-following behavior.
+   * Large values cause ants to detect pheromones far away, losing precision.
    */
-  SAMPLE_DISTANCE: 8000,
+  SAMPLE_DISTANCE: 300,
 
   /**
    * Strength of pheromone influence on foraging ant movement (0-1)
