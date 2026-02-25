@@ -64,9 +64,16 @@ export class PheromoneRenderer {
     const g = (color >> 8) & 0xff;
     const b = color & 0xff;
 
-    // Render each cell with opacity based on strength
-    for (let y = 0; y < gridHeight; y++) {
-      for (let x = 0; x < gridWidth; x++) {
+    // Viewport culling: only render cells visible in the current camera view
+    const worldView = this.scene.cameras.main.worldView;
+    const startX = Math.max(0, Math.floor(worldView.x / cellSize));
+    const startY = Math.max(0, Math.floor(worldView.y / cellSize));
+    const endX = Math.min(gridWidth, Math.ceil((worldView.x + worldView.width) / cellSize));
+    const endY = Math.min(gridHeight, Math.ceil((worldView.y + worldView.height) / cellSize));
+
+    // Render each visible cell with opacity based on strength
+    for (let y = startY; y < endY; y++) {
+      for (let x = startX; x < endX; x++) {
         const index = y * gridWidth + x;
         const strength = data[index];
 
