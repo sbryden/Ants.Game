@@ -10,7 +10,7 @@ import { AntState } from '../sim/AntState';
 import { Ant } from '../sim/Ant';
 import { Obstacle } from '../sim/Obstacle';
 import { PheromoneType } from '../sim/PheromoneType';
-import { SCENE_CONFIG, WORLD_CONFIG, THEME_CONFIG } from '../config';
+import { SCENE_CONFIG, WORLD_CONFIG, THEME_CONFIG, CAMERA_CONFIG } from '../config';
 import { GameConfig } from '../types/GameConfig';
 import { Theme } from '../types/Theme';
 
@@ -26,12 +26,22 @@ export class MainScene extends Phaser.Scene {
   private obstacleRenderer!: ObstacleRenderer;
   private pheromoneRenderer!: PheromoneRenderer;
   private foodSourceRenderer!: FoodSourceRenderer;
+  private titleText!: Phaser.GameObjects.Text;
+  private instructionsText!: Phaser.GameObjects.Text;
   private debugText!: Phaser.GameObjects.Text;
   private metricsText!: Phaser.GameObjects.Text;
   private pheromoneOverlayText!: Phaser.GameObjects.Text;
   private legendText!: Phaser.GameObjects.Text;
+  private hudCamera!: Phaser.Cameras.Scene2D.Camera;
   private currentTheme!: Theme;
   private traitOverlayEnabled: boolean = false;
+  private panKeys?: {
+    up: Phaser.Input.Keyboard.Key;
+    down: Phaser.Input.Keyboard.Key;
+    left: Phaser.Input.Keyboard.Key;
+    right: Phaser.Input.Keyboard.Key;
+  };
+  private wheelHandler?: (pointer: Phaser.Input.Pointer, _objs: unknown, _dx: number, deltaY: number) => void;
 
   constructor() {
     super({ key: 'MainScene' });
@@ -47,9 +57,9 @@ export class MainScene extends Phaser.Scene {
     // Set up camera and background with theme color
     this.cameras.main.setBackgroundColor(this.currentTheme.backgroundColor);
 
-    // Initialize simulation with configured ant count
-    const worldWidth = this.scale.width;
-    const worldHeight = this.scale.height;
+    // Initialize simulation with configured ant count using the expanded world dimensions
+    const worldWidth = WORLD_CONFIG.WORLD_WIDTH;
+    const worldHeight = WORLD_CONFIG.WORLD_HEIGHT;
     this.world = new World(worldWidth, worldHeight);
     this.simulationSystem = new SimulationSystem(this.world);
     this.simulationSystem.initializeWorld(antCount);
@@ -64,8 +74,38 @@ export class MainScene extends Phaser.Scene {
     this.pheromoneRenderer = new PheromoneRenderer(this, this.currentTheme);
     this.foodSourceRenderer = new FoodSourceRenderer(this, this.currentTheme);
 
+    // Configure camera: bounds cover full world, start centered on colony (world center)
+    this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
+    this.cameras.main.centerOn(worldWidth / 2, worldHeight / 2);
+
+    // Set up WASD pan keys (only when keyboard plugin is available)
+    if (this.input.keyboard) {
+      const keyboard = this.input.keyboard;
+      this.panKeys = {
+        up: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+        down: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+        left: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+        right: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
+      };
+    }
+
+    // Mouse wheel zoom: adjust zoom and keep the world point under the pointer fixed
+    this.wheelHandler = (pointer: Phaser.Input.Pointer, _objs: unknown, _dx: number, deltaY: number): void => {
+      const cam = this.cameras.main;
+      // World position under the pointer before zoom
+      const worldPointBefore = cam.getWorldPoint(pointer.x, pointer.y);
+      const factor = deltaY > 0 ? (1 - CAMERA_CONFIG.ZOOM_STEP) : (1 + CAMERA_CONFIG.ZOOM_STEP);
+      const newZoom = Phaser.Math.Clamp(cam.zoom * factor, CAMERA_CONFIG.MIN_ZOOM, CAMERA_CONFIG.MAX_ZOOM);
+      cam.setZoom(newZoom);
+      // Adjust scroll so the same world point remains under the pointer
+      const worldPointAfter = cam.getWorldPoint(pointer.x, pointer.y);
+      cam.scrollX += worldPointBefore.x - worldPointAfter.x;
+      cam.scrollY += worldPointBefore.y - worldPointAfter.y;
+    };
+    this.input.on('wheel', this.wheelHandler);
+
     // Display title with theme colors
-    this.add
+    this.titleText = this.add
       .text(SCENE_CONFIG.TITLE.X, SCENE_CONFIG.TITLE.Y, SCENE_CONFIG.TITLE.TEXT, {
         fontSize: SCENE_CONFIG.TITLE.FONT_SIZE,
         color: this.currentTheme.uiColors.title,
@@ -74,7 +114,7 @@ export class MainScene extends Phaser.Scene {
       .setDepth(SCENE_CONFIG.UI_DEPTH);
 
     // Display instructions
-    this.add
+    this.instructionsText = this.add
       .text(SCENE_CONFIG.INSTRUCTIONS.X, SCENE_CONFIG.INSTRUCTIONS.Y, SCENE_CONFIG.INSTRUCTIONS.TEXT, {
         fontSize: SCENE_CONFIG.INSTRUCTIONS.FONT_SIZE,
         color: this.currentTheme.uiColors.text,
@@ -118,6 +158,20 @@ export class MainScene extends Phaser.Scene {
       })
       .setDepth(SCENE_CONFIG.UI_DEPTH);
 
+    // Create a dedicated HUD camera that never zooms or scrolls.
+    // The main camera ignores HUD elements; the HUD camera ignores world elements.
+    this.hudCamera = this.cameras.add(0, 0, this.scale.width, this.scale.height);
+    const hudElements: Phaser.GameObjects.GameObject[] = [
+      this.titleText, this.instructionsText, this.legendText,
+      this.pheromoneOverlayText, this.debugText, this.metricsText,
+    ];
+    this.cameras.main.ignore(hudElements);
+    for (const child of this.children.list) {
+      if (!hudElements.includes(child)) {
+        this.hudCamera.ignore(child);
+      }
+    }
+
     // Set up keyboard input for pheromone overlay toggle
     this.input.keyboard?.on('keydown-P', () => {
       this.pheromoneRenderer.toggle();
@@ -135,6 +189,18 @@ export class MainScene extends Phaser.Scene {
       this.depositTestPheromones();
     });
 
+    // Zoom keys: '-' zooms out, '=' (keyCode 187, named PLUS in Phaser) zooms in
+    this.input.keyboard?.on('keydown-MINUS', () => {
+      const cam = this.cameras.main;
+      const newZoom = Phaser.Math.Clamp(cam.zoom * (1 - CAMERA_CONFIG.ZOOM_STEP), CAMERA_CONFIG.MIN_ZOOM, CAMERA_CONFIG.MAX_ZOOM);
+      cam.setZoom(newZoom);
+    });
+    this.input.keyboard?.on('keydown-PLUS', () => {
+      const cam = this.cameras.main;
+      const newZoom = Phaser.Math.Clamp(cam.zoom * (1 + CAMERA_CONFIG.ZOOM_STEP), CAMERA_CONFIG.MIN_ZOOM, CAMERA_CONFIG.MAX_ZOOM);
+      cam.setZoom(newZoom);
+    });
+
     // Restart key: Press 'R' to return to menu
     this.input.keyboard?.on('keydown-R', () => {
       this.returnToMenu();
@@ -147,6 +213,18 @@ export class MainScene extends Phaser.Scene {
   update(_time: number, delta: number): void {
     // Convert delta from milliseconds to seconds
     const deltaTime = delta / 1000;
+
+    // Camera panning with WASD
+    // Dividing by cam.zoom keeps perceived movement speed consistent:
+    // zoomed out (small zoom) → more world pixels per frame to feel the same speed.
+    const cam = this.cameras.main;
+    if (this.panKeys) {
+      const panSpeed = (CAMERA_CONFIG.PAN_SPEED / cam.zoom) * deltaTime;
+      if (this.panKeys.up.isDown)    cam.scrollY -= panSpeed;
+      if (this.panKeys.down.isDown)  cam.scrollY += panSpeed;
+      if (this.panKeys.left.isDown)  cam.scrollX -= panSpeed;
+      if (this.panKeys.right.isDown) cam.scrollX += panSpeed;
+    }
 
     // Update simulation (includes pheromone decay)
     this.simulationSystem.update(deltaTime);
@@ -201,15 +279,15 @@ export class MainScene extends Phaser.Scene {
     const pointer = this.input.activePointer;
     
     if (pointer.leftButtonDown()) {
-      this.world.pheromoneGrid.deposit(pointer.x, pointer.y, PheromoneType.FOOD, 0.5);
+      this.world.pheromoneGrid.deposit(pointer.worldX, pointer.worldY, PheromoneType.FOOD, 0.5);
     }
     
     if (pointer.rightButtonDown()) {
-      this.world.pheromoneGrid.deposit(pointer.x, pointer.y, PheromoneType.NEST, 0.5);
+      this.world.pheromoneGrid.deposit(pointer.worldX, pointer.worldY, PheromoneType.NEST, 0.5);
     }
     
     if (pointer.middleButtonDown()) {
-      this.world.pheromoneGrid.deposit(pointer.x, pointer.y, PheromoneType.DANGER, 0.5);
+      this.world.pheromoneGrid.deposit(pointer.worldX, pointer.worldY, PheromoneType.DANGER, 0.5);
     }
   }
 
@@ -259,8 +337,8 @@ export class MainScene extends Phaser.Scene {
    * Creates visible patterns to test the pheromone system
    */
   private depositTestPheromones(): void {
-    const centerX = this.scale.width / 2;
-    const centerY = this.scale.height / 2;
+    const centerX = this.world.width / 2;
+    const centerY = this.world.height / 2;
 
     // Deposit a horizontal line of FOOD pheromones (red)
     for (let i = 0; i < 150; i++) {
@@ -333,27 +411,44 @@ export class MainScene extends Phaser.Scene {
   }
 
   /**
-   * Add test obstacles to the world for MVP testing.
-   * Hardcoded positions for now - can be made configurable later.
+   * Scatter obstacles randomly across the full map.
+   * Avoids spawning on top of the colony (world center) or each other.
    */
   private addTestObstacles(): void {
-    const centerX = this.scale.width / 2;
-    const centerY = this.scale.height / 2;
+    const OBSTACLE_COUNT = 60;
+    const MIN_RADIUS = 20;
+    const MAX_RADIUS = 60;
+    const cx = this.world.width / 2;
+    const cy = this.world.height / 2;
+    // Keep obstacles away from the colony entrance
+    const COLONY_CLEAR_RADIUS = 200;
 
-    // Top-left obstacle
-    this.world.addObstacle(new Obstacle(centerX / 2, centerY / 2, 35));
+    const placed: Obstacle[] = [];
 
-    // Top-right obstacle
-    this.world.addObstacle(new Obstacle(centerX * 1.5, centerY / 2, 30));
+    for (let attempts = 0; placed.length < OBSTACLE_COUNT && attempts < OBSTACLE_COUNT * 10; attempts++) {
+      const r = MIN_RADIUS + Math.random() * (MAX_RADIUS - MIN_RADIUS);
+      const x = r + Math.random() * (this.world.width - r * 2);
+      const y = r + Math.random() * (this.world.height - r * 2);
 
-    // Bottom-left obstacle
-    this.world.addObstacle(new Obstacle(centerX / 2, centerY * 1.5, 40));
+      // Skip if too close to colony
+      const dColony = Math.hypot(x - cx, y - cy);
+      if (dColony < COLONY_CLEAR_RADIUS + r) continue;
 
-    // Bottom-right obstacle
-    this.world.addObstacle(new Obstacle(centerX * 1.5, centerY * 1.5, 45));
+      // Skip if overlapping an already-placed obstacle
+      let overlaps = false;
+      for (const existing of placed) {
+        const d = Math.hypot(x - existing.x, y - existing.y);
+        if (d < r + existing.radius + 10) {
+          overlaps = true;
+          break;
+        }
+      }
+      if (overlaps) continue;
 
-    // Left-side obstacle
-    this.world.addObstacle(new Obstacle(150, centerY, 25));
+      const obstacle = new Obstacle(x, y, r);
+      placed.push(obstacle);
+      this.world.addObstacle(obstacle);
+    }
   }
 
   /**
@@ -365,6 +460,14 @@ export class MainScene extends Phaser.Scene {
   }
 
   shutdown(): void {
+    // Remove wheel listener to prevent accumulation if scene restarts
+    if (this.wheelHandler) {
+      this.input.off('wheel', this.wheelHandler);
+    }
+    // Remove the HUD camera
+    if (this.hudCamera) {
+      this.cameras.remove(this.hudCamera);
+    }
     // Clean up renderer resources
     this.antRenderer.destroy();
     this.colonyRenderer.destroy();

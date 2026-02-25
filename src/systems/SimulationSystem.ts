@@ -540,8 +540,10 @@ export class SimulationSystem {
       applyRandomWander(ant, this.movementConfig);
     }
 
-    // Spawn initial food sources
-    this.world.spawnFoodSource();
-    this.world.spawnFoodSource();
+    // Spawn initial food sources (10 sources to give ants a realistic chance
+    // of discovering food across the large world)
+    for (let i = 0; i < 10; i++) {
+      this.world.spawnFoodSource();
+    }
   }
 }

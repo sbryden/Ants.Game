@@ -39,6 +39,18 @@ export const WORLD_CONFIG = {
    * Affects initial colony population
    */
   INITIAL_ANT_COUNT: 40,
+
+  /**
+   * World width in pixels (100x canvas width for large exploration space)
+   * Zoom and pan allow navigation of the full world
+   */
+  WORLD_WIDTH: 102400,
+
+  /**
+   * World height in pixels (100x canvas height for large exploration space)
+   * Zoom and pan allow navigation of the full world
+   */
+  WORLD_HEIGHT: 76800,
 } as const;
 
 /**
@@ -339,7 +351,7 @@ export const SCENE_CONFIG = {
     Y: 56,
     FONT_SIZE: '16px',
     COLOR: '#cccccc',
-    TEXT: 'Watch the ants wander and return home...',
+    TEXT: 'Watch the ants wander and return home... | Scroll/±= to zoom | WASD to pan',
   },
 
   /**
@@ -372,15 +384,49 @@ export const SCENE_CONFIG = {
 } as const;
 
 /**
+ * Camera configuration
+ * Controls zoom and pan behavior for navigating the large world
+ */
+export const CAMERA_CONFIG = {
+  /**
+   * Minimum zoom level (most zoomed out)
+   * Computed so the full world fits within the viewport:
+   *   min(canvas_width / WORLD_WIDTH, canvas_height / WORLD_HEIGHT)
+   * Stays in sync automatically if PHASER_CONFIG or WORLD_CONFIG changes.
+   */
+  MIN_ZOOM: Math.min(
+    PHASER_CONFIG.CANVAS_WIDTH / WORLD_CONFIG.WORLD_WIDTH,
+    PHASER_CONFIG.CANVAS_HEIGHT / WORLD_CONFIG.WORLD_HEIGHT,
+  ),
+
+  /**
+   * Maximum zoom level (most zoomed in)
+   */
+  MAX_ZOOM: 5.0,
+
+  /**
+   * Zoom step multiplier applied per scroll tick
+   * 0.15 = 15% zoom change per wheel notch
+   */
+  ZOOM_STEP: 0.15,
+
+  /**
+   * Camera pan speed in world pixels per second
+   */
+  PAN_SPEED: 1000,
+} as const;
+
+/**
  * Pheromone system configuration
  * Controls pheromone behavior, decay, and grid properties
  */
 export const PHEROMONE_CONFIG = {
   /**
    * Grid cell size in pixels
-   * 1 = one pheromone unit per pixel (highest resolution)
+   * 10px cells provide fine-grained trail resolution while keeping memory
+   * reasonable for the large world (102400/10 × 76800/10 = ~79M cells).
    */
-  GRID_CELL_SIZE: 1,
+  GRID_CELL_SIZE: 10,
 
   /**
    * Decay rate per second for Food pheromone (0-1)
@@ -491,11 +537,10 @@ export const PHEROMONE_CONFIG = {
 export const PHEROMONE_BEHAVIOR_CONFIG = {
   /**
    * Distance in pixels to sample pheromones in each of 8 directions
-   * Larger = ants sense further but less precisely (requires more computation)
-   * Smaller = ants only sense nearby pheromones (more localized)
-   * Increased to 80 to help wandering ants detect trails from further away
+   * 300px keeps sensing local and realistic for trail-following behavior.
+   * Large values cause ants to detect pheromones far away, losing precision.
    */
-  SAMPLE_DISTANCE: 80,
+  SAMPLE_DISTANCE: 300,
 
   /**
    * Strength of pheromone influence on foraging ant movement (0-1)
