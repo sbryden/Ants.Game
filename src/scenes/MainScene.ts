@@ -168,6 +168,18 @@ export class MainScene extends Phaser.Scene {
       this.depositTestPheromones();
     });
 
+    // Zoom keys: '-' zooms out, '=' zooms in
+    this.input.keyboard?.on('keydown-MINUS', () => {
+      const cam = this.cameras.main;
+      const newZoom = Phaser.Math.Clamp(cam.zoom * (1 - CAMERA_CONFIG.ZOOM_STEP), CAMERA_CONFIG.MIN_ZOOM, CAMERA_CONFIG.MAX_ZOOM);
+      cam.setZoom(newZoom);
+    });
+    this.input.keyboard?.on('keydown-EQUALS', () => {
+      const cam = this.cameras.main;
+      const newZoom = Phaser.Math.Clamp(cam.zoom * (1 + CAMERA_CONFIG.ZOOM_STEP), CAMERA_CONFIG.MIN_ZOOM, CAMERA_CONFIG.MAX_ZOOM);
+      cam.setZoom(newZoom);
+    });
+
     // Restart key: Press 'R' to return to menu
     this.input.keyboard?.on('keydown-R', () => {
       this.returnToMenu();

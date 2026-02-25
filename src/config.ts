@@ -351,7 +351,7 @@ export const SCENE_CONFIG = {
     Y: 56,
     FONT_SIZE: '16px',
     COLOR: '#cccccc',
-    TEXT: 'Watch the ants wander and return home... | Scroll to zoom | WASD to pan',
+    TEXT: 'Watch the ants wander and return home... | Scroll/±= to zoom | WASD to pan',
   },
 
   /**
